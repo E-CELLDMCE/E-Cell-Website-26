@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>E-Cell | DMCE</title>
+
+
+    <!-- Tailwind CSS -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <!-- Tailwind Configuration -->
+
+    <script>
+
+        tailwind.config = {
+
+            theme: {
+
+                extend: {
+
+                    colors: {
+
+                        ecellRed: '#d71920',
+                        ecellYellow: '#ffd21c'
+
+                    },
+
+                    keyframes: {
+
+                        fadeUp: {
+
+                            '0%': {
+                                opacity: '0',
+                                transform: 'translateY(40px)'
+                            },
+
+                            '100%': {
+                                opacity: '1',
+                                transform: 'translateY(0)'
+                            }
+
+                        },
+
+                        glow: {
+
+                            '0%, 100%': {
+                                opacity: '0.3'
+                            },
+
+                            '50%': {
+                                opacity: '0.7'
+                            }
+
+                        }
+
+                    },
+
+                    animation: {
+
+                        fadeUp:
+                            'fadeUp 1s ease-out forwards',
+
+                        glow:
+                            'glow 4s ease-in-out infinite'
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    </script>
+
+
+    <!-- Google Font -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <style>
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+
+        /* ========================================= */
+        /* SOFT WHITE GLOW BEHIND HERO WORDS */
+        /* ========================================= */
+
+        .glow-word {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.glow-word::before {
+    content: "";
+
+    position: absolute;
+
+    left: -10%;
+    right: -10%;
+    top: -10%;
+    bottom: -10%;
+
+    background: rgba(255, 215, 70, 0.25);
+
+    filter: blur(45px);
+
+    border-radius: 50%;
+
+    z-index: -1;
+
+    pointer-events: none;
+
+    animation: softGlow 4s ease-in-out infinite alternate;
+}
+
+        @keyframes softGlow {
+
+            from {
+                opacity: 0.45;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* CONTINUOUS YELLOW MOVING BAND */
+        /* ========================================= */
+
+        .moving-band {
+            width: 100%;
+            overflow: hidden;
+
+            background: #ffd21c;
+            color: #000;
+
+            white-space: nowrap;
+        }
+
+
+        .moving-track {
+            display: flex;
+            width: max-content;
+
+            animation: continuousMove 22s linear infinite;
+        }
+
+
+        .moving-group {
+            display: flex;
+            align-items: center;
+
+            flex-shrink: 0;
+
+            padding: 16px 0;
+        }
+
+
+        .moving-group span {
+            font-size: 1.5rem;
+            font-weight: 900;
+
+            letter-spacing: 0.05em;
+
+            white-space: nowrap;
+
+            margin: 0 40px;
+        }
+
+
+        .moving-group .diamond {
+            margin: 0;
+
+            font-size: 1.1rem;
+        }
+
+
+        /*
+            Four identical groups are used.
+
+            The animation moves exactly one group's
+            width, so when it loops the next identical
+            group is already in the same position.
+        */
+
+        @keyframes continuousMove {
+
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-25%);
+            }
+
+        }
+
+
+        /* ========================================= */
+        /* MOBILE ADJUSTMENT */
+        /* ========================================= */
+
+        @media (max-width: 768px) {
+
+            .moving-group span {
+                font-size: 1.15rem;
+                margin: 0 25px;
+            }
+
+            .moving-group .diamond {
+                font-size: 0.9rem;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+
+<body class="bg-black text-white">
+
+
+<!-- ================================================= -->
+<!-- HOME PAGE -->
+<!-- ================================================= -->
+
+
+<main>
+
+
+    <!-- ================================================= -->
+    <!-- HERO SECTION -->
+    <!-- ================================================= -->
+
+    <section
+        id="home"
+        class="relative
+        min-h-screen
+        flex items-center
+        overflow-hidden
+        bg-black"
+    >
+
+
+        <!-- Red Background Glow -->
+
+        <div
+            class="absolute
+            -left-32
+            top-1/3
+            w-96
+            h-96
+            bg-red-600/30
+            rounded-full
+            blur-[120px]
+            animate-glow"
+        ></div>
+
+
+        <!-- Yellow Background Glow -->
+
+        <div
+            class="absolute
+            right-10
+            top-1/4
+            w-72
+            h-72
+            bg-yellow-400/10
+            rounded-full
+            blur-[100px]"
+        ></div>
+
+
+
+        <!-- Hero Content -->
+
+        <div
+            class="relative
+            z-10
+            max-w-7xl
+            mx-auto
+            w-full
+            px-6
+            lg:px-12
+            pt-20"
+        >
+
+            <div class="max-w-4xl">
+
+
+                <!-- Entrepreneurship Cell -->
+
+                <div
+                    class="opacity-0
+                    animate-fadeUp
+                    flex items-center
+                    gap-3
+                    mb-6"
+                >
+
+                    <span
+                        class="w-12
+                        h-[2px]
+                        bg-yellow-400"
+                    ></span>
+
+
+                    <span
+                        class="text-yellow-400
+                        text-2xl
+                        font-bold
+                        tracking-[0.3em]"
+                    >
+
+                        ENTREPRENEURSHIP CELL
+
+                    </span>
+
+                </div>
+
+
+
+                <!-- Main Heading -->
+
+                <h1
+    class="opacity-0
+    animate-fadeUp
+    text-5xl
+    sm:text-6xl
+    md:text-7xl
+    lg:text-7xl
+    font-black
+    leading-[0.95]
+    isolate"
+    style="animation-delay: 0.2s;"
+>
+
+                    <span class="glow-word">
+                        BUILD.
+                    </span>
+
+                    <span class="glow-word text-yellow-400">
+                        INNOVATE.
+                    </span>
+
+                    <br>
+
+                    <span class="glow-word">
+                        INSPIRE.
+                    </span>
+
+                </h1>
+
+
+
+                <!-- Description -->
+
+                <p
+                    class="opacity-0
+                    animate-fadeUp
+                    mt-8
+                    max-w-2xl
+                    text-gray-300
+                    text-base
+                    md:text-lg
+                    leading-relaxed"
+                    style="animation-delay: 0.4s;"
+                >
+
+                    Entrepreneurship Cell of Datta Meghe College
+                    of Engineering — a student-driven community
+                    fostering innovation, creativity and the spirit
+                    of entrepreneurship.
+
+                </p>
+
+
+
+                <!-- Buttons -->
+
+                <div
+                    class="opacity-0
+                    animate-fadeUp
+                    flex flex-wrap
+                    gap-4
+                    mt-10"
+                    style="animation-delay: 0.6s;"
+                >
+
+
+                    <!-- Discover E-Cell -->
+
+                    <a
+                        href="#about"
+                        class="px-7
+                        py-4
+                        bg-black
+                        text-yellow-400
+                        font-bold
+                        rounded-lg
+                        border
+                        border-yellow-400
+                        hover:bg-yellow-400
+                        hover:text-black
+                        hover:-translate-y-1
+                        transition
+                        duration-300"
+                    >
+
+                        DISCOVER E-CELL →
+
+                    </a>
+
+
+
+                    <!-- Explore Events -->
+
+                    <a
+                        href="#events"
+                        class="px-7
+                        py-4
+                        bg-black
+                        text-yellow-400
+                        font-bold
+                        rounded-lg
+                        border
+                        border-yellow-400
+                        hover:bg-yellow-400
+                        hover:text-black
+                        hover:-translate-y-1
+                        transition
+                        duration-300"
+                    >
+
+                        EXPLORE EVENTS →
+
+                    </a>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Scroll Indicator -->
+
+        <div
+            class="absolute
+            bottom-8
+            left-1/2
+            -translate-x-1/2
+            flex
+            flex-col
+            items-center
+            gap-2"
+        >
+
+            <span
+                class="text-[10px]
+                tracking-[0.3em]
+                text-gray-500"
+            >
+
+                SCROLL
+
+            </span>
+
+
+            <div
+                class="w-[1px]
+                h-10
+                bg-gradient-to-b
+                from-yellow-400
+                to-transparent"
+            ></div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- CONTINUOUS YELLOW MOVING BAND -->
+    <!-- ================================================= -->
+
+    <section class="moving-band">
+
+        <div class="moving-track">
+
+
+            <!-- GROUP 1 -->
+
+            <div class="moving-group">
+
+                <span>INNOVATION</span>
+
+                <span class="diamond">✦</span>
+
+                <span>ENTREPRENEURSHIP</span>
+
+                <span class="diamond">✦</span>
+
+                <span>CREATIVITY</span>
+
+                <span class="diamond">✦</span>
+
+            </div>
+
+
+
+            <!-- GROUP 2 -->
+
+            <div class="moving-group">
+
+                <span>INNOVATION</span>
+
+                <span class="diamond">✦</span>
+
+                <span>ENTREPRENEURSHIP</span>
+
+                <span class="diamond">✦</span>
+
+                <span>CREATIVITY</span>
+
+                <span class="diamond">✦</span>
+
+            </div>
+
+
+
+            <!-- GROUP 3 -->
+
+            <div class="moving-group">
+
+                <span>INNOVATION</span>
+
+                <span class="diamond">✦</span>
+
+                <span>ENTREPRENEURSHIP</span>
+
+                <span class="diamond">✦</span>
+
+                <span>CREATIVITY</span>
+
+                <span class="diamond">✦</span>
+
+            </div>
+
+
+
+            <!-- GROUP 4 -->
+
+            <div class="moving-group">
+
+                <span>INNOVATION</span>
+
+                <span class="diamond">✦</span>
+
+                <span>ENTREPRENEURSHIP</span>
+
+                <span class="diamond">✦</span>
+
+                <span>CREATIVITY</span>
+
+                <span class="diamond">✦</span>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- WHAT IS E-CELL -->
+    <!-- ================================================= -->
+
+    <section
+        id="about"
+        class="relative
+        py-24
+        md:py-32
+        bg-black"
+    >
+
+        <div
+            class="max-w-6xl
+            mx-auto
+            px-6"
+        >
+
+
+            <!-- Heading -->
+
+            <div
+                class="text-center
+                mb-16"
+            >
+
+                <h2
+                    class="text-4xl
+                    md:text-6xl
+                    font-black"
+                >
+
+                    WHAT IS
+
+                    <span class="text-yellow-400">
+
+                        E-CELL?
+
+                    </span>
+
+                </h2>
+
+            </div>
+
+
+
+            <!-- Content -->
+
+            <div
+                class="grid
+                lg:grid-cols-2
+                gap-14
+                items-center"
+            >
+
+
+                <!-- Description -->
+
+                <div>
+
+                    <p
+                        class="text-gray-300
+                        text-lg
+                        leading-relaxed"
+                    >
+
+                        Entrepreneurship Cell of Datta Meghe
+                        College of Engineering is a student-driven
+                        community dedicated to promoting innovation,
+                        creativity and the spirit of entrepreneurship.
+
+                    </p>
+
+
+                    <p
+                        class="text-gray-400
+                        mt-6
+                        leading-relaxed"
+                    >
+
+                        It serves as a platform where students can
+                        learn, network and turn their ideas into
+                        meaningful ventures through workshops,
+                        competitions, mentorship and industry
+                        interactions.
+
+                    </p>
+
+                </div>
+
+
+
+                <!-- Statistics -->
+
+                <div
+                    class="relative
+                    p-8
+                    md:p-10
+                    rounded-2xl
+                    border
+                    border-red-500/20
+                    bg-gradient-to-br
+                    from-red-950/70
+                    via-red-950/30
+                    to-black
+                    overflow-hidden"
+                >
+
+
+                    <!-- Background Glow -->
+
+                    <div
+                        class="absolute
+                        -right-20
+                        -top-20
+                        w-64
+                        h-64
+                        bg-red-600/20
+                        rounded-full
+                        blur-3xl
+                        animate-glow"
+                    ></div>
+
+
+
+                    <div
+                        class="relative
+                        grid
+                        grid-cols-3
+                        gap-5"
+                    >
+
+
+                        <!-- Years -->
+
+                        <div class="text-center">
+
+                            <h3
+                                class="text-4xl
+                                md:text-5xl
+                                font-black
+                                text-yellow-400"
+                            >
+
+                                10
+
+                            </h3>
+
+
+                            <p
+                                class="text-xs
+                                md:text-sm
+                                text-gray-400
+                                mt-2"
+                            >
+
+                                YEARS
+
+                            </p>
+
+                        </div>
+
+
+
+                        <!-- Heads -->
+
+                        <div class="text-center">
+
+                            <h3
+                                class="text-4xl
+                                md:text-5xl
+                                font-black
+                                text-yellow-400"
+                            >
+
+                                14
+
+                            </h3>
+
+
+                            <p
+                                class="text-xs
+                                md:text-sm
+                                text-gray-400
+                                mt-2"
+                            >
+
+                                HEADS
+
+                            </p>
+
+                        </div>
+
+
+
+                        <!-- Members -->
+
+                        <div class="text-center">
+
+                            <h3
+                                class="text-4xl
+                                md:text-5xl
+                                font-black
+                                text-yellow-400"
+                            >
+
+                                100+
+
+                            </h3>
+
+
+                            <p
+                                class="text-xs
+                                md:text-sm
+                                text-gray-400
+                                mt-2"
+                            >
+
+                                MEMBERS
+
+                            </p>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- EVENTS -->
+    <!-- ================================================= -->
+
+    <section
+        id="events"
+        class="py-24
+        md:py-32
+        bg-zinc-950"
+    >
+
+        <div
+            class="max-w-7xl
+            mx-auto
+            px-6"
+        >
+
+
+            <!-- Heading -->
+
+            <div class="mb-14">
+
+                <p
+                    class="text-yellow-400
+                    text-sm
+                    font-bold
+                    tracking-[0.3em]
+                    mb-4"
+                >
+
+                    EXPERIENCE
+
+                </p>
+
+
+                <h2
+                    class="text-4xl
+                    md:text-6xl
+                    font-black"
+                >
+
+                    OUR EVENTS
+
+                </h2>
+
+            </div>
+
+
+
+            <!-- Event Cards -->
+
+            <div
+                class="grid
+                md:grid-cols-3
+                gap-6"
+            >
+
+
+                <!-- Workshops -->
+
+                <div
+                    class="group
+                    p-8
+                    rounded-2xl
+                    bg-black
+                    border
+                    border-white/10
+                    hover:border-yellow-400/50
+                    hover:-translate-y-2
+                    transition-all
+                    duration-500"
+                >
+
+                    <div
+                        class="text-yellow-400
+                        text-4xl
+                        mb-6"
+                    >
+
+                        🚀
+
+                    </div>
+
+
+                    <h3
+                        class="text-2xl
+                        font-bold
+                        group-hover:text-yellow-400
+                        transition"
+                    >
+
+                        Workshops
+
+                    </h3>
+
+
+                    <p
+                        class="text-gray-400
+                        mt-4
+                        leading-relaxed"
+                    >
+
+                        Learn from experienced entrepreneurs,
+                        industry professionals and inspiring
+                        speakers.
+
+                    </p>
+
+
+                    <div
+                        class="mt-8
+                        text-yellow-400
+                        font-semibold
+                        text-sm"
+                    >
+
+                        LEARN MORE →
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Competitions -->
+
+                <div
+                    class="group
+                    p-8
+                    rounded-2xl
+                    bg-black
+                    border
+                    border-white/10
+                    hover:border-yellow-400/50
+                    hover:-translate-y-2
+                    transition-all
+                    duration-500"
+                >
+
+                    <div
+                        class="text-yellow-400
+                        text-4xl
+                        mb-6"
+                    >
+
+                        💡
+
+                    </div>
+
+
+                    <h3
+                        class="text-2xl
+                        font-bold
+                        group-hover:text-yellow-400
+                        transition"
+                    >
+
+                        Competitions
+
+                    </h3>
+
+
+                    <p
+                        class="text-gray-400
+                        mt-4
+                        leading-relaxed"
+                    >
+
+                        Put your ideas to the test and compete
+                        with innovative minds from across
+                        the campus.
+
+                    </p>
+
+
+                    <div
+                        class="mt-8
+                        text-yellow-400
+                        font-semibold
+                        text-sm"
+                    >
+
+                        EXPLORE →
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Networking -->
+
+                <div
+                    class="group
+                    p-8
+                    rounded-2xl
+                    bg-black
+                    border
+                    border-white/10
+                    hover:border-yellow-400/50
+                    hover:-translate-y-2
+                    transition-all
+                    duration-500"
+                >
+
+                    <div
+                        class="text-yellow-400
+                        text-4xl
+                        mb-6"
+                    >
+
+                        🤝
+
+                    </div>
+
+
+                    <h3
+                        class="text-2xl
+                        font-bold
+                        group-hover:text-yellow-400
+                        transition"
+                    >
+
+                        Networking
+
+                    </h3>
+
+
+                    <p
+                        class="text-gray-400
+                        mt-4
+                        leading-relaxed"
+                    >
+
+                        Connect with like-minded students,
+                        mentors, entrepreneurs and industry
+                        leaders.
+
+                    </p>
+
+
+                    <div
+                        class="mt-8
+                        text-yellow-400
+                        font-semibold
+                        text-sm"
+                    >
+
+                        CONNECT →
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- FINAL CALL TO ACTION -->
+    <!-- ================================================= -->
+
+    <section
+        class="relative
+        py-28
+        overflow-hidden
+        bg-gradient-to-br
+        from-red-950
+        via-black
+        to-black"
+    >
+
+
+        <!-- Background Glow -->
+
+        <div
+            class="absolute
+            left-1/2
+            top-1/2
+            -translate-x-1/2
+            -translate-y-1/2
+            w-96
+            h-96
+            bg-red-600/20
+            rounded-full
+            blur-[120px]
+            animate-glow"
+        ></div>
+
+
+
+        <!-- Content -->
+
+        <div
+            class="relative
+            max-w-4xl
+            mx-auto
+            px-6
+            text-center"
+        >
+
+            <p
+                class="text-yellow-400
+                font-bold
+                tracking-[0.3em]
+                text-sm
+                mb-5"
+            >
+
+                HAVE AN IDEA?
+
+            </p>
+
+
+            <h2
+                class="text-4xl
+                md:text-6xl
+                font-black"
+            >
+
+                TURN YOUR IDEA
+
+                <br>
+
+                INTO
+
+                <span class="text-yellow-400">
+
+                    IMPACT.
+
+                </span>
+
+            </h2>
+
+
+            <p
+                class="text-gray-400
+                mt-6
+                max-w-2xl
+                mx-auto
+                leading-relaxed"
+            >
+
+                Innovation begins with an idea. E-Cell provides
+                the environment, community and opportunities to
+                help you take that idea forward.
+
+            </p>
+
+
+            <a
+                href="#home"
+                class="inline-block
+                mt-10
+                px-8
+                py-4
+                bg-yellow-400
+                text-black
+                font-bold
+                rounded-lg
+                hover:bg-yellow-300
+                hover:-translate-y-1
+                transition
+                duration-300"
+            >
+
+                BACK TO TOP ↑
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+</body>
+
+</html>
