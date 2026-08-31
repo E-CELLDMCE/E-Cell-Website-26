@@ -1,0 +1,181 @@
+import React, { useState } from 'react';
+
+const Home = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navLinks = [
+    { name: 'HOME', href: '#home', active: true },
+    { name: 'ABOUT US', href: '#about', active: false },
+    { name: 'EVENT', href: '#event', active: false },
+    { name: 'GALLERY', href: '#gallery', active: false },
+    { name: 'TEAM', href: '#team', active: false },
+    { name: 'INITIATIVE', href: '#initiative', active: false },
+    { name: 'BLOGS', href: '#blogs', active: false },
+  ];
+
+  return (
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-red-600 selection:text-white">
+      {/* ----------------- NAVBAR ----------------- */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-black/95 backdrop-blur-sm border-b border-neutral-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          
+          {/* Logo / Brand */}
+          <div className="flex items-center space-x-2 cursor-pointer">
+            <div className="flex flex-col space-y-0.5">
+              <span className="h-1 w-6 bg-red-600 rounded-full"></span>
+              <span className="h-1 w-4 bg-red-500 rounded-full"></span>
+              <span className="h-1 w-2 bg-red-400 rounded-full"></span>
+            </div>
+            <span className="text-xl font-black tracking-wider text-white">
+              CELL <span className="text-xs font-semibold text-neutral-400 block -mt-1 tracking-widest">DMCE</span>
+            </span>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                className={`text-xs lg:text-sm font-semibold tracking-wider transition-colors duration-200 ${
+                  link.active
+                    ? 'text-yellow-400 hover:text-yellow-300'
+                    : 'text-neutral-200 hover:text-yellow-400'
+                }`}
+              >
+                {link.name}
+              </a>
+            ))}
+          </nav>
+
+          {/* Mobile Hamburger Toggle */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              type="button"
+              className="text-neutral-300 hover:text-white focus:outline-none p-1"
+              aria-label="Toggle Menu"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {isMobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-black/95 border-b border-neutral-800 px-4 pt-2 pb-4 space-y-2">
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`block py-2 text-sm font-medium tracking-wide ${
+                  link.active ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
+                }`}
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <main className="pt-16">
+        {/* ----------------- HERO / GROUP PHOTO SECTION ----------------- */}
+        <section id="home" className="w-full bg-black py-4 px-2 sm:px-4">
+          <div className="max-w-6xl mx-auto">
+            {/* Image Card Container with Cyan Border */}
+            <div className="relative w-full rounded-sm overflow-hidden border-2 border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
+              {/* Main Team Photo */}
+              <div className="relative h-[320px] sm:h-[420px] md:h-[500px] lg:h-[560px] w-full bg-neutral-900">
+                <img
+                  src="/assets/ecell-team.jpg" 
+                  alt="E-CELL Team"
+                  className="w-full h-full object-cover object-center"
+                />
+                
+                {/* Subtle vignette/contrast overlay */}
+                <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+
+                {/* Bold Center Overlay Text */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white uppercase drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+                    E-CELL 25 - 26
+                  </h1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ----------------- WHAT IS E-CELL SECTION ----------------- */}
+        <section
+          id="about"
+          className="relative w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-center overflow-hidden bg-gradient-to-b from-[#2a0404] via-[#1a0202] to-black"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse 80% 50% at 50% 0%, rgba(220, 20, 20, 0.45), transparent 70%),
+              radial-gradient(circle at 80% 60%, rgba(180, 0, 0, 0.25), transparent 50%),
+              linear-gradient(to bottom, #000000 0%, transparent 15%, transparent 85%, #000000 100%)
+            `
+          }}
+        >
+          <div className="max-w-4xl mx-auto relative z-10">
+            {/* Section Header */}
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-wide text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] mb-6">
+              WHAT IS E-CELL ?
+            </h2>
+
+            {/* Description Paragraph */}
+            <p className="text-neutral-100 text-sm sm:text-base md:text-lg leading-relaxed font-normal max-w-3xl mx-auto px-2 mb-16 sm:mb-20">
+              Entrepreneurship Cell (E-Cell) of Datta Meghe College of Engineering is a
+              student-driven community dedicated to promoting innovation, creativity, and
+              the spirit of entrepreneurship. It serves as a platform where students can
+              learn, network, and turn ideas into successful ventures through workshops,
+              competitions, mentorship, and industry collaborations.
+            </p>
+
+            {/* Metrics & Key Highlights */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 items-center justify-center pt-4">
+              
+              {/* Metric 1 */}
+              <div className="flex flex-col items-center">
+                <span className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white">
+                  10 YEARS
+                </span>
+              </div>
+
+              {/* Metric 2 */}
+              <div className="flex flex-col items-center">
+                <span className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white">
+                  14 HEADS
+                </span>
+              </div>
+
+              {/* Metric 3 */}
+              <div className="flex flex-col items-center">
+                <div className="leading-none text-center">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-white block">
+                    100+
+                  </span>
+                  <span className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight text-white block mt-1">
+                    MEMBERS
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+};
+
+export default Home;
