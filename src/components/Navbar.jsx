@@ -69,13 +69,13 @@ const Navbar = () => {
             gap-7
           "
         >
-
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               className={`
                 relative
+                group
                 text-sm
                 font-semibold
                 tracking-wide
@@ -89,10 +89,10 @@ const Navbar = () => {
                 }
               `}
             >
-
               {link.name}
 
-              {/* Hover underline */}
+              {/* HOVER UNDERLINE */}
+
               <span
                 className="
                   absolute
@@ -100,63 +100,85 @@ const Navbar = () => {
                   left-0
                   w-0
                   h-[2px]
-                  bg-red-600
+                  bg-yellow-400
+                  group-hover:w-full
                   transition-all
                   duration-300
-                  group-hover:w-full
                 "
               />
-
             </a>
           ))}
-
         </div>
 
 
-        {/* ================= STUDENT DASHBOARD ================= */}
+        {/* ================= STUDENT DASHBOARD ICON ================= */}
 
         <div className="hidden lg:flex items-center">
 
           <a
-  href="/dashboard"
-  className="
-    px-5
-    py-2.5
-    rounded-lg
+            href="/dashboard"
+            title="Student Dashboard"
+            aria-label="Student Dashboard"
+            className="
+              w-11
+              h-11
 
-    bg-gradient-to-r
-    from-yellow-500
-    via-amber-500
-    to-yellow-600
+              flex
+              items-center
+              justify-center
 
-    border
-    border-yellow-400
+              rounded-full
 
-    text-black
-    text-sm
-    font-extrabold
-    tracking-wide
+              bg-yellow-400/5
 
-    hover:from-yellow-400
-    hover:via-amber-400
-    hover:to-yellow-500
+              border
+              border-yellow-400/60
 
-    hover:shadow-[0_0_22px_rgba(234,179,8,0.35)]
-    hover:scale-[1.03]
+              text-yellow-400
 
-    active:scale-[0.98]
+              hover:bg-yellow-400
+              hover:text-black
+              hover:border-yellow-400
 
-    transition-all
-    duration-300
-  "
->
-  STUDENT DASHBOARD
-</a>
+              hover:shadow-[0_0_20px_rgba(250,204,21,0.35)]
+              hover:scale-105
+
+              active:scale-95
+
+              transition-all
+              duration-300
+            "
+          >
+
+            {/* USER / PROFILE ICON */}
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+              />
+
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 20.25a7.5 7.5 0 0115 0"
+              />
+            </svg>
+
+          </a>
 
         </div>
 
 
-        {/* ================= MOBILE HAMBURGER ================= */}
+        {/* ================= MOBILE MENU BUTTON ================= */}
 
         <button
           type="button"
@@ -166,8 +188,11 @@ const Navbar = () => {
             flex
             items-center
             justify-center
+
             text-white
+
             hover:text-yellow-400
+
             transition
           "
           aria-label="Toggle navigation menu"
@@ -214,8 +239,10 @@ const Navbar = () => {
         <div
           className="
             lg:hidden
-            bg-black/98
+
+            bg-black/95
             backdrop-blur-md
+
             border-t
             border-gray-900
 
@@ -252,9 +279,7 @@ const Navbar = () => {
                   }
                 `}
               >
-
                 {link.name}
-
               </a>
 
             ))}
@@ -262,43 +287,72 @@ const Navbar = () => {
           </div>
 
 
-          {/* MOBILE DASHBOARD BUTTON */}
+          {/* ================= MOBILE STUDENT DASHBOARD ================= */}
 
           <a
-  href="/dashboard"
-  className="
-    px-5
-    py-2.5
-    rounded-lg
+            href="/dashboard"
+            onClick={() => setIsOpen(false)}
+            className="
+              mt-6
 
-    bg-gradient-to-r
-    from-yellow-500
-    via-amber-500
-    to-yellow-600
+              flex
+              items-center
+              justify-center
+              gap-3
 
-    border
-    border-yellow-400
+              w-full
 
-    text-black
-    text-sm
-    font-extrabold
-    tracking-wide
+              py-3
 
-    hover:from-yellow-400
-    hover:via-amber-400
-    hover:to-yellow-500
+              rounded-full
 
-    hover:shadow-[0_0_22px_rgba(234,179,8,0.35)]
-    hover:scale-[1.03]
+              bg-yellow-400/5
 
-    active:scale-[0.98]
+              border
+              border-yellow-400/60
 
-    transition-all
-    duration-300
-  "
->
-  STUDENT DASHBOARD
-</a>
+              text-yellow-400
+
+              text-sm
+              font-semibold
+
+              hover:bg-yellow-400
+              hover:text-black
+
+              transition-all
+              duration-300
+            "
+          >
+
+            {/* PROFILE ICON */}
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="w-5 h-5"
+            >
+
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+              />
+
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 20.25a7.5 7.5 0 0115 0"
+              />
+
+            </svg>
+
+            Student Dashboard
+
+          </a>
+
         </div>
 
       )}
