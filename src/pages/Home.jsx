@@ -173,6 +173,217 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+{/* Thin black separator */}
+<div className="h-[8px] w-full bg-black"></div>
+
+{/* ----------------- PREVIOUS SPEAKERS ----------------- */}
+<section className="relative w-full bg-black text-white overflow-hidden">
+
+  {/* Previous Speakers */}
+  <div className="relative py-16 sm:py-20 px-6">
+
+    {/* Red glow in background */}
+    <div
+  className="absolute inset-0 pointer-events-none"
+  style={{
+    background:
+      "radial-gradient(ellipse 120% 85% at 100% 20%, rgba(220, 20, 20, 0.45) 0%, rgba(150, 15, 25, 0.55) 35%, rgba(80, 10, 18, 0.2) 60%, transparent 70%)",
+  }}
+></div>
+
+    <div className="relative z-10 max-w-6xl mx-auto">
+
+      <h2 className="text-center text-2xl sm:text-3xl md:text-4xl font-black uppercase text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.35)] mb-16">
+        OUR PREVIOUS SPEAKERS
+      </h2>
+
+      {/* Speakers */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 items-start">
+
+        {/* Speaker 1 */}
+        <div className="flex flex-col items-center text-center">
+
+          {/* Image Placeholder */}
+          <div className="w-42 h-42 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] bg-neutral-700">
+          </div>
+
+          <h3 className="mt-5 text-sm sm:text-base font-bold text-purple-700 uppercase">
+            MS. ANNAMIKA SHUKLA
+          </h3>
+
+          <p className="mt-1 text-[13px] sm:text-[14px] uppercase text-white max-w-[280px] leading-relaxed">
+            (CORPORATE COMMUNICATION TRAINER
+            <br />
+            & PUBLIC SPEAKING COACH)
+          </p>
+
+        </div>
+
+
+        {/* Speaker 2 */}
+        <div className="flex flex-col items-center text-center">
+
+          {/* Image Placeholder */}
+          <div className="w-42 h-42 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] bg-neutral-700">
+          </div>
+
+          <h3 className="mt-5 text-sm sm:text-base font-bold text-purple-700 uppercase">
+            MR. AMAR KHANNA
+          </h3>
+
+          <p className="mt-1 text-[13px] sm:text-[14px] uppercase text-white max-w-[280px] leading-relaxed">
+            (FOUNDER OF ANGRYTRADERS)
+          </p>
+
+        </div>
+
+
+        {/* Speaker 3 */}
+        <div className="flex flex-col items-center text-center">
+
+          {/* Image Placeholder */}
+          <div className="w-42 h-42 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] bg-neutral-700">
+          </div>
+
+          <h3 className="mt-5 text-sm sm:text-base font-bold text-purple-700 uppercase">
+            MR. RAJ PADHIYAR
+          </h3>
+
+          <p className="mt-1 text-[13px] sm:text-[14px] uppercase text-white max-w-[280px] leading-relaxed">
+            (FOUNDER & CEO: DIGITAL GURUKUL)
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  {/* ----------------- SPONSORS ----------------- */}
+
+  <div className="relative py-10 sm:py-20 px-6">
+
+    {/* Red background glow */}
+    <div
+  className="absolute inset-0 pointer-events-none"
+  style={{
+    background:
+      "radial-gradient(ellipse 140% 95% at 100% 20%, rgba(220, 20, 20, 0.45) 0%, rgba(150, 15, 25, 0.55) 35%, rgba(80, 10, 18, 0.2) 60%, transparent 70%)",
+  }}
+></div>
+
+    <div className="relative z-10 max-w-6xl mx-auto">
+
+      <h2 className="text-center text-2xl sm:text-3xl md:text-4xl font-black uppercase text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.35)] mb-14">
+        OUR SPONSORS
+      </h2>
+
+
+      {/* Four Sponsor Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 justify-items-center">
+
+        {/* Sponsor 1 */}
+        <div
+  className="w-36 h-36 sm:w-36 sm:h-36 rounded-[24px] p-[7px] flex items-center justify-center"
+  style={{
+    background:
+      "linear-gradient(145deg, #5c0505 0%, #b91c1c 45%, #450303 100%)",
+  }}
+>
+  <div className="w-30 h-30 sm:w-28 sm:h-28 rounded-[15px] bg-white">
+  </div>
+</div>
+
+        {/* Sponsor 2 */}
+        <div
+  className="w-36 h-36 sm:w-36 sm:h-36 rounded-[24px] p-[7px] flex items-center justify-center"
+  style={{
+    background:
+      "linear-gradient(145deg, #5c0505 0%, #b91c1c 45%, #450303 100%)",
+  }}
+>
+  <div className="w-30 h-30 sm:w-28 sm:h-28 rounded-[15px] bg-white">
+  </div>
+</div>
+
+        {/* Sponsor 3 */}
+        <div
+  className="w-36 h-36 sm:w-36 sm:h-36 rounded-[24px] p-[7px] flex items-center justify-center"
+  style={{
+    background:
+      "linear-gradient(145deg, #5c0505 0%, #b91c1c 45%, #450303 100%)",
+  }}
+>
+  <div className="w-30 h-30 sm:w-28 sm:h-28 rounded-[15px] bg-white">
+  </div>
+</div>
+
+        {/* Sponsor 4 */}
+        <div
+  className="w-36 h-36 sm:w-36 sm:h-36 rounded-[24px] p-[7px] flex items-center justify-center"
+  style={{
+    background:
+      "linear-gradient(145deg, #5c0505 0%, #b91c1c 45%, #450303 100%)",
+  }}
+>
+  <div className="w-40 h-30 sm:w-28 sm:h-28 rounded-[15px] bg-white">
+  </div>
+</div>
+
+      </div>
+
+
+      {/* Bottom Logos */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-14 mt-16 items-end justify-items-center">
+
+        {/* Alumni */}
+        <div className="flex flex-col items-center gap-3">
+  <div className="w-40 h-30 invisible"></div>
+
+  <span className="text-xl sm:text-2xl font-black text-yellow-400 uppercase">
+    
+  </span>
+</div>
+
+
+        {/* E-CELL */}
+        <div className="flex flex-col items-center gap-3">
+  <div className="w-40 h-30 invisible"></div>
+
+  <span className="text-xl sm:text-2xl font-black text-yellow-400 uppercase">
+    
+  </span>
+</div>
+
+
+        {/* NEC */}
+        <div className="flex flex-col items-center gap-3">
+  <div className="w-40 h-30 invisible"></div>
+
+  <span className="text-xl sm:text-2xl font-black text-yellow-400 uppercase">
+    
+  </span>
+</div>
+
+
+        {/* Enspire */}
+        <div className="flex flex-col items-center gap-3">
+  <div className="w-40 h-30 invisible"></div>
+
+  <span className="text-xl sm:text-2xl font-black text-yellow-400 uppercase">
+    
+  </span>
+</div>
+
+      </div>
+
+    </div>
+  </div>
+
+</section>
       </main>
     </div>
   );
