@@ -1,9 +1,11 @@
 import uuid
+from datetime import datetime, timezone
 from typing import List
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_registration_access
 from app.database import get_db
 from app.models.event import Event
 from app.models.registration import EventRegistration, RegistrationMember
@@ -68,13 +70,45 @@ def register_team(
             detail="You must complete your profile (set your Student ID) before registering for events",
         )
 
-    # 1. Fetch Event
-    event = db.query(Event).filter(Event.id == payload.event_id).first()
+    # 1. Fetch Event with row lock for concurrency protection
+    event = (
+        db.query(Event)
+        .filter(Event.id == payload.event_id)
+        .with_for_update()
+        .first()
+    )
     if not event:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Event not found",
         )
+
+    # Server-side Registration Deadline check
+    if event.registration_deadline:
+        deadline = event.registration_deadline
+        if deadline.tzinfo is None:
+            deadline = deadline.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > deadline:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Registration deadline has passed for this event",
+            )
+
+    # Server-side Capacity check (concurrency protected by with_for_update lock)
+    if event.max_capacity is not None:
+        current_reg_count = (
+            db.query(EventRegistration)
+            .filter(
+                EventRegistration.event_id == event.id,
+                EventRegistration.status != "rejected",
+            )
+            .count()
+        )
+        if current_reg_count >= event.max_capacity:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Event full: maximum capacity reached",
+            )
 
     # 2. Team Size & Solo Event Validations
     clean_member_stdids = [sid.strip() for sid in payload.member_stdids if sid.strip()]
@@ -185,12 +219,69 @@ def register_team(
             amount_paid=registration.amount_paid,
             message="Registration initiated. Please proceed to payment submission.",
         )
+    except IntegrityError as ie:
+        db.rollback()
+        err_str = str(ie).lower()
+        if "registration_members" in err_str or "event_student" in err_str:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Student already registered for this event in another team",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Already registered for this event",
+        )
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create registration: {str(e)}",
         )
+
+
+@router.get("/{registration_id}", response_model=RegistrationDetailResponse)
+def get_registration(
+    registration: EventRegistration = Depends(require_registration_access),
+):
+    """
+    Returns registration details and team roster.
+    Accessible to team leader, team members, and admins.
+    """
+    members_detail = [
+        RegistrationMemberDetail(
+            id=m.id,
+            student_id=m.student_id,
+            student_name=m.student.name if m.student else "",
+            student_email=m.student.email if m.student else "",
+            student_stdid=m.student.stdid if m.student else None,
+            is_leader=m.is_leader,
+            ticket_qr_token=m.ticket_qr_token,
+            ticket_used=m.ticket_used,
+            scanned_at=m.scanned_at,
+        )
+        for m in registration.members
+    ]
+    return RegistrationDetailResponse(
+        id=registration.id,
+        event_id=registration.event_id,
+        event_title=registration.event.title if registration.event else None,
+        leader_id=registration.leader_id,
+        leader_name=registration.leader.name if registration.leader else None,
+        leader_email=registration.leader.email if registration.leader else None,
+        leader_stdid=registration.leader.stdid if registration.leader else None,
+        team_name=registration.team_name,
+        status=registration.status,
+        transaction_id=registration.transaction_id,
+        payment_screenshot_url=registration.payment_screenshot_url,
+        amount_paid=registration.amount_paid,
+        retry_count=registration.retry_count,
+        created_at=registration.created_at,
+        verified_at=registration.verified_at,
+        members=members_detail,
+    )
 
 
 @router.post("/{registration_id}/payment", response_model=RegistrationSimpleResponse)
@@ -203,6 +294,7 @@ async def submit_payment(
 ):
     """
     Uploads payment screenshot to Cloudinary and updates registration status to pending_approval.
+    Validates deadline and team size before accepting payment.
     """
     registration = (
         db.query(EventRegistration)
@@ -220,6 +312,32 @@ async def submit_payment(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the team leader can submit payment for this registration",
         )
+
+    event = registration.event or db.query(Event).filter(Event.id == registration.event_id).first()
+
+    # Re-check Registration Deadline server-side
+    if event and event.registration_deadline:
+        deadline = event.registration_deadline
+        if deadline.tzinfo is None:
+            deadline = deadline.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > deadline:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Registration deadline has passed for this event",
+            )
+
+    # Re-check Team Size before payment submission
+    if event:
+        member_count = (
+            db.query(RegistrationMember)
+            .filter(RegistrationMember.registration_id == registration.id)
+            .count()
+        )
+        if member_count < event.min_team_size or member_count > event.max_team_size:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid team size ({member_count}). Required team size is between {event.min_team_size} and {event.max_team_size}.",
+            )
 
     # Upload to Cloudinary
     screenshot_url = await upload_payment_screenshot(file)
@@ -239,6 +357,9 @@ async def submit_payment(
             amount_paid=registration.amount_paid,
             message="Payment screenshot uploaded successfully. Awaiting admin approval.",
         )
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(
