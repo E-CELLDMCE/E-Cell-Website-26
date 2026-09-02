@@ -4,6 +4,7 @@ from app.schemas.user import (
     StudentLookupResponse,
     GoogleCallbackRequest,
     DevLoginRequest,
+    AdminLoginRequest,
     TokenResponse,
 )
 from app.schemas.registration import (
@@ -16,7 +17,7 @@ from app.schemas.registration import (
     RegistrationMemberDetail,
     RegistrationSimpleResponse,
 )
-from app.schemas.event import EventCreate, EventResponse
+from app.schemas.event import EventCreate, EventUpdate, EventResponse
 
 __all__ = [
     "UserProfileUpdate",
@@ -24,6 +25,7 @@ __all__ = [
     "StudentLookupResponse",
     "GoogleCallbackRequest",
     "DevLoginRequest",
+    "AdminLoginRequest",
     "TokenResponse",
     "TeamRegistrationCreate",
     "PaymentSubmitRequest",
@@ -34,5 +36,6 @@ __all__ = [
     "RegistrationMemberDetail",
     "RegistrationSimpleResponse",
     "EventCreate",
+    "EventUpdate",
     "EventResponse",
 ]
