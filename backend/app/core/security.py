@@ -9,7 +9,21 @@ from app.config import settings
 from app.database import get_db
 from app.models.user import User
 
+import uuid
+import bcrypt
+
 security_scheme = HTTPBearer(auto_error=False)
+
+
+def hash_password(password: str) -> str:
+    """Hash a plaintext password using bcrypt."""
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plaintext password against a stored bcrypt hash."""
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -79,3 +93,67 @@ async def get_current_admin(
             detail="Admin privileges required for this action",
         )
     return current_user
+
+
+async def get_current_superadmin(
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+) -> User:
+    """Verify that current user is an admin with superadmin section."""
+    from app.models.user import AdminProfile
+    profile = (
+        db.query(AdminProfile)
+        .filter(AdminProfile.user_id == current_admin.id)
+        .first()
+    )
+    if not profile or profile.section != "superadmin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Superadmin privileges required for this action",
+        )
+    return current_admin
+
+
+async def require_registration_access(
+    registration_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Dependency/helper that loads EventRegistration by id.
+    Allows access if current_user is team leader, an admin, or a team member.
+    Otherwise raises 403 (or 404 if registration not found).
+    """
+    from app.models.registration import EventRegistration, RegistrationMember
+
+    registration = (
+        db.query(EventRegistration)
+        .filter(EventRegistration.id == registration_id)
+        .first()
+    )
+    if not registration:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Registration not found",
+        )
+
+    # Superadmin/Admin or Team Leader
+    if current_user.role == "admin" or current_user.id == registration.leader_id:
+        return registration
+
+    # Team member check
+    is_member = (
+        db.query(RegistrationMember)
+        .filter(
+            RegistrationMember.registration_id == registration.id,
+            RegistrationMember.student_id == current_user.id,
+        )
+        .first()
+    )
+    if not is_member:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this registration",
+        )
+
+    return registration
