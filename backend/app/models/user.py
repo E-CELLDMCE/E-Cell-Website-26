@@ -41,6 +41,7 @@ class User(Base):
     oauth_provider = Column(String(50), nullable=True)
     oauth_id = Column(String(255), nullable=True)
     phone = Column(String(20), nullable=True)
+    password_hash = Column(String(255), nullable=True)
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
