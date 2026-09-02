@@ -36,17 +36,19 @@ class EventRegistration(Base):
         UUID(as_uuid=True),
         ForeignKey("events.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     leader_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     team_name = Column(String(255), nullable=True)
     status = Column(
         SQLEnum(
             "pending_payment",
-            "payment_submitted",
+            "pending_approval",
             "approved",
             "rejected",
             name="registration_status_enum",
@@ -54,6 +56,7 @@ class EventRegistration(Base):
         ),
         nullable=False,
         default="pending_payment",
+        index=True,
     )
     transaction_id = Column(String(255), nullable=True)
     payment_screenshot_url = Column(String(500), nullable=True)
@@ -110,15 +113,24 @@ class RegistrationMember(Base):
         UUID(as_uuid=True),
         ForeignKey("event_registrations.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
+    )
+    event_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("events.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     student_id = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     is_leader = Column(Boolean, default=False, nullable=False)
-    ticket_qr_token = Column(String(255), unique=True, nullable=True, index=True)
+    ticket_qr_token = Column(UUID(as_uuid=True), unique=True, nullable=True, index=True, default=None)
     ticket_used = Column(Boolean, default=False, nullable=False)
+    scanned_at = Column(DateTime(timezone=True), nullable=True)
     added_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -129,10 +141,14 @@ class RegistrationMember(Base):
         UniqueConstraint(
             "registration_id", "student_id", name="uq_registration_members_reg_student"
         ),
+        UniqueConstraint(
+            "event_id", "student_id", name="uq_registration_members_event_student"
+        ),
     )
 
     # Relationships
     registration = relationship("EventRegistration", back_populates="members")
+    event = relationship("Event", foreign_keys=[event_id])
     student = relationship(
         "User",
         back_populates="registration_memberships",
@@ -140,7 +156,7 @@ class RegistrationMember(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<RegistrationMember id={self.id} registration_id={self.registration_id} student_id={self.student_id}>"
+        return f"<RegistrationMember id={self.id} event_id={self.event_id} student_id={self.student_id}>"
 
 
 class AuditLog(Base):

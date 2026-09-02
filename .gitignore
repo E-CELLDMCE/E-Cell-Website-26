@@ -52,3 +52,5 @@ htmlcov/
 
 # Temporary / Testing
 frontend-test/
+backend/fix_*.py
+backend/test_*.py

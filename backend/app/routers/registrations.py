@@ -1,0 +1,349 @@
+import uuid
+from typing import List
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
+
+from app.core.security import get_current_user
+from app.database import get_db
+from app.models.event import Event
+from app.models.registration import EventRegistration, RegistrationMember
+from app.models.user import User
+from app.schemas.registration import (
+    MemberTicketResponse,
+    RegistrationDetailResponse,
+    RegistrationMemberDetail,
+    RegistrationSimpleResponse,
+    TeamRegistrationCreate,
+)
+from app.schemas.user import StudentLookupResponse
+from app.services.cloudinary_service import upload_payment_screenshot
+from app.utils.qr_generator import generate_qr_base64
+
+router = APIRouter(prefix="/registrations", tags=["Registrations"])
+
+
+@router.get("/student-lookup/{stdid}", response_model=StudentLookupResponse)
+def lookup_student_by_stdid(
+    stdid: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Look up a student teammate by stdid.
+    Returns 404 if not found or role != 'student'.
+    """
+    clean_stdid = stdid.strip()
+    student = (
+        db.query(User)
+        .filter(User.stdid == clean_stdid, User.role == "student")
+        .first()
+    )
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Teammate profile not found with stdid '{clean_stdid}'",
+        )
+    return StudentLookupResponse(
+        id=student.id,
+        stdid=student.stdid,
+        name=student.name,
+        email=student.email,
+    )
+
+
+@router.post("/", response_model=RegistrationSimpleResponse, status_code=status.HTTP_201_CREATED)
+def register_team(
+    payload: TeamRegistrationCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Register leader and optional teammates for an event.
+    Performs team size validation, teammate resolution, duplicate check, and atomic insertion.
+    """
+    # 0. Ensure leader has completed profile with stdid
+    if not current_user.stdid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must complete your profile (set your Student ID) before registering for events",
+        )
+
+    # 1. Fetch Event
+    event = db.query(Event).filter(Event.id == payload.event_id).first()
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found",
+        )
+
+    # 2. Team Size & Solo Event Validations
+    clean_member_stdids = [sid.strip() for sid in payload.member_stdids if sid.strip()]
+
+    # Leader cannot include themselves in member_stdids
+    if current_user.stdid in clean_member_stdids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Leader Student ID cannot be included in teammate list",
+        )
+
+    # Check for duplicate stdids in input
+    if len(clean_member_stdids) != len(set(clean_member_stdids)):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Duplicate student IDs found in teammate list",
+        )
+
+    total_members = 1 + len(clean_member_stdids)
+
+    if not event.is_team_event and len(clean_member_stdids) > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This is an individual event. Teammates cannot be added.",
+        )
+
+    if total_members < event.min_team_size or total_members > event.max_team_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid team size {total_members}. Required team size is between {event.min_team_size} and {event.max_team_size}.",
+        )
+
+    # 3. Resolve all member stdids
+    teammates: List[User] = []
+    for sid in clean_member_stdids:
+        teammate = (
+            db.query(User)
+            .filter(User.stdid == sid, User.role == "student")
+            .first()
+        )
+        if not teammate:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Teammate profile not found with stdid '{sid}'",
+            )
+        teammates.append(teammate)
+
+    # 4. Check if Leader or any Teammate is already registered for this event
+    all_participant_users = [current_user] + teammates
+    all_participant_ids = [u.id for u in all_participant_users]
+
+    existing_memberships = (
+        db.query(RegistrationMember)
+        .filter(
+            RegistrationMember.event_id == event.id,
+            RegistrationMember.student_id.in_(all_participant_ids),
+        )
+        .all()
+    )
+    if existing_memberships:
+        conflict_student_id = existing_memberships[0].student_id
+        conflict_user = next((u for u in all_participant_users if u.id == conflict_student_id), None)
+        conflict_stdid = conflict_user.stdid if conflict_user else str(conflict_student_id)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Student '{conflict_stdid}' is already registered for this event",
+        )
+
+    # 5. Atomic Transaction: Create EventRegistration and RegistrationMember rows
+    try:
+        registration = EventRegistration(
+            event_id=event.id,
+            leader_id=current_user.id,
+            team_name=payload.team_name.strip() if payload.team_name else None,
+            status="pending_payment",
+            amount_paid=event.fee_amount,
+        )
+        db.add(registration)
+        db.flush()  # Populates registration.id
+
+        # Insert Leader as RegistrationMember
+        leader_member = RegistrationMember(
+            registration_id=registration.id,
+            event_id=event.id,
+            student_id=current_user.id,
+            is_leader=True,
+        )
+        db.add(leader_member)
+
+        # Insert Teammates
+        for teammate in teammates:
+            member = RegistrationMember(
+                registration_id=registration.id,
+                event_id=event.id,
+                student_id=teammate.id,
+                is_leader=False,
+            )
+            db.add(member)
+
+        db.commit()
+        db.refresh(registration)
+
+        return RegistrationSimpleResponse(
+            id=registration.id,
+            event_id=registration.event_id,
+            team_name=registration.team_name,
+            status=registration.status,
+            amount_paid=registration.amount_paid,
+            message="Registration initiated. Please proceed to payment submission.",
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create registration: {str(e)}",
+        )
+
+
+@router.post("/{registration_id}/payment", response_model=RegistrationSimpleResponse)
+async def submit_payment(
+    registration_id: uuid.UUID,
+    transaction_id: str = Form(..., description="Transaction ID / UTR reference"),
+    file: UploadFile = File(..., description="Payment screenshot image"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Uploads payment screenshot to Cloudinary and updates registration status to pending_approval.
+    """
+    registration = (
+        db.query(EventRegistration)
+        .filter(EventRegistration.id == registration_id)
+        .first()
+    )
+    if not registration:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Registration not found",
+        )
+
+    if registration.leader_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the team leader can submit payment for this registration",
+        )
+
+    # Upload to Cloudinary
+    screenshot_url = await upload_payment_screenshot(file)
+
+    try:
+        registration.transaction_id = transaction_id.strip()
+        registration.payment_screenshot_url = screenshot_url
+        registration.status = "pending_approval"
+        db.commit()
+        db.refresh(registration)
+
+        return RegistrationSimpleResponse(
+            id=registration.id,
+            event_id=registration.event_id,
+            team_name=registration.team_name,
+            status=registration.status,
+            amount_paid=registration.amount_paid,
+            message="Payment screenshot uploaded successfully. Awaiting admin approval.",
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update payment status: {str(e)}",
+        )
+
+
+@router.get("/my-tickets", response_model=List[MemberTicketResponse])
+def get_my_tickets(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Returns approved tickets for current student with base64 encoded QR codes.
+    """
+    memberships = (
+        db.query(RegistrationMember)
+        .join(EventRegistration, RegistrationMember.registration_id == EventRegistration.id)
+        .join(Event, RegistrationMember.event_id == Event.id)
+        .filter(
+            RegistrationMember.student_id == current_user.id,
+            EventRegistration.status == "approved",
+            RegistrationMember.ticket_qr_token.isnot(None),
+        )
+        .all()
+    )
+
+    tickets: List[MemberTicketResponse] = []
+    for m in memberships:
+        token_str = str(m.ticket_qr_token)
+        qr_b64 = generate_qr_base64(token_str)
+        tickets.append(
+            MemberTicketResponse(
+                ticket_qr_token=m.ticket_qr_token,
+                event_title=m.event.title if m.event else "E-Cell Event",
+                event_date=m.event.event_date if m.event else None,
+                team_name=m.registration.team_name if m.registration else None,
+                ticket_used=m.ticket_used,
+                scanned_at=m.scanned_at,
+                qr_code_base64=qr_b64,
+            )
+        )
+
+    return tickets
+
+
+@router.get("/my-registrations", response_model=List[RegistrationDetailResponse])
+def get_my_registrations(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Returns registrations led by or including the current user."""
+    # Find registration IDs where user is member or leader
+    member_reg_ids = (
+        db.query(RegistrationMember.registration_id)
+        .filter(RegistrationMember.student_id == current_user.id)
+        .subquery()
+    )
+
+    registrations = (
+        db.query(EventRegistration)
+        .filter(
+            (EventRegistration.leader_id == current_user.id)
+            | (EventRegistration.id.in_(member_reg_ids))
+        )
+        .order_by(EventRegistration.created_at.desc())
+        .all()
+    )
+
+    result: List[RegistrationDetailResponse] = []
+    for reg in registrations:
+        members_detail = []
+        for m in reg.members:
+            members_detail.append(
+                RegistrationMemberDetail(
+                    id=m.id,
+                    student_id=m.student_id,
+                    student_name=m.student.name if m.student else "",
+                    student_email=m.student.email if m.student else "",
+                    student_stdid=m.student.stdid if m.student else None,
+                    is_leader=m.is_leader,
+                    ticket_qr_token=m.ticket_qr_token,
+                    ticket_used=m.ticket_used,
+                    scanned_at=m.scanned_at,
+                )
+            )
+        result.append(
+            RegistrationDetailResponse(
+                id=reg.id,
+                event_id=reg.event_id,
+                event_title=reg.event.title if reg.event else None,
+                leader_id=reg.leader_id,
+                leader_name=reg.leader.name if reg.leader else None,
+                leader_email=reg.leader.email if reg.leader else None,
+                leader_stdid=reg.leader.stdid if reg.leader else None,
+                team_name=reg.team_name,
+                status=reg.status,
+                transaction_id=reg.transaction_id,
+                payment_screenshot_url=reg.payment_screenshot_url,
+                amount_paid=reg.amount_paid,
+                retry_count=reg.retry_count,
+                created_at=reg.created_at,
+                verified_at=reg.verified_at,
+                members=members_detail,
+            )
+        )
+    return result
