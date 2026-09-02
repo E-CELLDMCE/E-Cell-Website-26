@@ -3,13 +3,14 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
-from app.core.security import get_current_admin
+from app.core.security import get_current_admin, get_current_superadmin
 from app.database import get_db
 from app.models.event import Event
 from app.models.registration import EventRegistration, RegistrationMember, AuditLog
-from app.models.user import User
+from app.models.user import User, AdminProfile
+from app.schemas.user import UserResponse
 from app.schemas.registration import (
     RegistrationDetailResponse,
     RegistrationMemberDetail,
@@ -358,3 +359,87 @@ def scan_ticket(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Scan transaction failed: {str(e)}",
         )
+
+
+@router.post("/users/{user_id}/promote", response_model=UserResponse)
+def promote_user_to_admin(
+    user_id: uuid.UUID,
+    current_admin: User = Depends(get_current_superadmin),
+    db: Session = Depends(get_db),
+):
+    """
+    Superadmin promotes a student to admin:
+    - Looks up user by id (404 if not found, 400 if already admin).
+    - Sets role='admin'.
+    - Creates corresponding admin_profiles row with section='other'.
+    - Writes audit log with action='promote_to_admin'.
+    """
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if target_user.role == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already an admin",
+        )
+
+    target_user.role = "admin"
+
+    # Create admin_profiles row with section='other'
+    profile = db.query(AdminProfile).filter(AdminProfile.user_id == target_user.id).first()
+    if not profile:
+        profile = AdminProfile(
+            user_id=target_user.id,
+            section="other",
+            created_by=current_admin.id,
+        )
+        db.add(profile)
+    else:
+        profile.section = "other"
+
+    # Write audit log entry
+    audit = AuditLog(
+        admin_id=current_admin.id,
+        action="promote_to_admin",
+        target_type="user",
+        target_id=str(target_user.id),
+        details={
+            "promoted_user_email": target_user.email,
+            "promoted_user_name": target_user.name,
+            "assigned_section": "other",
+        },
+    )
+    db.add(audit)
+
+    db.commit()
+    db.refresh(target_user)
+    return UserResponse.model_validate(target_user)
+
+
+@router.get("/users", response_model=List[UserResponse])
+def list_students_for_promotion(
+    search: Optional[str] = None,
+    current_admin: User = Depends(get_current_superadmin),
+    db: Session = Depends(get_db),
+):
+    """
+    Lists all users with role='student' so superadmin can browse who to promote.
+    Supports optional search by name/email/stdid.
+    """
+    query = db.query(User).filter(User.role == "student")
+    if search and search.strip():
+        term = f"%{search.strip()}%"
+        query = query.filter(
+            or_(
+                User.name.ilike(term),
+                User.email.ilike(term),
+                User.stdid.ilike(term),
+            )
+        )
+
+    users = query.order_by(User.created_at.desc()).all()
+    return [UserResponse.model_validate(u) for u in users]
