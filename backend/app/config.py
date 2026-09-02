@@ -70,6 +70,7 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
     CLOUDINARY_API_SECRET: str = ""
+    CLOUDINARY_API_URL: str = ""
 
     # Brevo Email Service
     BREVO_API_KEY: str = ""
@@ -78,6 +79,10 @@ class Settings(BaseSettings):
     # Initial Superadmin Seeding
     INITIAL_ADMIN_EMAIL: str = "admin@ecell.college.edu"
     INITIAL_ADMIN_PASSWORD: str = ""
+
+    # Superadmin Password Auth (Required)
+    ADMIN_EMAIL: str
+    ADMIN_PASSWORD: str
 
     @field_validator("INITIAL_ADMIN_PASSWORD")
     @classmethod
