@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
-from app.core.security import create_access_token
+from app.config import settings
+from app.core.security import create_access_token, verify_password
 from app.database import get_db
 from app.models.user import User, AdminProfile
 from app.schemas.user import (
     GoogleCallbackRequest,
     DevLoginRequest,
+    AdminLoginRequest,
     TokenResponse,
     UserResponse,
 )
@@ -91,6 +94,59 @@ def dev_login(
             user.stdid = payload.stdid
         db.commit()
         db.refresh(user)
+
+    token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": user.role})
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        user=UserResponse.model_validate(user),
+    )
+
+
+@router.post("/admin-login", response_model=TokenResponse)
+def admin_login(
+    payload: AdminLoginRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Superadmin password login endpoint.
+    Accepts email + password.
+    ONLY works for the account matching ADMIN_EMAIL (rejects any other email).
+    Verifies password against stored hash, issues same JWT format used elsewhere in the app.
+    """
+    input_email = payload.email.strip().lower()
+    configured_admin_email = settings.ADMIN_EMAIL.strip().lower()
+
+    # Reject any other email attempting password login
+    if input_email != configured_admin_email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = (
+        db.query(User)
+        .filter(func.lower(User.email) == configured_admin_email)
+        .first()
+    )
+
+    if (
+        not user
+        or not user.password_hash
+        or not verify_password(payload.password, user.password_hash)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required",
+        )
 
     token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": user.role})
     return TokenResponse(
