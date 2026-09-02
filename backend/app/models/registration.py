@@ -128,7 +128,7 @@ class RegistrationMember(Base):
         index=True,
     )
     is_leader = Column(Boolean, default=False, nullable=False)
-    ticket_qr_token = Column(UUID(as_uuid=True), unique=True, nullable=True, index=True, default=None)
+    ticket_qr_token = Column(UUID(as_uuid=True), unique=True, nullable=True, index=True)
     ticket_used = Column(Boolean, default=False, nullable=False)
     scanned_at = Column(DateTime(timezone=True), nullable=True)
     added_at = Column(
@@ -142,7 +142,7 @@ class RegistrationMember(Base):
             "registration_id", "student_id", name="uq_registration_members_reg_student"
         ),
         UniqueConstraint(
-            "event_id", "student_id", name="uq_registration_members_event_student"
+            "event_id", "student_id", name="registration_members_event_student_key"
         ),
     )
 
