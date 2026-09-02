@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 from decimal import Decimal
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.config import settings
+from app.core.security import hash_password
 from app.database import Base, engine, SessionLocal
 from app.models.event import Event
 from app.models.user import User, AdminProfile
@@ -14,20 +16,24 @@ from app.routers.registrations import router as registrations_router
 from app.routers.admin import router as admin_router
 
 
-def seed_initial_data():
-    """Seeds initial events and demo users for testing if database is empty."""
-    from datetime import datetime, timezone, timedelta
+def ensure_superadmin_exists():
+    """
+    Checks if a user with role='admin' and email=settings.ADMIN_EMAIL exists in DB.
+    If not, creates one automatically with hashed password and matching admin_profiles row (section='superadmin').
+    """
     db = SessionLocal()
     try:
-        # Ensure demo admin exists first
-        admin = db.query(User).filter(User.email == "admin@ecell.college.edu").first()
+        admin_email = settings.ADMIN_EMAIL.strip()
+        admin = db.query(User).filter(User.email.ilike(admin_email)).first()
+        hashed_pwd = hash_password(settings.ADMIN_PASSWORD)
+
         if not admin:
             admin = User(
-                email="admin@ecell.college.edu",
-                name="E-Cell Chief Admin",
+                email=admin_email,
+                name="E-Cell Superadmin",
                 role="admin",
-                stdid="ADM001",
-                oauth_provider="dev_seed",
+                password_hash=hashed_pwd,
+                oauth_provider="local",
             )
             db.add(admin)
             db.commit()
@@ -36,6 +42,44 @@ def seed_initial_data():
             admin_prof = AdminProfile(user_id=admin.id, section="superadmin")
             db.add(admin_prof)
             db.commit()
+        else:
+            # User exists: ensure role='admin', password_hash is set, and admin_profile is superadmin
+            updated = False
+            if admin.role != "admin":
+                admin.role = "admin"
+                updated = True
+            if not admin.password_hash:
+                admin.password_hash = hashed_pwd
+                updated = True
+            if updated:
+                db.commit()
+                db.refresh(admin)
+
+            admin_prof = db.query(AdminProfile).filter(AdminProfile.user_id == admin.id).first()
+            if not admin_prof:
+                admin_prof = AdminProfile(user_id=admin.id, section="superadmin")
+                db.add(admin_prof)
+                db.commit()
+            elif admin_prof.section != "superadmin":
+                admin_prof.section = "superadmin"
+                db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"[Superadmin Startup] Error ensuring superadmin exists: {e}")
+    finally:
+        db.close()
+
+
+def seed_initial_data():
+    """Seeds initial events and demo users for testing if database is empty."""
+    from datetime import datetime, timezone, timedelta
+    db = SessionLocal()
+    try:
+        # Ensure admin exists first
+        admin = db.query(User).filter(User.email.ilike(settings.ADMIN_EMAIL.strip())).first()
+        if not admin:
+            ensure_superadmin_exists()
+            admin = db.query(User).filter(User.email.ilike(settings.ADMIN_EMAIL.strip())).first()
 
         # Check if events exist
         if db.query(Event).count() == 0:
@@ -136,9 +180,17 @@ async def lifespan(app: FastAPI):
     # Startup: Ensure database tables are created and seed data
     try:
         Base.metadata.create_all(bind=engine)
+        # Ensure password_hash column exists on users table if already provisioned
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);"))
+                conn.commit()
+        except Exception:
+            pass
+        ensure_superadmin_exists()
         seed_initial_data()
     except Exception as e:
-        print(f"[DB Startup] Table creation warning: {e}")
+        print(f"[DB Startup] Startup initialization warning: {e}")
     yield
     # Shutdown
 
