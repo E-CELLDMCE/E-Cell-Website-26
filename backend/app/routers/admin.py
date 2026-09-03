@@ -443,3 +443,129 @@ def list_students_for_promotion(
 
     users = query.order_by(User.created_at.desc()).all()
     return [UserResponse.model_validate(u) for u in users]
+
+
+@router.get("/export/{event_id}")
+def export_event_registrations(
+    event_id: uuid.UUID,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Exports all registrations and student attendee details for an event as an Excel (.xlsx) file.
+    """
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found",
+        )
+
+    import io
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from fastapi.responses import StreamingResponse
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Registrations"
+
+    # Header styling
+    header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
+    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    cell_border = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="CBD5E1"),
+        bottom=Side(style="thin", color="CBD5E1"),
+    )
+
+    headers = [
+        "Registration ID",
+        "Team Name",
+        "Leader Name",
+        "Leader Email",
+        "Leader Student ID",
+        "Member Name",
+        "Member Student ID",
+        "Member Email",
+        "Role",
+        "Registration Status",
+        "Amount Paid (INR)",
+        "Transaction ID",
+        "Ticket Used",
+        "Scanned At (UTC)",
+        "Registered At (UTC)",
+    ]
+    ws.append(headers)
+
+    for col_idx in range(1, len(headers) + 1):
+        cell = ws.cell(row=1, column=col_idx)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    registrations = (
+        db.query(EventRegistration)
+        .filter(EventRegistration.event_id == event.id)
+        .order_by(EventRegistration.created_at.desc())
+        .all()
+    )
+
+    row_idx = 2
+    for reg in registrations:
+        leader_name = reg.leader.name if reg.leader else "N/A"
+        leader_email = reg.leader.email if reg.leader else "N/A"
+        leader_stdid = reg.leader.stdid if reg.leader else "N/A"
+        team_name = reg.team_name or "Individual"
+
+        for member in reg.members:
+            student = member.student
+            m_name = student.name if student else "N/A"
+            m_stdid = student.stdid if student else "N/A"
+            m_email = student.email if student else "N/A"
+            m_role = "Leader" if member.is_leader else "Member"
+            scanned_str = member.scanned_at.strftime("%Y-%m-%d %H:%M:%S") if member.scanned_at else "No"
+            ticket_status = "Yes" if member.ticket_used else "No"
+            created_str = reg.created_at.strftime("%Y-%m-%d %H:%M:%S") if reg.created_at else ""
+
+            row_data = [
+                str(reg.id),
+                team_name,
+                leader_name,
+                leader_email,
+                leader_stdid,
+                m_name,
+                m_stdid,
+                m_email,
+                m_role,
+                reg.status,
+                str(reg.amount_paid),
+                reg.transaction_id or "N/A",
+                ticket_status,
+                scanned_str,
+                created_str,
+            ]
+            ws.append(row_data)
+            for col_idx in range(1, len(row_data) + 1):
+                cell = ws.cell(row=row_idx, column=col_idx)
+                cell.border = cell_border
+                cell.alignment = Alignment(vertical="center")
+            row_idx += 1
+
+    # Adjust column widths
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or "")) for cell in col)
+        col_letter = openpyxl.utils.get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"event_{event.id}_registrations.xlsx"
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )

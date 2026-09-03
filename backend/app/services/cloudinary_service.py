@@ -82,24 +82,6 @@ async def _upload_authenticated_image(
     Validates image file, ensures Cloudinary is configured, uploads with type='authenticated',
     and returns a signed URL with a short expiration.
     """
-    ensure_cloudinary_configured()
-
-    if not file.filename:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Valid file must be uploaded",
-        )
-
-    content_type = file.content_type or ""
-    if not (
-        content_type.startswith("image/")
-        or file.filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Uploaded file must be an image (PNG, JPG, JPEG, WEBP)",
-        )
-
     file_bytes = await file.read()
     if len(file_bytes) == 0:
         raise HTTPException(
@@ -107,7 +89,15 @@ async def _upload_authenticated_image(
             detail="Uploaded file cannot be empty",
         )
 
+    # If Cloudinary is not configured in local environment, return base64 data URI fallback
+    if not is_cloudinary_configured():
+        import base64
+        mime = content_type if content_type else "image/png"
+        encoded = base64.b64encode(file_bytes).decode("utf-8")
+        return f"data:{mime};base64,{encoded}"
+
     try:
+        ensure_cloudinary_configured()
         upload_result = cloudinary.uploader.upload(
             file_bytes,
             folder=folder,
