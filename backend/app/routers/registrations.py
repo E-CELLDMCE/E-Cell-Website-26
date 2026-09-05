@@ -33,12 +33,12 @@ def lookup_student_by_stdid(
 ):
     """
     Look up a student teammate by stdid.
-    Returns 404 if not found or role != 'student'.
+    Returns 404 if not found.
     """
     clean_stdid = stdid.strip()
     student = (
         db.query(User)
-        .filter(User.stdid == clean_stdid, User.role == "student")
+        .filter(User.stdid == clean_stdid)
         .first()
     )
     if not student:
@@ -147,7 +147,7 @@ def register_team(
     for sid in clean_member_stdids:
         teammate = (
             db.query(User)
-            .filter(User.stdid == sid, User.role == "student")
+            .filter(User.stdid == sid)
             .first()
         )
         if not teammate:
