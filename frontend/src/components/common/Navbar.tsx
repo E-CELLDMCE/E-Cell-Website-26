@@ -11,6 +11,12 @@ export const Navbar: React.FC = () => {
 
   const isHomePage = location.pathname === '/';
 
+  const handleLogout = () => {
+    setIsMobileMenuOpen(false);
+    logout();
+    navigate('/login');
+  };
+
   const handleNavClick = (href: string) => {
     setIsMobileMenuOpen(false);
     if (href.startsWith('#')) {
@@ -121,11 +127,17 @@ export const Navbar: React.FC = () => {
                   {user.name}
                 </span>
                 <span className="text-[10px] text-neutral-400 tracking-wider uppercase">
-                  {user.role} {user.stdid ? `• ${user.stdid}` : ''}
+                  {isAdmin ? (
+                    <span className="text-red-400 font-bold bg-red-950/60 border border-red-500/30 px-1.5 py-0.5 rounded">
+                      ADMIN
+                    </span>
+                  ) : (
+                    `${user.role} ${user.stdid ? `• ${user.stdid}` : ''}`
+                  )}
                 </span>
               </div>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 title="Logout"
                 className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400 hover:border-red-500/40 transition-all cursor-pointer"
               >
@@ -146,7 +158,7 @@ export const Navbar: React.FC = () => {
         <div className="lg:hidden flex items-center space-x-3">
           {user && (
             <button
-              onClick={logout}
+              onClick={handleLogout}
               title="Logout"
               className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400"
             >
@@ -217,10 +229,7 @@ export const Navbar: React.FC = () => {
           <div className="pt-4 border-t border-neutral-800">
             {user ? (
               <button
-                onClick={() => {
-                  logout();
-                  setIsMobileMenuOpen(false);
-                }}
+                onClick={handleLogout}
                 className="w-full py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-red-400 font-bold text-sm tracking-wider flex items-center justify-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
