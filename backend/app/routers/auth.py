@@ -27,7 +27,8 @@ def google_callback(
     Upserts user record into 'users' table via email and oauth_id.
     Returns backend JWT access token.
     """
-    user = db.query(User).filter(User.email == payload.email).first()
+    clean_email = payload.email.strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == clean_email).first()
 
     if user:
         # Update existing user OAuth info if missing
@@ -35,12 +36,21 @@ def google_callback(
             user.oauth_id = payload.oauth_id
         if payload.oauth_provider and not user.oauth_provider:
             user.oauth_provider = payload.oauth_provider
+        if payload.name and not user.name:
+            user.name = payload.name
+        # Ensure admin users have a superadmin profile
+        if user.role == "admin":
+            if not user.admin_profile:
+                admin_prof = AdminProfile(user_id=user.id, section="superadmin")
+                db.add(admin_prof)
+            elif user.admin_profile.section != "superadmin":
+                user.admin_profile.section = "superadmin"
         db.commit()
         db.refresh(user)
     else:
         # Create new user record
         user = User(
-            email=payload.email,
+            email=clean_email,
             name=payload.name,
             role="student",
             oauth_provider=payload.oauth_provider or "google",
