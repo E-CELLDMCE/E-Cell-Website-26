@@ -410,17 +410,17 @@ def promote_user_to_admin(
 
     target_user.role = "admin"
 
-    # Create admin_profiles row with section='other'
+    # Create or update admin_profiles row with section='superadmin'
     profile = db.query(AdminProfile).filter(AdminProfile.user_id == target_user.id).first()
     if not profile:
         profile = AdminProfile(
             user_id=target_user.id,
-            section="other",
+            section="superadmin",
             created_by=current_admin.id,
         )
         db.add(profile)
     else:
-        profile.section = "other"
+        profile.section = "superadmin"
 
     # Write audit log entry
     audit = AuditLog(
@@ -431,7 +431,7 @@ def promote_user_to_admin(
         details={
             "promoted_user_email": target_user.email,
             "promoted_user_name": target_user.name,
-            "assigned_section": "other",
+            "assigned_section": "superadmin",
         },
     )
     db.add(audit)
