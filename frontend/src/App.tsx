@@ -33,7 +33,7 @@ export const App = () => {
               
               <main className="flex-grow">
                 <Routes>
-                  {/* Public Routes */}
+                  {/* Public & Student Pages (accessible to all including admins) */}
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />
