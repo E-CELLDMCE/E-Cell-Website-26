@@ -92,7 +92,9 @@ async def _upload_authenticated_image(
     # If Cloudinary is not configured in local environment, return base64 data URI fallback
     if not is_cloudinary_configured():
         import base64
-        mime = content_type if content_type else "image/png"
+        mime = getattr(file, "content_type", None) or "image/png"
+        # Strip any parameters/whitespace and guard against header injection.
+        mime = mime.split(";", 1)[0].strip().strip("\x00") or "image/png"
         encoded = base64.b64encode(file_bytes).decode("utf-8")
         return f"data:{mime};base64,{encoded}"
 
