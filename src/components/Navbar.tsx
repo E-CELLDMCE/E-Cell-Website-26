@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 
-const Navbar = () => {
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+interface NavLink {
+  name: string;
+  href: string;
+  active: boolean;
+}
 
-  const navLinks = [
+const Navbar: React.FC = () => {
+  const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
+
+  const navLinks: NavLink[] = [
     { name: 'HOME', href: '#home', active: true },
     { name: 'ABOUT US', href: '#about', active: false },
     { name: 'EVENTS', href: '#events', active: false },
@@ -17,7 +23,7 @@ const Navbar = () => {
     <header className="fixed top-0 left-0 w-full z-50 px-3 sm:px-6 pt-3">
       {/* 
         - rounded-full creates the capsule/pill shape with circular ends
-        - w-[95%] max-w-[1400px] makes it long and wide across large monitors
+        - w-[96%] max-w-[1400px] makes it long and wide across large monitors
         - py-2.5 on mobile, py-3.5 on desktop
       */}
       <div className="w-[96%] max-w-[1400px] mx-auto bg-black/95 backdrop-blur-md rounded-full border border-neutral-800 px-5 sm:px-10 py-2.5 lg:py-3.5 flex items-center justify-between transition-all shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
@@ -40,33 +46,28 @@ const Navbar = () => {
           </div>
         </a>
         
-{/* ================= CENTER: DESKTOP INLINE NAV ================= */}
-<nav className="hidden lg:flex items-center lg:space-x-12 xl:space-x-16">
-  {navLinks.map((link) => (
-    <div key={link.name} className="relative flex flex-col items-center">
-      <a
-        href={link.href}
-        className={`font-extrabold uppercase transition-colors duration-200 py-1
-          /* Mobile baseline (kept intact) */
-          text-xs tracking-wider
-          /* Desktop scale & wider spread */
-          lg:text-[15px] xl:text-base lg:tracking-[0.18em]
-          ${
-            link.active
-              ? 'text-yellow-400'
-              : 'text-neutral-200 hover:text-yellow-400'
-          }`}
-      >
-        {link.name}
-      </a>
+        {/* ================= CENTER: DESKTOP INLINE NAV ================= */}
+        <nav className="hidden lg:flex items-center lg:space-x-12 xl:space-x-16">
+          {navLinks.map((link: NavLink) => (
+            <div key={link.name} className="relative flex flex-col items-center">
+              <a
+                href={link.href}
+                className={`font-extrabold uppercase transition-colors duration-200 py-1 text-xs tracking-wider lg:text-[15px] xl:text-base lg:tracking-[0.18em] ${
+                  link.active
+                    ? 'text-yellow-400'
+                    : 'text-neutral-200 hover:text-yellow-400'
+                }`}
+              >
+                {link.name}
+              </a>
 
-      {/* Yellow active underline */}
-      {link.active && (
-        <span className="absolute -bottom-1 w-full h-[3px] bg-yellow-400 rounded-full" />
-      )}
-    </div>
-  ))}
-</nav>
+              {/* Yellow active underline */}
+              {link.active && (
+                <span className="absolute -bottom-1 w-full h-[3px] bg-yellow-400 rounded-full" />
+              )}
+            </div>
+          ))}
+        </nav>
 
         {/* ================= RIGHT: DESKTOP PROFILE ICON ================= */}
         <div className="hidden lg:flex items-center flex-shrink-0">
@@ -125,7 +126,7 @@ const Navbar = () => {
       {/* ================= MOBILE MENU ================= */}
       {isMobileOpen && (
         <div className="lg:hidden mt-2 w-[96%] mx-auto bg-black/95 border border-neutral-800 rounded-3xl p-4 space-y-2">
-          {navLinks.map((link) => (
+          {navLinks.map((link: NavLink) => (
             <a
               key={link.name}
               href={link.href}
