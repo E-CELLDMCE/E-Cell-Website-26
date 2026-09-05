@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usersApi, UserProfile } from '../api/users';
+import { neonAuthClient } from '../neonAuth';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -63,6 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
+    try {
+      neonAuthClient.signOut().catch(() => {});
+    } catch {
+      // ignore
+    }
   };
 
   const updateUser = (updated: UserProfile) => {
