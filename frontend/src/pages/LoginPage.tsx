@@ -1,22 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { authApi } from '../api/auth';
 import { getErrorMessage } from '../api/client';
-import { ShieldCheck, GraduationCap, ArrowRight, Sparkles, Lock, Mail, User, KeyRound } from 'lucide-react';
+import { neonAuthClient } from '../neonAuth';
+import { ShieldCheck, GraduationCap, Mail, KeyRound } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'student' | 'admin'>('student');
   const [isLoading, setIsLoading] = useState(false);
+  const [isAwaitingGoogleSession, setIsAwaitingGoogleSession] = useState(false);
 
   // Admin login credentials
   const [adminEmail, setAdminEmail] = useState('admin@ecell.com');
   const [adminPassword, setAdminPassword] = useState('adminecell26');
-
-  // Custom student dev login
-  const [studentEmail, setStudentEmail] = useState('student@dmce.ac.in');
-  const [studentName, setStudentName] = useState('Demo Student');
 
   const { login } = useAuth();
   const toast = useToast();
@@ -43,41 +41,101 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  // Google OAuth / Student Login
-  const handleGoogleLogin = async (customEmail?: string, customName?: string) => {
-    setIsLoading(true);
-    try {
-      const email = customEmail || studentEmail || 'student@dmce.ac.in';
-      const name = customName || studentName || 'DMCE Student';
-      const res = await authApi.googleCallback({
-        email,
-        name,
-        oauth_provider: 'google',
-        oauth_id: 'google_' + Math.random().toString(36).substring(2, 10),
-      });
-      handlePostLogin(res.user, res.access_token);
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, 'Failed to sign in with Google'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Watch for Neon Auth session after Google OAuth redirect completes,
+  // then forward it to the existing backend google-callback endpoint.
+  useEffect(() => {
+    // Detect OAuth return: either we previously started the flow (state flag),
+    // or Neon just redirected us back here with its callback params in the URL.
+    // Neon uses `neon_auth_session_verifier` (popup flow) or standard OAuth
+    // `code`/`state`/`error` params (redirect flow).
+    const url = new URL(window.location.href);
+    const cameFromOAuth =
+      isAwaitingGoogleSession ||
+      url.searchParams.has('neon_auth_session_verifier') ||
+      url.searchParams.has('code') ||
+      url.searchParams.has('state') ||
+      url.searchParams.has('error');
 
-  // Pre-seeded Demo Students for easy testing
-  const handleQuickStudentLogin = async (seedName: string, seedEmail: string, seedStdid: string) => {
-    setIsLoading(true);
-    try {
-      const res = await authApi.devLogin({
-        email: seedEmail,
-        name: seedName,
-        role: 'student',
-        stdid: seedStdid,
+    if (!cameFromOAuth) return;
+
+    let cancelled = false;
+    const finalizeLogin = async (sessionUser: any) => {
+      if (cancelled) return;
+      setIsAwaitingGoogleSession(false);
+      setIsLoading(true);
+      const res = await authApi.googleCallback({
+        email: sessionUser.email,
+        name: sessionUser.name || sessionUser.email.split('@')[0],
+        oauth_id: sessionUser.id || undefined,
+        oauth_provider: 'google',
       });
       handlePostLogin(res.user, res.access_token);
+    };
+
+    // Use the plain default getSession() — no forceFetch / refresh-forcing
+    // options — so it issues a GET-only read of the cached session. Only
+    // forced-refresh options cause Better Auth to trigger the deferred
+    // POST refresh path, which Neon's Auth server rejects with 405
+    // METHOD_NOT_ALLOWED_DEFER_SESSION_REQUIRED.
+    const tryGetSession = async (attempt = 0): Promise<any | null> => {
+      try {
+        const { data } = await neonAuthClient.getSession();
+        if (data?.user?.email) return data.user;
+      } catch {
+        // fall through to retry
+      }
+      if (attempt >= 8) return null;
+      await new Promise((r) => setTimeout(r, 500 * Math.min(attempt + 1, 4)));
+      return tryGetSession(attempt + 1);
+    };
+
+    const cleanupUrl = () => {
+      if (
+        url.searchParams.has('neon_auth_session_verifier') ||
+        url.searchParams.has('code') ||
+        url.searchParams.has('state') ||
+        url.searchParams.has('error')
+      ) {
+        window.history.replaceState({}, '', window.location.origin + window.location.pathname);
+      }
+    };
+
+    const checkSession = async () => {
+      const sessionUser = await tryGetSession();
+      if (cancelled) return;
+      if (!sessionUser) {
+        toast.error('Google sign-in completed but no session was established. Please try again.');
+        setIsAwaitingGoogleSession(false);
+        setIsLoading(false);
+        cleanupUrl();
+        return;
+      }
+      cleanupUrl();
+      try {
+        await finalizeLogin(sessionUser);
+      } catch (err: any) {
+        toast.error(getErrorMessage(err, 'Failed to complete Google sign-in'));
+        setIsAwaitingGoogleSession(false);
+        setIsLoading(false);
+      }
+    };
+
+    void checkSession();
+  }, [isAwaitingGoogleSession, toast]);
+
+  // Real Neon-powered Google OAuth trigger (opens account chooser).
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await neonAuthClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/login',
+      });
+      // Neon will redirect back; effect above will pick up the session.
+      setIsAwaitingGoogleSession(true);
     } catch (err: any) {
-      toast.error(getErrorMessage(err, 'Dev login failed'));
-    } finally {
       setIsLoading(false);
+      toast.error(getErrorMessage(err, 'Failed to start Google sign-in'));
     }
   };
 
@@ -178,7 +236,7 @@ export const LoginPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Google OAuth Simulation Button */}
+            {/* Real Google OAuth via Neon Auth */}
             <button
               onClick={() => handleGoogleLogin()}
               disabled={isLoading}
@@ -202,64 +260,8 @@ export const LoginPage: React.FC = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              {isLoading ? 'Connecting...' : 'Sign in with Google'}
+              {isLoading ? 'Connecting to Google...' : 'Sign in with Google'}
             </button>
-
-            {/* Divider */}
-            <div className="relative flex py-2 items-center">
-              <div className="flex-grow border-t border-neutral-800"></div>
-              <span className="flex-shrink mx-4 text-xs uppercase font-bold text-neutral-500 tracking-wider">
-                Or Quick Test Accounts
-              </span>
-              <div className="flex-grow border-t border-neutral-800"></div>
-            </div>
-
-            {/* Pre-seeded demo students for instant verification */}
-            <div className="space-y-2">
-              <p className="text-[11px] uppercase font-bold text-neutral-400 tracking-wider text-center">
-                One-Click Seeded Students (In Database):
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickStudentLogin('Rahul Sharma', 'rahul.sharma@college.edu', 'STD2026001')}
-                  className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-red-500/60 text-left transition-all group cursor-pointer"
-                >
-                  <p className="text-xs font-bold text-white group-hover:text-yellow-400">Rahul</p>
-                  <p className="text-[10px] text-neutral-400">STD2026001</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickStudentLogin('Ananya Patel', 'ananya.patel@college.edu', 'STD2026002')}
-                  className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-red-500/60 text-left transition-all group cursor-pointer"
-                >
-                  <p className="text-xs font-bold text-white group-hover:text-yellow-400">Ananya</p>
-                  <p className="text-[10px] text-neutral-400">STD2026002</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickStudentLogin('Vikram Singh', 'vikram.singh@college.edu', 'STD2026003')}
-                  className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-red-500/60 text-left transition-all group cursor-pointer"
-                >
-                  <p className="text-xs font-bold text-white group-hover:text-yellow-400">Vikram</p>
-                  <p className="text-[10px] text-neutral-400">STD2026003</p>
-                </button>
-              </div>
-            </div>
-
-            {/* First-time Student test */}
-            <div className="p-3.5 rounded-xl bg-red-950/20 border border-red-900/40 text-center">
-              <p className="text-xs text-neutral-300">
-                Want to test the <span className="text-yellow-400 font-bold">First-Time Onboarding</span> flow?
-              </p>
-              <button
-                type="button"
-                onClick={() => handleGoogleLogin(`newstudent_${Date.now()}@dmce.ac.in`, 'New Innovator')}
-                className="mt-2 text-xs font-bold text-red-400 hover:text-red-300 underline cursor-pointer"
-              >
-                Sign in as New Student without Student ID &rarr;
-              </button>
-            </div>
           </div>
         )}
 
