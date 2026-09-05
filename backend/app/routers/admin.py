@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 
+from fastapi import File, UploadFile
+
 from app.core.security import get_current_admin, get_current_superadmin
 from app.database import get_db
 from app.models.event import Event
@@ -17,8 +19,30 @@ from app.schemas.registration import (
     TicketScanRequest,
     TicketScanResponse,
 )
+from app.services.cloudinary_service import upload_payment_qr, upload_poster_image
+from app.services.registration_service import generate_tickets_for_registration
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
+
+
+@router.post("/upload/poster")
+async def upload_poster(
+    file: UploadFile = File(...),
+    current_admin: User = Depends(get_current_admin),
+) -> dict:
+    """Uploads an event poster image and returns the hosted URL string."""
+    url = await upload_poster_image(file)
+    return {"url": url}
+
+
+@router.post("/upload/payment-qr")
+async def upload_qr(
+    file: UploadFile = File(...),
+    current_admin: User = Depends(get_current_admin),
+) -> dict:
+    """Uploads a payment UPI QR image and returns the hosted URL string."""
+    url = await upload_payment_qr(file)
+    return {"url": url}
 
 
 @router.get("/registrations/pending", response_model=List[RegistrationDetailResponse])
@@ -106,16 +130,13 @@ def approve_registration(
         registration.verified_at = datetime.now(timezone.utc)
 
         # Generate ticket_qr_tokens for all members in this registration
-        members = (
+        generate_tickets_for_registration(db, registration)
+
+        members_count = (
             db.query(RegistrationMember)
             .filter(RegistrationMember.registration_id == registration.id)
-            .with_for_update()
-            .all()
+            .count()
         )
-
-        for member in members:
-            if member.ticket_qr_token is None:
-                member.ticket_qr_token = uuid.uuid4()
 
         # Audit log
         audit = AuditLog(
@@ -128,7 +149,7 @@ def approve_registration(
                 "leader_id": str(registration.leader_id),
                 "team_name": registration.team_name,
                 "amount_paid": str(registration.amount_paid),
-                "members_count": len(members),
+                "members_count": members_count,
             },
         )
         db.add(audit)
