@@ -48,6 +48,24 @@ export const adminApi = {
     return `${API_BASE_URL}/admin/export/${eventId}`;
   },
 
+  uploadPoster: async (file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await apiClient.post<{ url: string }>('/admin/upload/poster', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.url;
+  },
+
+  uploadPaymentQr: async (file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await apiClient.post<{ url: string }>('/admin/upload/payment-qr', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.url;
+  },
+
   downloadExportExcel: async (eventId: string, eventTitle = 'event'): Promise<void> => {
     const res = await apiClient.get(`/admin/export/${eventId}`, {
       responseType: 'blob',
