@@ -19,6 +19,7 @@ from app.schemas.registration import (
 )
 from app.schemas.user import StudentLookupResponse
 from app.services.cloudinary_service import upload_payment_screenshot
+from app.services.registration_service import generate_tickets_for_registration
 from app.utils.qr_generator import generate_qr_base64
 
 router = APIRouter(prefix="/registrations", tags=["Registrations"])
@@ -179,11 +180,17 @@ def register_team(
 
     # 5. Atomic Transaction: Create EventRegistration and RegistrationMember rows
     try:
+        # Free events (fee_amount == 0) skip the payment step entirely:
+        # set status to 'approved' immediately and generate tickets so the
+        # registration never gets stuck in the payment-approval queue.
+        is_free_event = event.fee_amount is None or float(event.fee_amount) == 0
+        initial_status = "approved" if is_free_event else "pending_payment"
+
         registration = EventRegistration(
             event_id=event.id,
             leader_id=current_user.id,
             team_name=payload.team_name.strip() if payload.team_name else None,
-            status="pending_payment",
+            status=initial_status,
             amount_paid=event.fee_amount,
         )
         db.add(registration)
@@ -208,6 +215,16 @@ def register_team(
             )
             db.add(member)
 
+        db.flush()  # Populate member ids before generating tickets
+
+        if is_free_event:
+            # Auto-approve free events: stamp verified_at + tickets so the
+            # registration behaves identically to an admin-approved one.
+            # Reuse the exact same ticket-generation helper the admin
+            # approval endpoint uses, so there is one source of truth.
+            registration.verified_at = datetime.now(timezone.utc)
+            generate_tickets_for_registration(db, registration)
+
         db.commit()
         db.refresh(registration)
 
@@ -217,7 +234,11 @@ def register_team(
             team_name=registration.team_name,
             status=registration.status,
             amount_paid=registration.amount_paid,
-            message="Registration initiated. Please proceed to payment submission.",
+            message=(
+                "Registration confirmed. Tickets generated."
+                if is_free_event
+                else "Registration initiated. Please proceed to payment submission."
+            ),
         )
     except IntegrityError as ie:
         db.rollback()
@@ -239,132 +260,6 @@ def register_team(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create registration: {str(e)}",
-        )
-
-
-@router.get("/{registration_id}", response_model=RegistrationDetailResponse)
-def get_registration(
-    registration: EventRegistration = Depends(require_registration_access),
-):
-    """
-    Returns registration details and team roster.
-    Accessible to team leader, team members, and admins.
-    """
-    members_detail = [
-        RegistrationMemberDetail(
-            id=m.id,
-            student_id=m.student_id,
-            student_name=m.student.name if m.student else "",
-            student_email=m.student.email if m.student else "",
-            student_stdid=m.student.stdid if m.student else None,
-            is_leader=m.is_leader,
-            ticket_qr_token=m.ticket_qr_token,
-            ticket_used=m.ticket_used,
-            scanned_at=m.scanned_at,
-        )
-        for m in registration.members
-    ]
-    return RegistrationDetailResponse(
-        id=registration.id,
-        event_id=registration.event_id,
-        event_title=registration.event.title if registration.event else None,
-        leader_id=registration.leader_id,
-        leader_name=registration.leader.name if registration.leader else None,
-        leader_email=registration.leader.email if registration.leader else None,
-        leader_stdid=registration.leader.stdid if registration.leader else None,
-        team_name=registration.team_name,
-        status=registration.status,
-        transaction_id=registration.transaction_id,
-        payment_screenshot_url=registration.payment_screenshot_url,
-        amount_paid=registration.amount_paid,
-        retry_count=registration.retry_count,
-        created_at=registration.created_at,
-        verified_at=registration.verified_at,
-        members=members_detail,
-    )
-
-
-@router.post("/{registration_id}/payment", response_model=RegistrationSimpleResponse)
-async def submit_payment(
-    registration_id: uuid.UUID,
-    transaction_id: str = Form(..., description="Transaction ID / UTR reference"),
-    file: UploadFile = File(..., description="Payment screenshot image"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """
-    Uploads payment screenshot to Cloudinary and updates registration status to pending_approval.
-    Validates deadline and team size before accepting payment.
-    """
-    registration = (
-        db.query(EventRegistration)
-        .filter(EventRegistration.id == registration_id)
-        .first()
-    )
-    if not registration:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Registration not found",
-        )
-
-    if registration.leader_id != current_user.id and current_user.role != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only the team leader can submit payment for this registration",
-        )
-
-    event = registration.event or db.query(Event).filter(Event.id == registration.event_id).first()
-
-    # Re-check Registration Deadline server-side
-    if event and event.registration_deadline:
-        deadline = event.registration_deadline
-        if deadline.tzinfo is None:
-            deadline = deadline.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) > deadline:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Registration deadline has passed for this event",
-            )
-
-    # Re-check Team Size before payment submission
-    if event:
-        member_count = (
-            db.query(RegistrationMember)
-            .filter(RegistrationMember.registration_id == registration.id)
-            .count()
-        )
-        if member_count < event.min_team_size or member_count > event.max_team_size:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid team size ({member_count}). Required team size is between {event.min_team_size} and {event.max_team_size}.",
-            )
-
-    # Upload to Cloudinary
-    screenshot_url = await upload_payment_screenshot(file)
-
-    try:
-        registration.transaction_id = transaction_id.strip()
-        registration.payment_screenshot_url = screenshot_url
-        registration.status = "pending_approval"
-        db.commit()
-        db.refresh(registration)
-
-        return RegistrationSimpleResponse(
-            id=registration.id,
-            event_id=registration.event_id,
-            team_name=registration.team_name,
-            status=registration.status,
-            amount_paid=registration.amount_paid,
-            message="Payment screenshot uploaded successfully. Awaiting admin approval.",
-        )
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update payment status: {str(e)}",
         )
 
 
@@ -468,3 +363,138 @@ def get_my_registrations(
             )
         )
     return result
+
+
+@router.get("/{registration_id}", response_model=RegistrationDetailResponse)
+def get_registration(
+    registration: EventRegistration = Depends(require_registration_access),
+):
+    """
+    Returns registration details and team roster.
+    Accessible to team leader, team members, and admins.
+    """
+    members_detail = [
+        RegistrationMemberDetail(
+            id=m.id,
+            student_id=m.student_id,
+            student_name=m.student.name if m.student else "",
+            student_email=m.student.email if m.student else "",
+            student_stdid=m.student.stdid if m.student else None,
+            is_leader=m.is_leader,
+            ticket_qr_token=m.ticket_qr_token,
+            ticket_used=m.ticket_used,
+            scanned_at=m.scanned_at,
+        )
+        for m in registration.members
+    ]
+    return RegistrationDetailResponse(
+        id=registration.id,
+        event_id=registration.event_id,
+        event_title=registration.event.title if registration.event else None,
+        leader_id=registration.leader_id,
+        leader_name=registration.leader.name if registration.leader else None,
+        leader_email=registration.leader.email if registration.leader else None,
+        leader_stdid=registration.leader.stdid if registration.leader else None,
+        team_name=registration.team_name,
+        status=registration.status,
+        transaction_id=registration.transaction_id,
+        payment_screenshot_url=registration.payment_screenshot_url,
+        amount_paid=registration.amount_paid,
+        retry_count=registration.retry_count,
+        created_at=registration.created_at,
+        verified_at=registration.verified_at,
+        members=members_detail,
+    )
+
+
+@router.post("/{registration_id}/payment", response_model=RegistrationSimpleResponse)
+async def submit_payment(
+    registration_id: uuid.UUID,
+    transaction_id: str = Form(..., description="Transaction ID / UTR reference"),
+    file: UploadFile = File(..., description="Payment screenshot image"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Uploads payment screenshot to Cloudinary and updates registration status to pending_approval.
+    Validates deadline and team size before accepting payment.
+    """
+    registration = (
+        db.query(EventRegistration)
+        .filter(EventRegistration.id == registration_id)
+        .first()
+    )
+    if not registration:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Registration not found",
+        )
+
+    if registration.leader_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the team leader can submit payment for this registration",
+        )
+
+    event = registration.event or db.query(Event).filter(Event.id == registration.event_id).first()
+
+    # Defensive guard: free events must never accept a payment submission.
+    # Registration for a free event is auto-approved at creation time, so
+    # reaching this endpoint for one indicates a client bug; reject cleanly.
+    if event is not None and (event.fee_amount is None or float(event.fee_amount) == 0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This event is free; no payment is required.",
+        )
+
+    # Re-check Registration Deadline server-side
+    if event and event.registration_deadline:
+        deadline = event.registration_deadline
+        if deadline.tzinfo is None:
+            deadline = deadline.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > deadline:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Registration deadline has passed for this event",
+            )
+
+    # Re-check Team Size before payment submission
+    if event:
+        member_count = (
+            db.query(RegistrationMember)
+            .filter(RegistrationMember.registration_id == registration.id)
+            .count()
+        )
+        if member_count < event.min_team_size or member_count > event.max_team_size:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid team size ({member_count}). Required team size is between {event.min_team_size} and {event.max_team_size}.",
+            )
+
+    # Upload to Cloudinary
+    screenshot_url = await upload_payment_screenshot(file)
+
+    try:
+        registration.transaction_id = transaction_id.strip()
+        registration.payment_screenshot_url = screenshot_url
+        registration.status = "pending_approval"
+        db.commit()
+        db.refresh(registration)
+
+        return RegistrationSimpleResponse(
+            id=registration.id,
+            event_id=registration.event_id,
+            team_name=registration.team_name,
+            status=registration.status,
+            amount_paid=registration.amount_paid,
+            message="Payment screenshot uploaded successfully. Awaiting admin approval.",
+        )
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update payment status: {str(e)}",
+        )
