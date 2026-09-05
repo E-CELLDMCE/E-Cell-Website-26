@@ -8,7 +8,7 @@ const Navbar = () => {
     { name: 'ABOUT US', href: '#about', active: false },
     { name: 'EVENTS', href: '#events', active: false },
     { name: 'GALLERY', href: '#gallery', active: false },
-    { name: 'TEAM', href: '#team', active: false },
+    { name: 'TEAM', href: '/team', active: false },
     { name: 'INITIATIVE', href: '#initiative', active: false },
     { name: 'BLOGS', href: '#blogs', active: false },
   ];
