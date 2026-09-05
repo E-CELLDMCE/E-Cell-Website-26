@@ -1,19 +1,117 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 import { eventsApi, EventCreatePayload } from '../../api/events';
+import { adminApi } from '../../api/admin';
 import { useToast } from '../../context/ToastContext';
 import { getErrorMessage } from '../../api/client';
 import {
-  CalendarPlus,
   ArrowLeft,
-  Save,
   Clock,
   Users,
   Image,
   QrCode,
   DollarSign,
   AlertCircle,
+  Loader2,
 } from 'lucide-react';
+
+const formatMb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
+const ImageUploadField: React.FC<{
+  label: string;
+  icon: React.ReactNode;
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+  onClear: () => void;
+  upload: (file: File) => Promise<string>;
+}> = ({ label, icon, currentUrl, onUploaded, onClear, upload }) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [compressionInfo, setCompressionInfo] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setCompressionInfo(null);
+    const originalSize = file.size;
+    setIsUploading(true);
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 2000,
+        useWebWorker: true,
+      });
+      setCompressionInfo(`${formatMb(originalSize)} -> ${formatMb(compressed.size)}`);
+      const url = await upload(compressed);
+      onUploaded(url);
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Upload failed'));
+    } finally {
+      setIsUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
+        {icon}
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          disabled={isUploading}
+          className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-yellow-400 file:text-black file:font-bold file:text-xs file:uppercase file:cursor-pointer focus:outline-none focus:border-yellow-400 transition-colors disabled:opacity-60"
+        />
+        {isUploading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] text-neutral-400">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-yellow-400" />
+            Uploading...
+          </div>
+        )}
+      </div>
+      {compressionInfo && !error && (
+        <p className="text-[10px] text-neutral-500">{compressionInfo}</p>
+      )}
+      {error && (
+        <p className="text-[10px] text-red-400 flex items-center gap-1">
+          <AlertCircle className="w-3 h-3" />
+          {error}
+        </p>
+      )}
+      {currentUrl && !error && (
+        <div className="mt-2 flex items-start gap-3 p-2 rounded-lg bg-neutral-900/60 border border-neutral-800">
+          <img
+            src={currentUrl}
+            alt={`${label} preview`}
+            className="w-16 h-16 object-cover rounded-md border border-neutral-800"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-green-400 font-bold uppercase">Uploaded</p>
+            <p className="text-[10px] text-neutral-500 truncate">{currentUrl}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-[10px] text-neutral-400 hover:text-red-400 font-bold uppercase"
+          >
+            Remove
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const EventEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -304,33 +402,23 @@ export const EventEditorPage: React.FC = () => {
 
         {/* URLs & Media Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <Image className="w-3.5 h-3.5 text-yellow-400" />
-              Poster Image URL
-            </label>
-            <input
-              type="url"
-              value={posterUrl}
-              onChange={(e) => setPosterUrl(e.target.value)}
-              placeholder="https://.../poster.jpg"
-              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors"
-            />
-          </div>
+          <ImageUploadField
+            label="Poster Image"
+            icon={<Image className="w-3.5 h-3.5 text-yellow-400" />}
+            currentUrl={posterUrl}
+            onUploaded={(url) => setPosterUrl(url)}
+            onClear={() => setPosterUrl('')}
+            upload={adminApi.uploadPoster}
+          />
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <QrCode className="w-3.5 h-3.5 text-yellow-400" />
-              Payment UPI QR Code URL
-            </label>
-            <input
-              type="url"
-              value={paymentQrUrl}
-              onChange={(e) => setPaymentQrUrl(e.target.value)}
-              placeholder="https://.../qr.png"
-              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors"
-            />
-          </div>
+          <ImageUploadField
+            label="Payment UPI QR Code"
+            icon={<QrCode className="w-3.5 h-3.5 text-yellow-400" />}
+            currentUrl={paymentQrUrl}
+            onUploaded={(url) => setPaymentQrUrl(url)}
+            onClear={() => setPaymentQrUrl('')}
+            upload={adminApi.uploadPaymentQr}
+          />
         </div>
 
         {/* Status Dropdown */}
