@@ -23,6 +23,11 @@ export const GateScannerPage: React.FC = () => {
   const [scanError, setScanError] = useState<string | null>(null);
   const [history, setHistory] = useState<TicketScanResult[]>([]);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  // Tracks whether the html5-qrcode instance has finished starting successfully,
+  // so cleanup only runs on a fully-started scanner.
+  const scannerStartedRef = useRef(false);
+  // Tracks whether the component is still mounted, to avoid setState-after-unmount.
+  const isMountedRef = useRef(true);
   const toast = useToast();
 
   const handleProcessToken = async (token: string) => {
@@ -34,20 +39,53 @@ export const GateScannerPage: React.FC = () => {
 
     try {
       const res = await adminApi.scanTicket(token.trim());
+      if (!isMountedRef.current) return;
       setScanResult(res);
       setHistory((prev) => [res, ...prev.slice(0, 9)]);
       toast.success(`Entry Approved: ${res.member_name}`);
     } catch (err: any) {
+      if (!isMountedRef.current) return;
       const msg = getErrorMessage(err, 'Failed to scan ticket');
       setScanError(msg);
       toast.error(msg);
     } finally {
-      setIsScanning(false);
+      if (isMountedRef.current) {
+        setIsScanning(false);
+      }
     }
+  };
+
+  // Safely stop and clear the scanner. No-op if it was never started.
+  // All html5-qrcode teardown errors are swallowed because they only fire
+  // during unmount and never affect active scanning.
+  const teardownScanner = async () => {
+    const scanner = scannerRef.current;
+    if (!scanner || !scannerStartedRef.current) {
+      scannerRef.current = null;
+      return;
+    }
+    try {
+      await scanner.stop();
+    } catch {
+      // already stopped or never fully started — safe to ignore
+    }
+    try {
+      // clear() removes html5-qrcode's injected DOM nodes (video element etc.)
+      // so React's unmount doesn't fight them.
+      scanner.clear();
+    } catch {
+      // already cleared — safe to ignore
+    }
+    scannerRef.current = null;
+    scannerStartedRef.current = false;
   };
 
   const startCamera = async () => {
     try {
+      // Tear down any previous instance first so we never have two scanners
+      // competing for the same #qr-reader DOM node.
+      await teardownScanner();
+
       const scanner = new Html5Qrcode('qr-reader');
       scannerRef.current = scanner;
 
@@ -64,35 +102,34 @@ export const GateScannerPage: React.FC = () => {
         }
       );
 
-      setIsCameraActive(true);
+      scannerStartedRef.current = true;
+      if (isMountedRef.current) {
+        setIsCameraActive(true);
+      }
     } catch (err: any) {
       console.error('Failed to start camera scanner', err);
-      toast.error('Unable to access device camera. Please use manual token entry.');
-      setIsCameraActive(false);
+      await teardownScanner();
+      if (isMountedRef.current) {
+        toast.error('Unable to access device camera. Please use manual token entry.');
+        setIsCameraActive(false);
+      }
     }
   };
 
   const stopCamera = async () => {
-    if (scannerRef.current && isCameraActive) {
-      try {
-        await scannerRef.current.stop();
-        scannerRef.current.clear();
-      } catch (e) {
-        console.warn('Error stopping scanner', e);
-      }
+    await teardownScanner();
+    if (isMountedRef.current) {
       setIsCameraActive(false);
     }
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
-      if (scannerRef.current) {
-        try {
-          scannerRef.current.stop();
-        } catch {
-          // ignore cleanup error
-        }
-      }
+      isMountedRef.current = false;
+      // Fire-and-forget — React's unmount can't await a Promise, but the
+      // teardown is idempotent and swallows its own errors.
+      void teardownScanner();
     };
   }, []);
 
