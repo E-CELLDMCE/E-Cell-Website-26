@@ -16,10 +16,16 @@ export const LoginPage: React.FC = () => {
   const [adminEmail, setAdminEmail] = useState('admin@ecell.com');
   const [adminPassword, setAdminPassword] = useState('adminecell26');
 
-  const { login } = useAuth();
+  const { login, isAdmin } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAdmin, navigate]);
 
   const handlePostLogin = (user: any, token: string) => {
     login(token, user);
