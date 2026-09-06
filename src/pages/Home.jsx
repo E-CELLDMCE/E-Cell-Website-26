@@ -1,5 +1,8 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import sandeepSindhu from '../assets/sandeep-sindhu.png';
+import drPawanAgarwal from '../assets/dr-pawan-agarwal.jpg';
+import vishwajitKashid from '../assets/vishwajit-kashid.jpg';
 
 const Home = () => {
   return (
@@ -128,36 +131,58 @@ const Home = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 items-start">
                 {/* Speaker 1 */}
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] bg-neutral-700"></div>
+                  <div className="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] overflow-hidden bg-neutral-700">
+                    <img
+                      src={drPawanAgarwal}
+                      alt="Mr. Pawan G. Agarwal"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <h3 className="mt-5 text-sm sm:text-base font-bold text-purple-700 uppercase">
-                    MS. ANNAMIKA SHUKLA
+                    MR. PAWAN G. AGARWAL
                   </h3>
                   <p className="mt-1 text-[13px] sm:text-[14px] uppercase text-white max-w-[280px] leading-relaxed">
-                    (CORPORATE COMMUNICATION TRAINER
+                    (INTERNATIONAL MOTIVATIONAL SPEAKER,
                     <br />
-                    & PUBLIC SPEAKING COACH)
+                    AUTHOR AND EDUCATIONIST)
                   </p>
                 </div>
 
                 {/* Speaker 2 */}
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] bg-neutral-700"></div>
+                  <div className="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] overflow-hidden bg-neutral-700">
+                    <img
+                      src={sandeepSindhu}
+                      alt="Mr. Sandeep Sindhu"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <h3 className="mt-5 text-sm sm:text-base font-bold text-purple-700 uppercase">
-                    MR. AMAR KHANNA
+                    MR. SANDEEP SINDHU
                   </h3>
                   <p className="mt-1 text-[13px] sm:text-[14px] uppercase text-white max-w-[280px] leading-relaxed">
-                    (FOUNDER OF ANGRYTRADERS)
+                    (ENTREPRENEUR, INVESTOR AND
+                    <br />
+                    DIGITAL MEDIA EXPERT)
                   </p>
                 </div>
 
                 {/* Speaker 3 */}
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] bg-neutral-700"></div>
+                  <div className="w-44 h-44 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[22px] overflow-hidden bg-neutral-700">
+                    <img
+                      src={vishwajitKashid}
+                      alt="Mr. Veeshwajeet Kashid"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>  
                   <h3 className="mt-5 text-sm sm:text-base font-bold text-purple-700 uppercase">
-                    MR. RAJ PADHIYAR
+                    MR. VISHWAJIT KASHID 
                   </h3>
                   <p className="mt-1 text-[13px] sm:text-[14px] uppercase text-white max-w-[280px] leading-relaxed">
-                    (FOUNDER & CEO: DIGITAL GURUKUL)
+                    (GLOBAL SPEAKER, TECH ARCHITECT AND
+                    <br />
+                    HEALTHCARE ADVOCATE)
                   </p>
                 </div>
               </div>
