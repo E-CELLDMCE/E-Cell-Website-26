@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from 'lucide-react';
+import PortalHero from '../components/home/PortalHero';
 
 export const Home: React.FC = () => {
   const speakers = [
@@ -73,75 +74,8 @@ export const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-red-600 selection:text-white overflow-hidden">
       
-      {/* ----------------- 1. HERO / GROUP PHOTO SECTION (Figma Replica) ----------------- */}
-      <section id="home" className="w-full pt-28 pb-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Cyan Glow Card Container */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="relative w-full rounded-2xl overflow-hidden border-2 border-cyan-400 shadow-[0_0_35px_rgba(34,211,238,0.35)] group"
-          >
-            {/* Main Team Photo */}
-            <div className="relative h-[360px] sm:h-[460px] md:h-[540px] lg:h-[600px] w-full bg-neutral-950 overflow-hidden">
-              <img
-                src="/images/ecell-team.jpg"
-                alt="E-CELL DMCE Team"
-                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 filter brightness-95"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop&q=80';
-                }}
-              />
-
-              {/* Gradient dark overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/20 pointer-events-none" />
-
-              {/* Bold Center Overlay Text: "E-CELL 25 - 26" */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <motion.div
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.7 }}
-                >
-                  <span className="inline-block text-xs sm:text-sm font-black tracking-widest text-cyan-300 uppercase bg-cyan-950/70 border border-cyan-500/40 px-4 py-1.5 rounded-full mb-3 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
-                    Datta Meghe College of Engineering
-                  </span>
-                  <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white uppercase drop-shadow-[0_6px_20px_rgba(0,0,0,0.95)]">
-                    E-CELL 25 - 26
-                  </h1>
-                  <p className="mt-3 text-sm sm:text-lg md:text-xl font-medium text-neutral-200 max-w-2xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                    Building the next generation of founders, thinkers, and changemakers.
-                  </p>
-                </motion.div>
-
-                {/* Quick Call to Action inside hero */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.6 }}
-                  className="mt-6 sm:mt-8 flex flex-wrap gap-4 justify-center"
-                >
-                  <Link
-                    to="/events"
-                    className="px-6 py-3 rounded-full text-xs sm:text-sm font-black tracking-wider uppercase bg-gradient-to-r from-red-600 to-red-800 text-white border border-red-500/50 hover:from-red-500 hover:to-red-700 hover:shadow-[0_0_25px_rgba(239,68,68,0.6)] transition-all transform hover:scale-105 flex items-center gap-2"
-                  >
-                    <Calendar className="w-4 h-4" />
-                    Explore Events
-                  </Link>
-                  <a
-                    href="#about"
-                    className="px-6 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wider uppercase bg-black/60 backdrop-blur-md text-white border border-white/20 hover:border-cyan-400 hover:text-cyan-300 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] transition-all"
-                  >
-                    Discover E-Cell
-                  </a>
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      {/* ----------------- 1. GSAP PORTAL HERO SECTION ----------------- */}
+      <PortalHero />
 
       {/* ----------------- 2. WHAT IS E-CELL SECTION (Figma Replica) ----------------- */}
       <section
