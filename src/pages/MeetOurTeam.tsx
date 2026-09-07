@@ -1,5 +1,20 @@
 import React from "react";
 import ecellLogo from "../assets/ecell-logo.png";
+import adityaDongre from "../assets/aditya-dongre.png";
+import advayDeshmukh from "../assets/advay-deshmukh.jpg";
+import akshadaSangore from "../assets/akshada-sangore.png";
+import aryaKamble from "../assets/arya-kamble.png";
+import harpalKotadiya from "../assets/harpal-kotadiya.png";
+import juiJagtap from "../assets/jui-jagtap.png";
+import komalSahu from "../assets/komal-sahu.jpg";
+import krishMahanwar from "../assets/krish-mahanwar.png";
+import malashriShrirage from "../assets/malashri-shrirage.png";
+import niteshShetty from "../assets/nitesh-shetty.png";
+import riyaBehere from "../assets/riya-behere.png";
+import sadiyaShaikh from "../assets/sadiya-shaikh.png";
+import sayliChaudhari from "../assets/sayli-chaudhari.png";
+import sunishPanigrahy from "../assets/sunish-panigrahy.png";
+import varshaChaurasiya from "../assets/varsha-chaurasiya.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -10,6 +25,72 @@ import {
   faLinkedinIn,
   faFacebookF,
 } from "@fortawesome/free-brands-svg-icons";
+
+const TeamMemberCard = ({
+  name,
+  role,
+  image,
+  objectPosition = "center 30%",
+}: {
+  name: string;
+  role: string;
+  image: string;
+  objectPosition?: string;
+}) => {
+  return (
+    <div className="w-full max-w-[320px] overflow-hidden rounded-[22px] bg-[#4d0000] shadow-lg">
+
+      {/* Photo Sub-Container */}
+      <div className="p-5 pb-5">
+  <div className="aspect-[4/3] overflow-hidden rounded-tl-[22px] rounded-br-[22px] bg-[#8B0000]">
+    <img
+      src={image}
+      alt={name}
+      className="w-full h-full object-cover"
+      style={{ objectPosition }}
+    />
+  </div>
+</div>
+
+      {/* Name + Role */}
+      <div className="bg-[#050505] text-center px-2 py-1.5">
+        <h3 className="text-[18px] sm:text-[19px] font-bold text-white leading-tight">
+          {name}
+        </h3>
+
+        <p className="text-[13px] sm:text-[14px] text-white leading-tight">
+          {role}
+        </p>
+      </div>
+
+      {/* Bottom Action Bar */}
+      <div className="flex items-center justify-between bg-black px-2 py-2.5">
+
+        {/* Social Icons */}
+        <div className="flex items-center gap-7">
+          <FontAwesomeIcon
+            icon={faLinkedinIn}
+            className="w-4 h-4 text-white"
+          />
+
+          <FontAwesomeIcon
+            icon={faEnvelope}
+            className="w-4 h-4 text-white"
+          />
+        </div>
+
+        {/* Contact Button */}
+        <button
+          type="button"
+          className="rounded-full bg-[#b40000] px-3 py-1 text-[10px] font-semibold text-yellow-400"
+        >
+          Contact Me
+        </button>
+
+      </div>
+    </div>
+  );
+};
 
 const MeetOurTeam = () => {
   return (
@@ -73,17 +154,127 @@ const MeetOurTeam = () => {
 </div>
 
           {/* Team Area */}
-          <div className="flex-1 relative">
+{/* ================= TEAM AREA ================= */}
+<div className="flex-1 relative px-6 pb-20">
 
-            {/*
-              Team members will be added here later.
-              Keeping this area empty for now preserves
-              the layout shown in the reference.
-            */}
+  <div className="max-w-6xl mx-auto">
 
-          </div>
+    {/* ================= TOP HEAD ================= */}
+    <div className="flex justify-center mb-16">
+      <TeamMemberCard
+        name="ADITYA DONGRE"
+        role="Chairperson"
+        image={adityaDongre}
+      />
+    </div>
 
-        </div>
+    {/* ================= TEAM PAIRS ================= */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-14 justify-items-center">
+
+      {/* Row 1 */}
+      <TeamMemberCard
+        name="HARPAL KOTADIYA"
+        role="Co-Chairperson"
+        image={harpalKotadiya}
+      />
+
+      <TeamMemberCard
+        name="NITESH SHETTY"
+        role="Co-Chairperson"
+        image={niteshShetty}
+        objectPosition="center 20%"
+      />
+
+      {/* Row 2 */}
+      <TeamMemberCard
+        name="AKSHADA SANGORE"
+        role="Event Initiative Head"
+        image={akshadaSangore}
+      />
+
+      <TeamMemberCard
+        name="KOMAL SAHU"
+        role="Event Initiative Head"
+        image={komalSahu}
+        objectPosition="center 10%"
+      />
+
+      {/* Row 3 */}
+      <TeamMemberCard
+        name="JUI JAGTAP"
+        role="Public Relation Head"
+        image={juiJagtap}
+      />
+
+      <TeamMemberCard
+        name="RIYA BEHERE"
+        role="Public Relation Head"
+        image={riyaBehere}
+      />
+
+      {/* Row 4 */}
+      <TeamMemberCard
+        name="KRISH MAHANWAR"
+        role="Technical Head"
+        image={krishMahanwar}
+        objectPosition="center 40%"
+      />
+
+      <TeamMemberCard
+        name="MALASHRI SHRIRAGE"
+        role="Technical Head"
+        image={malashriShrirage}
+        objectPosition="center 20%"
+      />
+
+      {/* Row 5 */}
+      <TeamMemberCard
+        name="VARSHA CHAURASIYA"
+        role="Creative Head"
+        image={varshaChaurasiya}
+      />
+
+      <TeamMemberCard
+        name="SUNISH PANIGRAHY"
+        role="Creative Head"
+        image={sunishPanigrahy}
+      />
+
+      {/* Row 6 */}
+      <TeamMemberCard
+        name="ADVAY DESHMUKH"
+        role="Social Media Head"
+        image={advayDeshmukh}
+      />
+
+      <TeamMemberCard
+        name="SAYLI CHAUDHARI"
+        role="Social Media Head"
+        image={sayliChaudhari}
+        objectPosition="center 40%"
+      />
+
+      {/* Row 7 */}
+      <TeamMemberCard
+        name="ARYA KAMBLE"
+        role="Alumni Initiative Head"
+        image={aryaKamble}
+        objectPosition="center 20%"
+      />
+
+      <TeamMemberCard
+        name="SADIYA SHAIKH"
+        role="Documentation Head"
+        image={sadiyaShaikh}
+        objectPosition="center 50%"
+      />
+
+    </div>
+
+  </div>
+
+</div>
+</div>
 
       </section>
 
