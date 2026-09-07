@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Globe, ArrowUp } from 'lucide-react';
+import { Mail, MapPin, Phone, Globe, ArrowUp, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const scrollToTop = () => {
@@ -12,35 +12,35 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="relative bg-black text-white border-t border-neutral-800 pt-16 pb-12 overflow-hidden">
+    <footer className="relative bg-black text-white border-t border-neutral-800 pt-20 pb-12 overflow-hidden">
       {/* Subtle top crimson glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 pointer-events-none opacity-40 blur-3xl"
         style={{
-          background: 'radial-gradient(circle, rgba(220,38,38,0.5) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(220,38,38,0.6) 0%, transparent 70%)',
         }}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-neutral-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 pb-14 border-b border-neutral-900">
           
           {/* Col 1: Brand */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <img
-                src="/images/ecell-logo.png"
+                src="/img_vid/ecell-logo.png"
                 alt="E-CELL DMCE"
                 className="h-10 w-auto object-contain"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
-              <span className="text-xl font-black tracking-widest text-white">
+              <span className="text-xl font-black tracking-widest text-white font-heading">
                 <span className="text-red-500">E</span>-CELL DMCE
               </span>
             </div>
-            <p className="text-sm text-neutral-400 leading-relaxed">
-              Entrepreneurship Cell of Datta Meghe College of Engineering. Fostering a vibrant ecosystem of student innovators, tech pioneers, and future business leaders.
+            <p className="text-sm text-neutral-400 leading-relaxed font-normal">
+              Entrepreneurship Cell of Datta Meghe College of Engineering. Fostering a vibrant ecosystem of student innovators, tech pioneers, and future enterprise creators.
             </p>
             <div className="flex items-center space-x-3 pt-2">
               {/* Instagram */}
@@ -79,7 +79,7 @@ export const Footer: React.FC = () => {
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </a>
-              {/* Website */}
+              {/* DMCE Website */}
               <a
                 href="https://dmce.ac.in"
                 target="_blank"
@@ -94,37 +94,40 @@ export const Footer: React.FC = () => {
 
           {/* Col 2: Navigation */}
           <div>
-            <h4 className="text-sm font-bold tracking-widest uppercase text-yellow-400 mb-4">
+            <h4 className="text-xs font-black tracking-widest uppercase text-yellow-400 mb-4 font-heading">
               Quick Links
             </h4>
-            <ul className="space-y-2.5 text-sm text-neutral-400">
+            <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-400 font-sans">
               <li>
-                <Link to="/" className="hover:text-white transition-colors">Home</Link>
+                <a href="#home" className="hover:text-white transition-colors">Home</a>
+              </li>
+              <li>
+                <a href="#about" className="hover:text-white transition-colors">About E-Cell</a>
               </li>
               <li>
                 <Link to="/events" className="hover:text-white transition-colors">Events & Competitions</Link>
               </li>
               <li>
-                <Link to="/tickets" className="hover:text-white transition-colors">My Entry Tickets</Link>
-              </li>
-              <li>
-                <Link to="/login" className="hover:text-white transition-colors">Student & Admin Portal</Link>
-              </li>
-              <li>
                 <a href="#speakers" className="hover:text-white transition-colors">Keynote Speakers</a>
               </li>
               <li>
-                <a href="#sponsors" className="hover:text-white transition-colors">Partners & Sponsors</a>
+                <a href="#sponsors" className="hover:text-white transition-colors">Sponsors & Partners</a>
+              </li>
+              <li>
+                <a href="#backbone" className="hover:text-white transition-colors">Backbone Team</a>
+              </li>
+              <li>
+                <a href="#advisor" className="hover:text-white transition-colors">Faculty Advisor</a>
               </li>
             </ul>
           </div>
 
           {/* Col 3: Programs */}
           <div>
-            <h4 className="text-sm font-bold tracking-widest uppercase text-yellow-400 mb-4">
+            <h4 className="text-xs font-black tracking-widest uppercase text-yellow-400 mb-4 font-heading">
               Flagship Programs
             </h4>
-            <ul className="space-y-2.5 text-sm text-neutral-400">
+            <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-400">
               <li>
                 <span className="text-white font-medium">E-Summit Annual:</span> Startup Pitch Tank
               </li>
@@ -135,20 +138,20 @@ export const Footer: React.FC = () => {
                 <span className="text-white font-medium">Ideathon:</span> Innovation Prototype Fair
               </li>
               <li>
-                <span className="text-white font-medium">Speaker Series:</span> C-Suite & Founders
+                <span className="text-white font-medium">Speaker Conclave:</span> C-Suite & Founders
               </li>
               <li>
-                <span className="text-white font-medium">Incubation Support:</span> Mentorship & Seed
+                <span className="text-white font-medium">Incubation Hub:</span> Mentorship & Seed
               </li>
             </ul>
           </div>
 
           {/* Col 4: Contact info */}
           <div>
-            <h4 className="text-sm font-bold tracking-widest uppercase text-yellow-400 mb-4">
-              Contact & Location
+            <h4 className="text-xs font-black tracking-widest uppercase text-yellow-400 mb-4 font-heading">
+              Campus Location
             </h4>
-            <ul className="space-y-3 text-sm text-neutral-400">
+            <ul className="space-y-3 text-xs sm:text-sm text-neutral-400">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <span>Sector 3, Airoli, Navi Mumbai, Maharashtra 400708</span>
@@ -167,10 +170,10 @@ export const Footer: React.FC = () => {
 
             <button
               onClick={scrollToTop}
-              className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-yellow-400 transition-colors cursor-pointer"
+              className="mt-6 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-yellow-400 transition-colors cursor-pointer font-heading"
             >
               <ArrowUp className="w-4 h-4" />
-              Back to top
+              <span>Back to top</span>
             </button>
           </div>
 
@@ -179,8 +182,8 @@ export const Footer: React.FC = () => {
         {/* Bottom Credits */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4">
           <p>© {new Date().getFullYear()} E-CELL DMCE. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Built with pure passion by <span className="text-neutral-300 font-semibold">E-Cell Tech Team</span>
+          <p className="flex items-center gap-1.5">
+            Crafted with passion by <span className="text-neutral-300 font-semibold">E-Cell Tech Team</span>
           </p>
         </div>
       </div>
