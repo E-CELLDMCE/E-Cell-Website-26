@@ -1,7 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Mail, MapPin, Upload } from 'lucide-react';
-import { FaInstagram, FaLinkedin, FaFacebook } from 'react-icons/fa';
-
+import { FaInstagram, FaLinkedin } from 'react-icons/fa';
+import ecellLogo from '../assets/ecell-logo.png';
+import InitiativeBackground from '../components/InitiativeBackground';
 interface FormData {
   firstName: string;
   lastName: string;
@@ -133,45 +134,31 @@ export const RegistrationPage: React.FC = () => {
       </nav>
 
       {/* ================= MAIN ================= */}
-      <main
-        className="
-          relative
-          min-h-[calc(100vh-56px)]
-          overflow-hidden
-          bg-[radial-gradient(circle_at_10%_0%,#a90000_0%,#310000_20%,#090000_48%,#000000_75%)]
-        "
-      >
-
-        {/* Decorative red glow - top right */}
-        <div className="absolute right-[-100px] top-[-70px] w-[430px] h-[230px] rounded-full border border-red-700/40 rotate-[12deg]" />
-        <div className="absolute right-[-100px] top-[-55px] w-[430px] h-[230px] rounded-full border border-red-700/30 rotate-[12deg]" />
-        <div className="absolute right-[-100px] top-[-40px] w-[430px] h-[230px] rounded-full border border-red-700/20 rotate-[12deg]" />
-
-        {/* Decorative red glow - bottom left */}
-        <div className="absolute left-[-120px] bottom-[-90px] w-[430px] h-[230px] rounded-full border border-red-700/40 rotate-[12deg]" />
-        <div className="absolute left-[-120px] bottom-[-75px] w-[430px] h-[230px] rounded-full border border-red-700/30 rotate-[12deg]" />
-        <div className="absolute left-[-120px] bottom-[-60px] w-[430px] h-[230px] rounded-full border border-red-700/20 rotate-[12deg]" />
-
-        {/* Small decorative dots */}
-        <div className="absolute top-[35%] left-[12%] w-1 h-1 rounded-full bg-red-500/70" />
-        <div className="absolute top-[55%] right-[10%] w-1 h-1 rounded-full bg-red-500/70" />
-        <div className="absolute bottom-[20%] right-[18%] w-1 h-1 rounded-full bg-red-500/50" />
+<main
+  className="
+    relative
+    min-h-[calc(100vh-56px)]
+    overflow-hidden
+    bg-black
+  "
+>
+  <InitiativeBackground />
 
         {/* Registration container */}
         <div className="relative z-10 flex justify-center px-4 py-10 md:py-14">
 
-          <div
-            className="
-              w-full
-              max-w-[620px]
-              rounded-2xl
-              bg-gradient-to-b from-[#850000]/95 via-[#610000]/95 to-[#790000]/95
-              px-6 py-7
-              md:px-10 md:py-8
-              shadow-[0_20px_70px_rgba(0,0,0,0.65)]
-            "
-          >
-
+<div
+  className="
+    w-full
+    max-w-[560px]
+    rounded-2xl
+    bg-[#D70000]/40
+    px-5 py-6
+    md:px-7 md:py-6
+    shadow-[0_20px_70px_rgba(0,0,0,0.65)]
+  "
+  style={{ fontFamily: "'Montagu Slab', serif" }}
+>
             {/* Heading */}
             <h1 className="text-center text-2xl md:text-3xl font-bold text-[#ffd04a] mb-7">
               Register Here
@@ -345,22 +332,24 @@ export const RegistrationPage: React.FC = () => {
 
                 <div className="h-10 rounded-md bg-[#b78d8d] border border-[#d5aaaa] flex items-center overflow-hidden">
 
-                  <label
-                    className="
-                      h-full
-                      px-3
-                      flex
-                      items-center
-                      gap-2
-                      bg-[#a70000]
-                      hover:bg-[#c00000]
-                      text-[#ffd04a]
-                      text-xs
-                      font-semibold
-                      cursor-pointer
-                      transition
-                    "
-                  >
+                <label
+  className="
+   h-[80%]
+my-1
+px-1.5
+flex
+    items-center
+    gap-2
+    bg-gradient-to-r from-[#8F0000] to-[#290000]
+    hover:bg-[#c00000]
+    rounded-xl
+    text-[#ffd04a]
+    text-[9px]
+    font-semibold
+    cursor-pointer
+    transition
+  "
+>
                     <Upload size={14} />
                     Choose File
 
@@ -403,10 +392,10 @@ export const RegistrationPage: React.FC = () => {
                 <button
                   type="submit"
                   className="
-                    w-full
+                  w-[75%] mx-auto block
                     h-10
                     rounded-md
-                    bg-gradient-to-r from-[#c40000] to-[#650000]
+                    bg-gradient-to-r from-[#8F0000] to-[#290000]
                     hover:from-[#e00000] hover:to-[#850000]
                     text-[#ffd04a]
                     font-bold
@@ -435,11 +424,11 @@ export const RegistrationPage: React.FC = () => {
 
             {/* Brand */}
             <div>
-              <div className="text-xl font-black text-red-600">
-                E
-                <span className="text-yellow-400">CELL</span>
-              </div>
-
+             <img
+  src={ecellLogo}
+  alt="ECELL DMCE"
+  className="w-24 h-auto object-contain"
+/>
               <p className="text-[10px] text-gray-400 mt-2 flex items-start gap-1">
                 <MapPin size={13} className="text-red-500 shrink-0" />
                 <span>
@@ -528,27 +517,35 @@ export const RegistrationPage: React.FC = () => {
                 </li>
 
                 <li className="flex items-center gap-2">
-                  <FaInstagram size={13} className="text-red-500" />
-                  <span>ecell_dmce</span>
-                </li>
+  <FaInstagram size={13} className="text-red-500" />
+  <a
+    href="https://www.instagram.com/ecell_dmce?stkn=MWRnbXB2c2VzZHRuNg=="
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:text-red-500 transition"
+  >
+    ecell_dmce
+  </a>
+</li>
 
-                <li className="flex items-center gap-2">
-                  <FaLinkedin size={13} className="text-red-500" />
-                  <span>ECell_DMCE</span>
-                </li>
-
-                <li className="flex items-center gap-2">
-                  <FaFacebook size={13} className="text-red-500" />
-                  <span>ECell_DMCE</span>
-                </li>
-
+               <li className="flex items-center gap-2">
+  <FaLinkedin size={13} className="text-red-500" />
+  <a
+    href="https://www.linkedin.com/company/e-celldmce/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:text-red-500 transition"
+  >
+    ECell_DMCE
+  </a>
+</li>
               </ul>
             </div>
 
           </div>
 
           <div className="border-t border-gray-800 mt-7 pt-4 text-center text-[9px] text-gray-600">
-            © 2025 ECELL | E-CELL DMCE. All Rights Reserved.
+            © 2026 ECELL | E-CELL DMCE. All Rights Reserved.
           </div>
 
         </div>

@@ -1,5 +1,7 @@
+import { RegistrationPage } from './pages/registration';
+
 function App() {
-  return <h1>React + TypeScript Setup</h1>
+  return <RegistrationPage />;
 }
 
-export default App
+export default App;
