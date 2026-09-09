@@ -1,7 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Mail, MapPin, Upload } from 'lucide-react';
 import { FaInstagram, FaLinkedin } from 'react-icons/fa';
-import ecellLogo from '../assets/ecell-logo.png';
+import ecellLogo from '../assets/ECELL LOGO.png';
+import Navbar from '../components/Navbar';
 import InitiativeBackground from '../components/InitiativeBackground';
 interface FormData {
   firstName: string;
@@ -92,46 +93,7 @@ export const RegistrationPage: React.FC = () => {
     <div className="min-h-screen bg-black text-white font-sans">
 
       {/* ================= NAVBAR ================= */}
-      <nav className="h-14 bg-black flex items-center justify-between px-5 md:px-10 border-b border-gray-800">
-
-        {/* Logo */}
-        <div className="flex items-center">
-          <div className="leading-none">
-            <div className="text-red-600 font-black text-xl tracking-tight">
-              E
-              <span className="text-yellow-400">CELL</span>
-            </div>
-            <div className="text-[7px] text-gray-300 tracking-[0.25em]">
-              ENTREPRENEURSHIP CELL
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="hidden md:flex items-center gap-7 text-[10px] font-semibold">
-          <a href="#home" className="hover:text-red-500 transition">
-            HOME
-          </a>
-          <a href="#about" className="hover:text-red-500 transition">
-            ABOUT US
-          </a>
-          <a href="#event" className="hover:text-red-500 transition">
-            EVENT
-          </a>
-          <a href="#gallery" className="hover:text-red-500 transition">
-            GALLERY
-          </a>
-          <a href="#team" className="hover:text-red-500 transition">
-            TEAM
-          </a>
-          <a href="#initiative" className="hover:text-red-500 transition">
-            INITIATIVE
-          </a>
-          <a href="#blogs" className="hover:text-red-500 transition">
-            BLOGS
-          </a>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ================= MAIN ================= */}
 <main
@@ -145,7 +107,7 @@ export const RegistrationPage: React.FC = () => {
   <InitiativeBackground />
 
         {/* Registration container */}
-        <div className="relative z-10 flex justify-center px-4 py-10 md:py-14">
+       <div className="relative z-10 flex justify-center px-4 pt-28 pb-10 md:pt-32 md:pb-14">
 
 <div
   className="
