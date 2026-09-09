@@ -1,5 +1,6 @@
 import React from "react";
-import ecellLogo from "../assets/ecell-logo.png";
+import Navbar from "../components/Navbar";
+import ecellLogo from "../assets/ECELL LOGO.png";
 import adityaDongre from "../assets/aditya-dongre.png";
 import advayDeshmukh from "../assets/advay-deshmukh.jpg";
 import akshadaSangore from "../assets/akshada-sangore.png";
@@ -95,7 +96,7 @@ const TeamMemberCard = ({
 const MeetOurTeam = () => {
   return (
     <div className="min-h-screen bg-[#0d0002] text-white overflow-hidden">
-
+    <Navbar />
       {/* ================= TEAM PAGE ================= */}
       <section className="relative min-h-screen bg-[#0d0002] overflow-hidden">
 
@@ -145,7 +146,7 @@ const MeetOurTeam = () => {
           {/* Heading */}
           {/* Heading */}
 {/* Heading */}
-<div className="pt-16 sm:pt-20">
+<div className="pt-32 sm:pt-36 md:pt-40">
   <div className="max-w-4xl mx-auto text-center">
     <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-wide text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] mb-6">
       MEET OUR TEAM
