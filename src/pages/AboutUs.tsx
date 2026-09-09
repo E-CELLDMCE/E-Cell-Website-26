@@ -81,9 +81,9 @@ const AboutUs = () => {
       </div>
 
       {/* TITLE */}
-      <h1 className="text-center text-3xl font-extrabold text-yellow-400 sm:text-4xl lg:text-left lg:text-[42px]">
+      <h2 className="text-xl sm:text-2xl md:text-4xl font-extrabold uppercase tracking-wide text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] mb-7">
         ORIGIN OF E-CELL
-      </h1>
+      </h2>
 
     </div>
 
@@ -106,9 +106,9 @@ const AboutUs = () => {
                   text-white
                   text-sm
                   sm:text-base
-                  md:text-lg
+                  md:text-xl
                   font-semibold
-                  tracking-[0.08em]
+                  tracking-[0.09em]
                   leading-relaxed
                 "
               >
@@ -154,6 +154,7 @@ to-[#8f0007]
     md:text-3xl 
     font-black 
     text-yellow-400 
+    drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)]
     uppercase 
     mb-15 
   " 
@@ -375,15 +376,15 @@ to-[#8f0007]
                 <div className="text-center pt-7 pb-11 sm:pt-9 sm:pb-13">
 
                   <p
-                    className="
-                      text-white
-                      text-lg
-                      sm:text-xl
-                      md:text-2xl
-                      font-['Times_New_Roman']
-                      leading-relaxed
-                    "
-                  >
+                  className="
+                  text-white
+                  text-xl
+                  sm:text-2xl
+                  md:text-3xl
+                  font-['Times_New_Roman']
+                  leading-relaxed
+  "
+>
                     Founded in August 2014
                     <br />
                     by Ankit Jaiswal.
