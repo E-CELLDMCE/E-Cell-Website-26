@@ -163,135 +163,107 @@ to-[#8f0007]
 </h2>
 
 
-              <div className="grid grid-cols-3 gap-3 sm:gap-8">
+              <div className="grid grid-cols-3 gap-1 sm:gap-8">
 
   {/* Facebook */}
-<div className="flex flex-col items-center text-center">
+  <div className="flex min-w-0 flex-col items-center text-center">
 
-  <FontAwesomeIcon
-    icon={faFacebookF}
-    className="text-white text-3xl sm:text-4xl md:text-5xl mb-3"
-  />
+    <FontAwesomeIcon
+      icon={faFacebookF}
+      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
+    />
 
-  {/* Counter */}
-  <div className="flex items-center mb-1">
+    <div className="flex items-center justify-center whitespace-nowrap">
 
-    {/* First 0 */}
-    <div className="bg-[#3d0002] rounded-md px-3 py-1">
-      <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
         0
-      </p>
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold px-1">
+        .
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold ml-1">
+        K+
+      </span>
+
     </div>
 
-    {/* Decimal point */}
-    <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold">
-      .
-    </span>
-
-    {/* Second 0 */}
-    <div className="bg-[#3d0002] rounded-md px-3 py-1">
-      <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-        0
-      </p>
-    </div>
-
-    {/* K+ */}
-    <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold ml-1">
-      K+
-    </span>
-
-  </div>
-
-  <p className="text-white text-xs sm:text-sm md:text-base font-semibold">
-    followers
-  </p>
-
-</div>
-
-
-{/* Instagram */}
-<div className="flex flex-col items-center text-center">
-
-  <FontAwesomeIcon
-    icon={faInstagram}
-    className="text-white text-3xl sm:text-4xl md:text-5xl mb-3"
-  />
-
-  {/* Counter */}
-  <div className="flex items-center mb-1">
-
-    {/* First 0 */}
-    <div className="bg-[#3d0002] rounded-md px-3 py-1">
-      <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-        0
-      </p>
-    </div>
-
-    {/* Decimal point */}
-    <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold">
-      .
-    </span>
-
-    {/* Second 0 */}
-    <div className="bg-[#3d0002] rounded-md px-3 py-1">
-      <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-        0
-      </p>
-    </div>
-
-    {/* K+ */}
-    <span className="text-white text-2xl sm:text-3xl md:text-4xl font-bold ml-1">
-      K+
-    </span>
-
-  </div>
-
-  <p className="text-white text-xs sm:text-sm md:text-base font-semibold">
-    followers
-  </p>
-
-</div>
-
-
-{/* LinkedIn */}
-<div className="flex flex-col items-center text-center">
-
-  <FontAwesomeIcon
-    icon={faLinkedinIn}
-    className="text-white text-3xl sm:text-4xl md:text-5xl mb-3"
-  />
-
-  {/* Counter */}
-  <div className="flex items-center mb-1">
-
-  {/* First 0 */}
-  <div className="bg-[#3d0002] rounded-l-md px-3 py-1">
-    <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-      0
+    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
+      followers
     </p>
+
   </div>
 
-  {/* Second 0 */}
-  <div className="bg-[#3d0002] px-3 py-1 border-l border-[#720005]">
-    <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-      0
+
+  {/* Instagram */}
+  <div className="flex min-w-0 flex-col items-center text-center">
+
+    <FontAwesomeIcon
+      icon={faInstagram}
+      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
+    />
+
+    <div className="flex items-center justify-center whitespace-nowrap">
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold px-1">
+        .
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold ml-1">
+        K+
+      </span>
+
+    </div>
+
+    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
+      followers
     </p>
+
   </div>
 
-  {/* Third 0 */}
-  <div className="bg-[#3d0002] rounded-r-md px-3 py-1 border-l border-[#720005]">
-    <p className="text-white text-2xl sm:text-3xl md:text-4xl font-bold leading-none">
-      0
+
+  {/* LinkedIn */}
+  <div className="flex min-w-0 flex-col items-center text-center">
+
+    <FontAwesomeIcon
+      icon={faLinkedinIn}
+      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
+    />
+
+    <div className="flex items-center justify-center whitespace-nowrap">
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-l-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center border-l border-red-900 bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-r-md border-l border-red-900 bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+    </div>
+
+    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
+      followers
     </p>
+
   </div>
-
-</div>
-
-  <p className="text-white text-xs sm:text-sm md:text-base font-semibold">
-    followers
-  </p>
-
-</div>
 
 </div>
 
@@ -454,7 +426,7 @@ to-[#8f0007]
                   <img
                     src={ecellLogo}
                     alt="E-Cell DMCE"
-                    className="w-40 h-auto object-contain"
+                    className="w-32 sm:w-40 h-auto object-contain"
                   />
 
                 </div>
@@ -478,7 +450,7 @@ to-[#8f0007]
                   Quick Links
                 </h3>
 
-                <div className="space-y-1 text-base text-neutral-400">
+                <div className="space-y-1 text-sm sm:text-base text-neutral-400">
 
                   <p>Home</p>
                   <p>About us</p>
@@ -502,7 +474,7 @@ to-[#8f0007]
                     Resources
                   </h3>
 
-                  <div className="space-y-1 text-base text-neutral-400">
+                  <div className="space-y-1 text-sm sm:text-base text-neutral-400">
 
                     <p>FAQs</p>
                     <p>Register</p>
@@ -519,7 +491,7 @@ to-[#8f0007]
                     Legal
                   </h3>
 
-                  <div className="space-y-1 text-base text-neutral-400">
+                  <div className="space-y-1 text-sm sm:text-base text-neutral-400">
 
                     <p>Privacy Policy</p>
                     <p>Terms & Conditions</p>
