@@ -38,7 +38,7 @@ const TeamMemberCard = ({
   objectPosition?: string;
 }) => {
   return (
-    <div className="w-full max-w-[320px] overflow-hidden rounded-[22px] bg-[#4d0000] shadow-lg">
+    <div className="w-full max-w-[320px] overflow-hidden rounded-[22px] bg-[#520006] shadow-lg">
 
       {/* Photo Sub-Container */}
       <div className="p-5 pb-5">
@@ -53,7 +53,7 @@ const TeamMemberCard = ({
 </div>
 
       {/* Name + Role */}
-      <div className="bg-[#050505] text-center px-2 py-1.5">
+      <div className="bg-[#4d0000] text-center px-2 py-1.5">
         <h3 className="text-[18px] sm:text-[19px] font-bold text-white leading-tight">
           {name}
         </h3>
@@ -94,10 +94,10 @@ const TeamMemberCard = ({
 
 const MeetOurTeam = () => {
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="min-h-screen bg-[#0d0002] text-white overflow-hidden">
 
       {/* ================= TEAM PAGE ================= */}
-      <section className="relative min-h-screen bg-black overflow-hidden">
+      <section className="relative min-h-screen bg-[#0d0002] overflow-hidden">
 
         {/* Background Gradient */}
         <div
@@ -119,13 +119,13 @@ const MeetOurTeam = () => {
                 transparent 75%
               ),
               linear-gradient(
-                135deg,
-                #160004 0%,
-                #080002 35%,
-                #000000 55%,
-                #080002 75%,
-                #180004 100%
-              )
+  135deg,
+  #220005 0%,
+  #140002 35%,
+  #0f0002 55%,
+  #160003 75%,
+  #260006 100%
+)
             `,
           }}
         />
