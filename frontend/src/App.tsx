@@ -8,10 +8,15 @@ import Footer from './components/common/Footer';
 
 // Pages
 import Home from './pages/Home';
-import LoginPage from './pages/LoginPage';
-import OnboardingPage from './pages/OnboardingPage';
+import AboutUsPage from './pages/AboutUsPage';
 import EventsPage from './pages/EventsPage';
 import EventDetailPage from './pages/EventDetailPage';
+import GalleryPage from './pages/GalleryPage';
+import TeamPage from './pages/TeamPage';
+import InitiativesPage from './pages/InitiativesPage';
+import BlogsPage from './pages/BlogsPage';
+import LoginPage from './pages/LoginPage';
+import OnboardingPage from './pages/OnboardingPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 
 // Admin Pages
@@ -35,10 +40,15 @@ export const App = () => {
                 <Routes>
                   {/* Public & Student Pages (accessible to all including admins) */}
                   <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/onboarding" element={<OnboardingPage />} />
+                  <Route path="/about-us" element={<AboutUsPage />} />
                   <Route path="/events" element={<EventsPage />} />
                   <Route path="/events/:id" element={<EventDetailPage />} />
+                  <Route path="/gallery" element={<GalleryPage />} />
+                  <Route path="/team" element={<TeamPage />} />
+                  <Route path="/initiatives" element={<InitiativesPage />} />
+                  <Route path="/blogs" element={<BlogsPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/onboarding" element={<OnboardingPage />} />
                   <Route path="/tickets" element={<MyTicketsPage />} />
 
                   {/* Admin Protected Routes */}
