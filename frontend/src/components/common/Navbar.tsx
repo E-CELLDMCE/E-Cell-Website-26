@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, LogOut, ShieldCheck, Ticket, Calendar } from 'lucide-react';
+import { Menu, X, LogOut, ShieldCheck, Ticket } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -9,48 +9,28 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
 
-  const isHomePage = location.pathname === '/';
-
   const handleLogout = () => {
     setIsMobileMenuOpen(false);
     logout();
     navigate('/login');
   };
 
-  const handleNavClick = (href: string) => {
-    setIsMobileMenuOpen(false);
-    if (href.startsWith('#')) {
-      if (!isHomePage) {
-        navigate('/' + href);
-      } else {
-        const elem = document.querySelector(href);
-        if (elem && window.__lenis) {
-          window.__lenis.scrollTo(elem as HTMLElement, { offset: -70 });
-        } else if (elem) {
-          elem.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
-    } else {
-      navigate(href);
-    }
-  };
-
   const navLinks = [
-    { name: 'HOME', href: '#home' },
-    { name: 'ABOUT', href: '#about' },
-    { name: 'EVENTS', href: '/events' },
-    { name: 'SPEAKERS', href: '#speakers' },
-    { name: 'SPONSORS', href: '#sponsors' },
-    { name: 'BACKBONE', href: '#backbone' },
-    { name: 'ADVISOR', href: '#advisor' },
+    { name: 'Home', href: '/' },
+    { name: 'About Us', href: '/about-us' },
+    { name: 'Event', href: '/events' },
+    { name: 'Gallery', href: '/gallery' },
+    { name: 'Team', href: '/team' },
+    { name: 'Initiatives', href: '/initiatives' },
+    { name: 'Blogs', href: '/blogs' },
   ];
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-black/50 backdrop-blur-md border-b border-white/10 transition-colors duration-300">
+    <header className="fixed top-0 left-0 w-full z-50 bg-black/60 backdrop-blur-md border-b border-white/10 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Logo / Brand */}
-        <Link to="/" className="flex items-center cursor-pointer group">
+        <Link to="/" className="flex items-center cursor-pointer group flex-shrink-0">
           <img
             src="/img_vid/ecell-logo.png"
             alt="E-CELL DMCE"
@@ -62,36 +42,40 @@ export const Navbar: React.FC = () => {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8 font-heading">
-          {navLinks.map((link) => (
-            <button
-              key={link.name}
-              onClick={() => handleNavClick(link.href)}
-              className="nav-underline text-xs font-bold tracking-widest text-neutral-300 hover:text-yellow-400 transition-colors duration-200 cursor-pointer py-1 uppercase"
-            >
-              {link.name}
-            </button>
-          ))}
+        <nav className="hidden lg:flex items-center space-x-5 xl:space-x-7 font-heading">
+          {navLinks.map((link) => {
+            const isActive =
+              link.href === '/'
+                ? location.pathname === '/'
+                : location.pathname === link.href || location.pathname.startsWith(link.href + '/');
 
-          {/* Direct link to My Tickets if authenticated */}
-          {user && (
-            <Link
-              to="/tickets"
-              className="text-xs font-bold tracking-widest flex items-center gap-1.5 text-neutral-300 hover:text-yellow-400 transition-colors uppercase"
-            >
-              <Ticket className="w-3.5 h-3.5 text-yellow-400" />
-              MY TICKETS
-            </Link>
-          )}
+            return (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={`relative text-xs font-bold tracking-widest uppercase transition-colors duration-200 py-1.5 cursor-pointer group ${
+                  isActive ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
+                }`}
+              >
+                <span>{link.name}</span>
+                {/* Subtle yellow underline on active or hover */}
+                <span
+                  className={`absolute bottom-0 left-0 h-[2px] bg-yellow-400 transition-all duration-300 ${
+                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                  }`}
+                />
+              </Link>
+            );
+          })}
 
-          {/* Direct link to Admin Panel if admin */}
+          {/* Admin Panel Direct Link for Admins */}
           {isAdmin && (
             <Link
               to="/admin"
               className="text-xs font-bold tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full border border-red-500/50 bg-red-950/40 text-red-300 hover:bg-red-900/50 hover:border-red-400 transition-all shadow-[0_0_12px_rgba(220,38,38,0.3)] uppercase"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
-              ADMIN PANEL
+              ADMIN
             </Link>
           )}
         </nav>
@@ -100,6 +84,14 @@ export const Navbar: React.FC = () => {
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <div className="flex items-center gap-3">
+              <Link
+                to="/tickets"
+                className="text-xs font-bold tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-yellow-400 hover:border-yellow-400/40 transition-colors uppercase font-heading"
+              >
+                <Ticket className="w-3.5 h-3.5 text-yellow-400" />
+                MY TICKETS
+              </Link>
+
               <div className="flex flex-col text-right">
                 <span className="text-xs font-bold text-white leading-tight font-sans">
                   {user.name}
@@ -117,7 +109,7 @@ export const Navbar: React.FC = () => {
               <button
                 onClick={handleLogout}
                 title="Logout"
-                className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400 hover:border-red-500/40 transition-all cursor-pointer"
+                className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400 hover:border-red-500/40 transition-all cursor-pointer active:scale-95"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -138,7 +130,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={handleLogout}
               title="Logout"
-              className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400"
+              className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-red-400 active:scale-95"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -146,7 +138,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             type="button"
-            className="text-neutral-300 hover:text-white p-2 rounded-xl bg-neutral-900/80 border border-neutral-800 cursor-pointer"
+            className="text-neutral-300 hover:text-white p-2 rounded-xl bg-neutral-900/80 border border-neutral-800 cursor-pointer active:scale-95"
             aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? <X className="h-6 w-6 text-red-400" /> : <Menu className="h-6 w-6" />}
@@ -164,43 +156,50 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-col space-y-3 font-heading">
-            {navLinks.map((link) => (
-              <button
-                key={link.name}
-                onClick={() => handleNavClick(link.href)}
-                className="text-left py-2 text-sm font-bold tracking-widest text-neutral-300 hover:text-yellow-400 transition-colors uppercase cursor-pointer"
-              >
-                {link.name}
-              </button>
-            ))}
+          <div className="flex flex-col space-y-2.5 font-heading">
+            {navLinks.map((link) => {
+              const isActive =
+                link.href === '/'
+                  ? location.pathname === '/'
+                  : location.pathname === link.href || location.pathname.startsWith(link.href + '/');
 
-            <button
-              onClick={() => handleNavClick('/events')}
-              className="text-left py-2 text-sm font-bold tracking-widest text-neutral-300 hover:text-yellow-400 flex items-center gap-2 uppercase cursor-pointer"
-            >
-              <Calendar className="w-4 h-4 text-yellow-400" />
-              EXPLORE EVENTS
-            </button>
+              return (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center justify-between py-2 text-sm font-bold tracking-widest uppercase transition-colors ${
+                    isActive ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
+                  }`}
+                >
+                  <span>{link.name}</span>
+                  {isActive && (
+                    <span className="w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.8)]" />
+                  )}
+                </Link>
+              );
+            })}
 
             {user && (
-              <button
-                onClick={() => handleNavClick('/tickets')}
-                className="text-left py-2 text-sm font-bold tracking-widest text-neutral-300 hover:text-yellow-400 flex items-center gap-2 uppercase cursor-pointer"
+              <Link
+                to="/tickets"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="py-2 text-sm font-bold tracking-widest text-neutral-300 hover:text-yellow-400 flex items-center gap-2 uppercase cursor-pointer"
               >
                 <Ticket className="w-4 h-4 text-yellow-400" />
                 MY TICKETS
-              </button>
+              </Link>
             )}
 
             {isAdmin && (
-              <button
-                onClick={() => handleNavClick('/admin')}
-                className="text-left py-2 text-sm font-bold tracking-widest text-red-400 hover:text-red-300 flex items-center gap-2 uppercase cursor-pointer"
+              <Link
+                to="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="py-2 text-sm font-bold tracking-widest text-red-400 hover:text-red-300 flex items-center gap-2 uppercase cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4 text-red-500" />
                 ADMIN PANEL
-              </button>
+              </Link>
             )}
           </div>
 
@@ -208,7 +207,7 @@ export const Navbar: React.FC = () => {
             {user ? (
               <button
                 onClick={handleLogout}
-                className="w-full py-2.5 rounded-full bg-neutral-900 border border-neutral-800 text-red-400 font-bold text-sm tracking-wider flex items-center justify-center gap-2 uppercase font-heading cursor-pointer"
+                className="w-full py-2.5 rounded-full bg-neutral-900 border border-neutral-800 text-red-400 font-bold text-sm tracking-wider flex items-center justify-center gap-2 uppercase font-heading cursor-pointer active:scale-95"
               >
                 <LogOut className="w-4 h-4" />
                 LOGOUT
@@ -217,7 +216,7 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full py-3 rounded-full text-center bg-gradient-to-r from-red-600 to-red-800 text-white font-black text-sm tracking-widest uppercase shadow-lg shadow-red-900/40 font-heading"
+                className="block w-full py-3 rounded-full text-center bg-gradient-to-r from-red-600 to-red-800 text-white font-black text-sm tracking-widest uppercase shadow-lg shadow-red-900/40 font-heading active:scale-95"
               >
                 LOGIN
               </Link>
