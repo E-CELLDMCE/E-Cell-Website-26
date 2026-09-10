@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Html5Qrcode } from 'html5-qrcode';
 import { adminApi, TicketScanResult } from '../../api/admin';
 import { useToast } from '../../context/ToastContext';
@@ -12,7 +13,7 @@ import {
   RefreshCw,
   UserCheck,
   Clock,
-  Users,
+  SquareSlash,
 } from 'lucide-react';
 
 export const GateScannerPage: React.FC = () => {
@@ -56,8 +57,6 @@ export const GateScannerPage: React.FC = () => {
   };
 
   // Safely stop and clear the scanner. No-op if it was never started.
-  // All html5-qrcode teardown errors are swallowed because they only fire
-  // during unmount and never affect active scanning.
   const teardownScanner = async () => {
     const scanner = scannerRef.current;
     if (!scanner || !scannerStartedRef.current) {
@@ -70,8 +69,6 @@ export const GateScannerPage: React.FC = () => {
       // already stopped or never fully started — safe to ignore
     }
     try {
-      // clear() removes html5-qrcode's injected DOM nodes (video element etc.)
-      // so React's unmount doesn't fight them.
       scanner.clear();
     } catch {
       // already cleared — safe to ignore
@@ -82,8 +79,6 @@ export const GateScannerPage: React.FC = () => {
 
   const startCamera = async () => {
     try {
-      // Tear down any previous instance first so we never have two scanners
-      // competing for the same #qr-reader DOM node.
       await teardownScanner();
 
       const scanner = new Html5Qrcode('qr-reader');
@@ -127,8 +122,6 @@ export const GateScannerPage: React.FC = () => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      // Fire-and-forget — React's unmount can't await a Promise, but the
-      // teardown is idempotent and swallows its own errors.
       void teardownScanner();
     };
   }, []);
@@ -142,34 +135,40 @@ export const GateScannerPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="max-w-5xl mx-auto space-y-6 sm:space-y-8"
+    >
       {/* Header */}
-      <div className="p-6 rounded-3xl bg-neutral-950 border border-neutral-800 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-red-500 bg-red-950/60 border border-red-500/30 px-3 py-1 rounded-full">
-            Live Entry Checkpoint
-          </span>
-          <h2 className="text-2xl font-black text-white mt-2 uppercase tracking-tight">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-red-400 bg-red-950/60 border border-red-500/30 px-2.5 py-0.5 rounded-full">
+              Live Entry Checkpoint
+            </span>
+          </div>
+          <h2 className="text-lg sm:text-xl font-black text-white mt-1.5 uppercase tracking-tight">
             Gate QR Ticket Scanner
           </h2>
           <p className="text-xs text-neutral-400 mt-0.5">
-            Validate attendee entry passes in real-time with row-level double-scan prevention
+            Validate attendee entry passes in real-time with double-scan protection
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="w-full sm:w-auto">
           {isCameraActive ? (
             <button
               onClick={stopCamera}
-              className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-neutral-900 border border-red-500/40 hover:bg-red-950/40 text-red-400 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
-              Stop Camera
+              <SquareSlash className="w-4 h-4" /> Stop Camera
             </button>
           ) : (
             <button
               onClick={startCamera}
-              className="px-4 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg shadow-yellow-500/20 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md shadow-red-950/50 hover:shadow-red-600/30 active:scale-95 cursor-pointer"
             >
               <Camera className="w-4 h-4" /> Start Camera
             </button>
@@ -177,34 +176,36 @@ export const GateScannerPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Scanner Feed & Manual Box Left */}
-        <div className="md:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-6">
           
           {/* Live Camera Viewport */}
-          <div className="p-6 rounded-3xl bg-neutral-950 border border-neutral-800 space-y-4">
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 space-y-4 shadow-xl">
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-2">
-              <Camera className="w-4 h-4 text-yellow-400" /> Camera Feed
+              <Camera className="w-4 h-4 text-red-500" /> Camera Feed
             </h3>
 
             <div
               id="qr-reader"
-              className="w-full rounded-2xl overflow-hidden bg-black border border-neutral-800 min-h-[260px] flex items-center justify-center text-center p-4"
+              className="w-full rounded-2xl overflow-hidden bg-black border border-neutral-800/80 min-h-[260px] flex items-center justify-center text-center p-4 relative"
             >
               {!isCameraActive && (
-                <div className="text-neutral-500 space-y-2">
+                <div className="text-neutral-500 space-y-2 p-4">
                   <QrCode className="w-12 h-12 mx-auto text-neutral-700" />
-                  <p className="text-xs">Camera is off. Click "Start Camera" above or paste token below.</p>
+                  <p className="text-xs text-neutral-400">
+                    Camera is off. Click "Start Camera" above or paste token below.
+                  </p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Manual Token Entry Box */}
-          <div className="p-6 rounded-3xl bg-neutral-950 border border-neutral-800 space-y-4">
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 space-y-3.5 shadow-xl">
             <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-2">
-              <Keyboard className="w-4 h-4 text-yellow-400" /> Manual Token / Scanner Gun Entry
+              <Keyboard className="w-4 h-4 text-red-500" /> Manual Token / Scanner Gun Entry
             </h3>
 
             <form onSubmit={handleManualSubmit} className="flex gap-2">
@@ -213,14 +214,18 @@ export const GateScannerPage: React.FC = () => {
                 value={manualToken}
                 onChange={(e) => setManualToken(e.target.value)}
                 placeholder="Paste ticket UUID token..."
-                className="flex-1 px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-xs focus:outline-none focus:border-yellow-400 transition-colors"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-xs placeholder-neutral-500 focus:outline-none focus:border-red-500/50 transition-all duration-300"
               />
               <button
                 type="submit"
                 disabled={isScanning || !manualToken.trim()}
-                className="px-5 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-md shadow-red-950/40 active:scale-95 cursor-pointer shrink-0 disabled:opacity-50"
               >
-                {isScanning ? '...' : 'Scan'}
+                {isScanning ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  'Scan'
+                )}
               </button>
             </form>
           </div>
@@ -228,33 +233,35 @@ export const GateScannerPage: React.FC = () => {
         </div>
 
         {/* Scan Result Feedback Right */}
-        <div className="md:col-span-6 space-y-6">
+        <div className="lg:col-span-6 space-y-6">
           
           {/* Result Card */}
           {scanResult ? (
-            <div className="p-8 rounded-3xl bg-gradient-to-br from-emerald-950/60 to-black border-2 border-emerald-500 space-y-4 shadow-[0_0_30px_rgba(16,185,129,0.2)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-950/50 via-neutral-950 to-neutral-950 border border-emerald-500/50 space-y-4 shadow-[0_0_30px_rgba(16,185,129,0.15)] animate-in fade-in zoom-in-95 duration-200">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-emerald-500/20 text-emerald-400">
-                  <CheckCircle2 className="w-8 h-8" />
+                <div className="p-2.5 rounded-full bg-emerald-500/20 text-emerald-400 flex-shrink-0">
+                  <CheckCircle2 className="w-7 h-7" />
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-black tracking-widest text-emerald-400">
+                <div className="min-w-0">
+                  <span className="text-[10px] uppercase font-black tracking-widest text-emerald-400 block">
                     Admission Granted
                   </span>
-                  <h3 className="text-xl font-black text-white">{scanResult.member_name}</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-white truncate">{scanResult.member_name}</h3>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl bg-black/60 border border-emerald-500/30 text-xs space-y-2">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-neutral-400">Student ID:</span>
-                  <span className="font-mono font-bold text-yellow-400">{scanResult.student_id}</span>
+                  <span className="font-mono font-bold text-neutral-200 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
+                    {scanResult.student_id}
+                  </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-neutral-400">Team Name:</span>
-                  <span className="font-semibold text-white">{scanResult.team_name}</span>
+                  <span className="font-semibold text-white truncate ml-2">{scanResult.team_name}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-neutral-400">Timestamp:</span>
                   <span className="font-mono text-neutral-300">
                     {new Date(scanResult.scanned_at).toLocaleTimeString()}
@@ -263,24 +270,24 @@ export const GateScannerPage: React.FC = () => {
               </div>
             </div>
           ) : scanError ? (
-            <div className="p-8 rounded-3xl bg-gradient-to-br from-red-950/60 to-black border-2 border-red-500 space-y-4 shadow-[0_0_30px_rgba(239,68,68,0.2)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-red-950/50 via-neutral-950 to-neutral-950 border border-red-500/50 space-y-4 shadow-[0_0_30px_rgba(239,68,68,0.15)] animate-in fade-in zoom-in-95 duration-200">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-red-500/20 text-red-400">
-                  <AlertCircle className="w-8 h-8" />
+                <div className="p-2.5 rounded-full bg-red-500/20 text-red-400 flex-shrink-0">
+                  <AlertCircle className="w-7 h-7" />
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-black tracking-widest text-red-400">
+                <div className="min-w-0">
+                  <span className="text-[10px] uppercase font-black tracking-widest text-red-400 block">
                     Entry Denied / Invalid Pass
                   </span>
-                  <h3 className="text-lg font-black text-white">Scan Rejected</h3>
+                  <h3 className="text-base sm:text-lg font-black text-white">Scan Rejected</h3>
                 </div>
               </div>
-              <p className="text-xs text-neutral-300 leading-relaxed bg-black/50 p-4 rounded-xl border border-red-900/40">
+              <p className="text-xs text-neutral-300 leading-relaxed bg-black/60 p-3.5 rounded-xl border border-red-900/40">
                 {scanError}
               </p>
             </div>
           ) : (
-            <div className="p-8 rounded-3xl bg-neutral-950 border border-neutral-800 text-center space-y-3">
+            <div className="p-8 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 text-center space-y-3 shadow-xl">
               <UserCheck className="w-12 h-12 text-neutral-700 mx-auto" />
               <h4 className="text-sm font-bold text-white uppercase">Awaiting Next Ticket</h4>
               <p className="text-xs text-neutral-400 max-w-xs mx-auto">
@@ -291,18 +298,18 @@ export const GateScannerPage: React.FC = () => {
 
           {/* Session Scan Log */}
           {history.length > 0 && (
-            <div className="p-6 rounded-3xl bg-neutral-950 border border-neutral-800 space-y-3">
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 space-y-3 shadow-xl">
               <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-yellow-400" /> Recent Gate Admissions ({history.length})
+                <Clock className="w-3.5 h-3.5 text-red-500" /> Recent Gate Admissions ({history.length})
               </h4>
-              <div className="divide-y divide-neutral-900">
+              <div className="divide-y divide-neutral-900 max-h-60 overflow-y-auto">
                 {history.map((h, i) => (
-                  <div key={i} className="py-2.5 flex items-center justify-between text-xs">
-                    <div>
-                      <p className="font-bold text-white">{h.member_name}</p>
-                      <p className="text-[10px] text-neutral-500">ID: {h.student_id} • {h.team_name}</p>
+                  <div key={i} className="py-2.5 flex items-center justify-between text-xs gap-3">
+                    <div className="min-w-0">
+                      <p className="font-bold text-white truncate">{h.member_name}</p>
+                      <p className="text-[10px] text-neutral-400 truncate">ID: {h.student_id} • {h.team_name}</p>
                     </div>
-                    <span className="font-mono text-[10px] text-emerald-400">
+                    <span className="font-mono text-[10px] text-emerald-400 shrink-0">
                       {new Date(h.scanned_at).toLocaleTimeString()}
                     </span>
                   </div>
@@ -315,7 +322,7 @@ export const GateScannerPage: React.FC = () => {
 
       </div>
 
-    </div>
+    </motion.div>
   );
 };
 
