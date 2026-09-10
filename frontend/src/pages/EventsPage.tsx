@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { eventsApi, EventItem } from '../api/events';
+import { adminApi } from '../api/admin';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../api/client';
 import {
@@ -13,14 +14,28 @@ import {
   Sparkles,
   AlertCircle,
   CheckCircle2,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export const EventsPage: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'team' | 'solo' | 'free'>('all');
   const toast = useToast();
+
+  const handleDownloadExcel = async (eventId: string, title: string) => {
+    setIsExporting(eventId);
+    try {
+      await adminApi.downloadExportExcel(eventId, title);
+      toast.success(`Downloaded registrations report for ${title}`);
+    } catch (err: any) {
+      toast.error(getErrorMessage(err, 'Failed to download Excel report'));
+    } finally {
+      setIsExporting(null);
+    }
+  };
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -237,6 +252,17 @@ export const EventsPage: React.FC = () => {
                       View Details & Register
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </Link>
+
+                    {/* Excel Report Download */}
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadExcel(event.id, event.title)}
+                      disabled={isExporting === event.id}
+                      className="w-full mt-2 py-3 rounded-xl bg-transparent border border-emerald-600/60 text-emerald-400 hover:bg-emerald-950/40 hover:border-emerald-500 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      {isExporting === event.id ? 'Generating Report...' : 'Download Excel Report'}
+                    </button>
                   </div>
                 </div>
               );
