@@ -89,7 +89,7 @@ const TeamMemberCard = ({
             {name}
           </h3>
 
-          <p className="text-[13px] sm:text-[14px] text-white leading-tight">
+          <p className="font-team-role text-[13px] sm:text-[14px] text-white leading-tight">
             {role}
           </p>
 
@@ -177,14 +177,14 @@ sm:h-[94px]
     <div className="ml-3 min-w-0 flex-1">
 
   <h3
-    className="
-      text-white
-      text-[19px]
-      sm:text-[21px]
-      font-bold
-      leading-tight
-    "
-  >
+  className="
+    text-white
+    text-[19px]
+    sm:text-[21px]
+    font-bold
+    leading-tight
+  "
+>
     {name
       .toLowerCase()
       .replace(/\b\w/g, (char) => char.toUpperCase())}
@@ -192,6 +192,7 @@ sm:h-[94px]
 
   <p
   className="
+    font-team-role
     text-yellow-400
     text-[15px]
     sm:text-[17px]
@@ -274,7 +275,7 @@ sm:text-[22px]
 
 const MeetOurTeam = () => {
   return (
-    <div className="min-h-screen bg-[#0d0002] text-white overflow-hidden">
+    <div className="team-page min-h-screen bg-[#0d0002] text-white overflow-hidden">
       {/* ================= TEAM PAGE ================= */}
       <section className="relative min-h-screen bg-[#0d0002] overflow-hidden">
 

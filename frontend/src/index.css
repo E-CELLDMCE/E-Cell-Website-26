@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
 
 @layer base {
@@ -7,9 +9,18 @@
     background-color: #000000;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
-  }
+  .team-page {
+  font-family: 'Poppins', sans-serif;
+}
+
+.team-page h1,
+.team-page h2,
+.team-page h3,
+.team-page h4,
+.team-page h5,
+.team-page h6 {
+  font-family: 'Poppins', sans-serif;
+}
 }
 
 /* Font Utility Classes */
@@ -23,6 +34,14 @@
 
 .font-handwritten {
   font-family: 'Caveat', cursive;
+}
+
+.font-team-name {
+  font-family: 'Poppins', sans-serif;
+}
+
+.font-team-role {
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Glowing text & shadow effects */
