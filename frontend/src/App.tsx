@@ -14,6 +14,9 @@ import EventDetailPage from './pages/EventDetailPage';
 import GalleryPage from './pages/GalleryPage';
 import TeamPage from './pages/TeamPage';
 import InitiativesPage from './pages/InitiativesPage';
+import NecPage from './pages/initiatives/NecPage';
+import AlumniPage from './pages/initiatives/AlumniPage';
+import EnspirePage from './pages/initiatives/EnspirePage';
 import BlogsPage from './pages/BlogsPage';
 import LoginPage from './pages/LoginPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -46,6 +49,11 @@ export const App = () => {
                   <Route path="/gallery" element={<GalleryPage />} />
                   <Route path="/team" element={<TeamPage />} />
                   <Route path="/initiatives" element={<InitiativesPage />} />
+                  <Route path="/initiatives/nec" element={<NecPage />} />
+                  <Route path="/initiatives/alumni" element={<AlumniPage />} />
+                  <Route path="/alumni" element={<AlumniPage />} />
+                  <Route path="/initiatives/enspire" element={<EnspirePage />} />
+                  <Route path="/enspire" element={<EnspirePage />} />
                   <Route path="/blogs" element={<BlogsPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/onboarding" element={<OnboardingPage />} />
