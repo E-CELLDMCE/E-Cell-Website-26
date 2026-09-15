@@ -1,4 +1,5 @@
 import React from "react";
+import ecellLogo from "../assets/ECELL LOGO.png";
 import adityaDongre from "../assets/aditya-dongre.png";
 import advayDeshmukh from "../assets/advay-deshmukh.jpg";
 import akshadaSangore from "../assets/akshada-sangore.png";
@@ -20,7 +21,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 
 import {
+  faInstagram,
   faLinkedinIn,
+  faFacebookF,
 } from "@fortawesome/free-brands-svg-icons";
 
 const TeamMemberCard = ({
@@ -469,7 +472,198 @@ const MeetOurTeam = () => {
 </div>
 </div>
 
-      </section>
+            </section>
+
+      {/* ================================================= */}
+      {/* FOOTER */}
+      {/* ================================================= */}
+
+      <footer className="relative bg-black text-white overflow-hidden">
+
+        {/* Footer Gradient */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(
+                ellipse 65% 80% at 100% 100%,
+                rgba(160, 0, 15, 0.85) 0%,
+                rgba(100, 0, 10, 0.55) 30%,
+                rgba(40, 0, 5, 0.25) 55%,
+                transparent 75%
+              ),
+              radial-gradient(
+                ellipse 55% 55% at 0% 80%,
+                rgba(70, 0, 10, 0.35),
+                transparent 70%
+              )
+            `,
+          }}
+        />
+
+        <div className="relative z-10">
+
+          <div className="max-w-6xl mx-auto px-8 pt-14 pb-8">
+
+            <div
+              className="
+                grid
+                grid-cols-1
+                md:grid-cols-[1.2fr_0.65fr_1.3fr_1fr]
+                gap-3
+              "
+            >
+
+              {/* BRAND */}
+
+              <div>
+
+                <div className="mb-5">
+
+                  <img
+                    src={ecellLogo}
+                    alt="E-Cell DMCE"
+                    className="w-32 sm:w-40 h-auto object-contain"
+                  />
+
+                </div>
+
+                <p className="text-base text-neutral-400 leading-relaxed max-w-[240px]">
+                  📍 Location: Datta Meghe
+                  <br />
+                  College of Engineering, Navi
+                  <br />
+                  Mumbai
+                </p>
+
+              </div>
+
+
+              {/* QUICK LINKS */}
+
+              <div>
+
+                <h3 className="text-base font-bold mb-4">
+                  Quick Links
+                </h3>
+
+                <div className="space-y-1 text-sm sm:text-base text-neutral-400">
+
+                  <p>Home</p>
+                  <p>About us</p>
+                  <p>Event</p>
+                  <p>Gallery</p>
+                  <p>Team</p>
+                  <p>Contact</p>
+
+                </div>
+
+              </div>
+
+
+              {/* RESOURCES + LEGAL */}
+
+              <div className="grid grid-cols-2 gap-4">
+
+                <div>
+
+                  <h3 className="text-base font-bold mb-4">
+                    Resources
+                  </h3>
+
+                  <div className="space-y-1 text-sm sm:text-base text-neutral-400">
+
+                    <p>FAQs</p>
+                    <p>Register</p>
+                    <p>Volunteer</p>
+
+                  </div>
+
+                </div>
+
+
+                <div>
+
+                  <h3 className="text-base font-bold mb-4">
+                    Legal
+                  </h3>
+
+                  <div className="space-y-1 text-sm sm:text-base text-neutral-400">
+
+                    <p>Privacy Policy</p>
+                    <p>Terms & Conditions</p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {/* CONTACT */}
+
+              <div>
+
+                <h3 className="text-base font-bold mb-4">
+                  Contact Us
+                </h3>
+
+                <div className="space-y-3 text-sm text-neutral-400">
+
+                  <p className="flex items-center gap-3">
+                    <FontAwesomeIcon
+                      icon={faEnvelope}
+                      className="w-5 h-5 text-white"
+                    />
+                    <span>Ecell.dmce.14@gmail.com</span>
+                  </p>
+
+                  <p className="flex items-center gap-3">
+                    <FontAwesomeIcon
+                      icon={faInstagram}
+                      className="w-5 h-5 text-white"
+                    />
+                    <span>Ecell_dmce</span>
+                  </p>
+
+                  <p className="flex items-center gap-3">
+                    <FontAwesomeIcon
+                      icon={faLinkedinIn}
+                      className="w-5 h-5 text-white"
+                    />
+                    <span>Ecell_DMCE</span>
+                  </p>
+
+                  <p className="flex items-center gap-3">
+                    <FontAwesomeIcon
+                      icon={faFacebookF}
+                      className="w-5 h-5 text-white"
+                    />
+                    <span>Ecell_DMCE</span>
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* COPYRIGHT */}
+
+          <div className="border-t border-white/10">
+
+            <p className="text-center text-sm sm:text-base text-neutral-400 py-4">
+              © 2025 ECELL | E-CELL DMCE. All Rights Reserved.
+            </p>
+
+          </div>
+
+        </div>
+
+      </footer>
 
     </div>
   );
