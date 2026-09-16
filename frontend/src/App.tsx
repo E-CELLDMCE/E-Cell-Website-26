@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import SmoothScroll from './components/common/SmoothScroll';
@@ -22,14 +22,6 @@ import EventEditorPage from './pages/admin/EventEditorPage';
 import ApprovalsPage from './pages/admin/ApprovalsPage';
 import GateScannerPage from './pages/admin/GateScannerPage';
 import UserManagePage from './pages/admin/UserManagePage';
-
-const ConditionalFooter: React.FC = () => {
-  const location = useLocation();
-
-  return location.pathname === '/team'
-    ? null
-    : <Footer />;
-};
 
 export const App = () => {
   return (
@@ -66,7 +58,7 @@ export const App = () => {
                 </Routes>
               </main>
 
-              <ConditionalFooter />
+              <Footer />
             </div>
           </SmoothScroll>
         </AuthProvider>
