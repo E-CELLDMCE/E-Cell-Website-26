@@ -1,0 +1,381 @@
+import React from "react";
+import ecellLogo from "../assets/ecell-logo.png";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+} from "@fortawesome/free-solid-svg-icons";
+
+import {
+  faInstagram,
+  faLinkedinIn,
+  faFacebookF,
+} from "@fortawesome/free-brands-svg-icons";
+
+const AboutUs = () => {
+  return (
+    <div className="about-us-page min-h-screen bg-black text-white overflow-hidden">
+
+
+      {/* ================= MAIN PAGE ================= */}
+      <main className="relative bg-black overflow-hidden pt-28">
+
+        {/* Background Glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(
+                ellipse 75% 35% at 0% 8%,
+                rgba(150, 0, 15, 0.75),
+                transparent 70%
+              ),
+              radial-gradient(
+                ellipse 70% 40% at 100% 75%,
+                rgba(150, 0, 15, 0.65),
+                transparent 70%
+              ),
+              linear-gradient(
+                135deg,
+                #160004 0%,
+                #080002 35%,
+                #000000 55%,
+                #080002 75%,
+                #180004 100%
+              )
+            `,
+          }}
+        />
+
+
+        <div className="relative z-10">
+
+
+          {/* ================================================= */}
+          {/* ORIGIN OF E-CELL */}
+          {/* ================================================= */}
+
+          <section className="mx-auto w-full max-w-[1200px] px-4 pt-12 sm:px-6 lg:px-10">
+
+  <div
+    className="
+    max-w-6xl mx-auto
+      relative
+      bg-gradient-to-br
+      from-[#a90000]
+      via-[#520000]
+      to-[#180000]
+      px-5
+      pb-8
+      pt-10
+      sm:px-8
+      lg:px-12
+    "
+  >
+
+    <div className="relative z-10 flex flex-col items-center gap-8 lg:flex-row lg:gap-12">
+
+      {/* PHOTO */}
+      <div className="-mt-14 h-[260px] w-full max-w-[480px] shrink-0 bg-[#292929] sm:h-[290px]">
+        {/* Actual Origin of E-Cell image goes here */}
+      </div>
+
+      {/* TITLE */}
+      <h2 className="text-xl sm:text-2xl md:text-4xl font-extrabold uppercase tracking-wide text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] mb-7">
+        ORIGIN OF E-CELL
+      </h2>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+
+          {/* ================================================= */}
+          {/* MISSION STATEMENT */}
+          {/* ================================================= */}
+
+          <section className="px-6 py-10 sm:py-12">
+
+            <div className="max-w-3xl mx-auto text-center">
+
+              <p
+                className="
+                  text-white
+                  text-sm
+                  sm:text-base
+                  md:text-xl
+                  font-semibold
+                  tracking-[0.09em]
+                  leading-relaxed
+                "
+              >
+                To empower students to transform entrepreneurial
+                ideas into impactful ventures by cultivating a
+                culture of innovation, execution, and continuous
+                learning.
+              </p>
+
+            </div>
+
+          </section>
+
+
+
+          {/* ================================================= */}
+          {/* OUR REACH */}
+          {/* ================================================= */}
+
+          <section className="px-4 sm:px-8">
+
+            <div 
+  className=" 
+    max-w-6xl
+    mx-auto 
+    bg-gradient-to-b
+from-[#120000]
+via-[#4a0003]
+to-[#8f0007]
+    px-6 
+    py-7 
+    sm:py-9 
+    min-h-[310px]
+    sm:min-h-[350px]
+  " 
+>
+
+              <h2 
+  className=" 
+    text-center 
+    text-xl 
+    sm:text-2xl 
+    md:text-3xl 
+    font-black 
+    text-yellow-400 
+    drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)]
+    uppercase 
+    mb-15 
+  " 
+>
+  OUR REACH
+</h2>
+
+
+              <div className="grid grid-cols-3 gap-1 sm:gap-8">
+
+  {/* Facebook */}
+  <div className="flex min-w-0 flex-col items-center text-center">
+
+    <FontAwesomeIcon
+      icon={faFacebookF}
+      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
+    />
+
+    <div className="flex items-center justify-center whitespace-nowrap">
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold px-1">
+        .
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold ml-1">
+        K+
+      </span>
+
+    </div>
+
+    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
+      followers
+    </p>
+
+  </div>
+
+
+  {/* Instagram */}
+  <div className="flex min-w-0 flex-col items-center text-center">
+
+    <FontAwesomeIcon
+      icon={faInstagram}
+      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
+    />
+
+    <div className="flex items-center justify-center whitespace-nowrap">
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold px-1">
+        .
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="text-white text-base sm:text-xl font-bold ml-1">
+        K+
+      </span>
+
+    </div>
+
+    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
+      followers
+    </p>
+
+  </div>
+
+
+  {/* LinkedIn */}
+  <div className="flex min-w-0 flex-col items-center text-center">
+
+    <FontAwesomeIcon
+      icon={faLinkedinIn}
+      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
+    />
+
+    <div className="flex items-center justify-center whitespace-nowrap">
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-l-md bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center border-l border-red-900 bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-r-md border-l border-red-900 bg-[#650005] text-white text-base sm:text-xl font-bold">
+        0
+      </span>
+
+    </div>
+
+    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
+      followers
+    </p>
+
+  </div>
+
+</div>
+
+            </div>
+
+          </section>
+
+
+
+          {/* ================================================= */}
+          {/* 2014 HISTORY */}
+          {/* ================================================= */}
+
+          <section className="px-5 sm:px-8 py-12 sm:py-16">
+
+            <div className="max-w-xl mx-auto relative">
+
+              {/* Decorative glow */}
+              <div
+                className="
+                  absolute
+                  inset-0
+                  rounded-[55px]
+                  bg-red-700/20
+                  blur-3xl
+                  pointer-events-none
+                "
+              ></div>
+
+
+              <div
+  className="
+    relative
+    overflow-hidden
+    rounded-[50px]
+    bg-white/5
+    backdrop-blur-md
+    border border-white/10
+  "
+>
+
+                {/* PHOTO PLACEHOLDER */}
+
+                <div
+  className="
+    relative
+    w-full
+    aspect-[1.8/1]
+    rounded-[50px]
+    bg-neutral-700
+    overflow-hidden
+    flex
+    items-center
+    justify-center
+  "
+>
+
+                  {/* Photo will be added here later */}
+
+                  <span
+                    className="
+                      absolute
+                      inset-0
+                      flex
+                      items-center
+                      justify-center
+                      text-6xl
+                      sm:text-7xl
+                      md:text-8xl
+                      font-['Times_New_Roman']
+                      text-white
+                    "
+                  >
+                    2014
+                  </span>
+
+                </div>
+
+
+                {/* HISTORY TEXT */}
+
+                <div className="text-center pt-7 pb-11 sm:pt-9 sm:pb-13">
+
+                  <p
+                  className="
+                  text-white
+                  text-xl
+                  sm:text-2xl
+                  md:text-3xl
+                  font-['Times_New_Roman']
+                  leading-relaxed
+  "
+>
+                    Founded in August 2014
+                    <br />
+                    by Ankit Jaiswal.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </main>
+
+    </div>
+  );
+};
+
+export default AboutUs;
