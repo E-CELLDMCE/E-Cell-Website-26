@@ -1,5 +1,6 @@
 import React from "react";
 import ecellLogo from "../assets/ecell-logo.png";
+import { useEffect, useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,7 +13,59 @@ import {
   faFacebookF,
 } from "@fortawesome/free-brands-svg-icons";
 
+const timelineData = [
+  {
+    year: "2014",
+    description: "Founded in 2014 by Ankit Jaiswal",
+  },
+  {
+    year: "2015",
+    description: "First ENSPIRE held on 24 January 2015",
+  },
+  {
+    year: "2016",
+    description: "First ENSPIRE held on 6 February 2016.",
+  },
+  {
+    year: "2017",
+    description: "Participated in the National Entrepreneurship Challenge.",
+  },
+  {
+    year: "2018",
+    description: "Won the basic track for NEC.",
+  },
+  {
+    year: "2019",
+    description: "ENSPIRE 2019 featured Entrepreneurship sessions.",
+  },
+  {
+    year: "2020",
+    description: "New leadership team took E-CELL forward.",
+  },
+  {
+    year: "2021",
+    description: "Hosted Hussle Behind the Curtains and What If...?",
+  },
+  {
+    year: "2022",
+    description: "Continued entrepreneurship activities and initiatives.",
+  },
+  {
+    year: "2023",
+    description: "Expanded E-CELL's didgital presence and activities.",
+  },
+  {
+    year: "2024",
+    description: "Secured 5th in the State Challenge and Top 20 in India at NEC.",
+  },
+  {
+    year: "2025",
+    description: "ENSPIRE 2025 featured speakers, competitions, and innovation.",
+  },
+];
+
 const AboutUs = () => {
+
   return (
     <div className="about-us-page min-h-screen bg-black text-white overflow-hidden">
 
@@ -273,102 +326,78 @@ to-[#8f0007]
 
 
 
-          {/* ================================================= */}
-          {/* 2014 HISTORY */}
-          {/* ================================================= */}
+{/* ================================================= */}
+{/* HISTORY */}
+{/* ================================================= */}
 
-          <section className="px-5 sm:px-8 py-12 sm:py-16">
+<section className="px-5 sm:px-8 pt-12 pb-0 sm:pt-12 sm:pb-0 overflow-hidden">
+  <div className="w-full relative">
 
-            <div className="max-w-xl mx-auto relative">
+    {/* Red glow */}
+    <div className="absolute inset-0 rounded-[55px] bg-red-700/20 blur-3xl pointer-events-none"></div>
 
-              {/* Decorative glow */}
-              <div
-                className="
-                  absolute
-                  inset-0
-                  rounded-[55px]
-                  bg-red-700/20
-                  blur-3xl
-                  pointer-events-none
-                "
-              ></div>
+    {/* Carousel viewport */}
+    <div className="relative overflow-hidden">
 
+      {/* Continuously moving track */}
+      <div className="history-carousel-track flex gap-12 sm:gap-16 lg:gap-20">
 
-              <div
-  className="
-    relative
-    overflow-hidden
-    rounded-[50px]
-    bg-white/5
-    backdrop-blur-md
-    border border-white/10
-  "
->
+        {/* First copy */}
+        {timelineData.map((item, index) => (
+          <div
+            key={`first-${item.year}-${index}`}
+            className="w-[calc(100vw-40px)] max-w-xl shrink-0"
+          >
+            <div className="relative overflow-hidden rounded-[50px] bg-white/5 backdrop-blur-md border border-white/10">
 
-                {/* PHOTO PLACEHOLDER */}
+              <div className="relative w-full h-[340px] rounded-[50px] bg-neutral-700 overflow-hidden flex items-center justify-center">
+                <span className="absolute inset-0 flex items-center justify-center text-6xl sm:text-7xl md:text-8xl font-['Times_New_Roman'] text-white">
+                  {item.year}
+                </span>
+              </div>
 
-                <div
-  className="
-    relative
-    w-full
-    aspect-[1.8/1]
-    rounded-[50px]
-    bg-neutral-700
-    overflow-hidden
-    flex
-    items-center
-    justify-center
-  "
->
-
-                  {/* Photo will be added here later */}
-
-                  <span
-                    className="
-                      absolute
-                      inset-0
-                      flex
-                      items-center
-                      justify-center
-                      text-6xl
-                      sm:text-7xl
-                      md:text-8xl
-                      font-['Times_New_Roman']
-                      text-white
-                    "
-                  >
-                    2014
-                  </span>
-
-                </div>
-
-
-                {/* HISTORY TEXT */}
-
-                <div className="text-center pt-7 pb-11 sm:pt-9 sm:pb-13">
-
-                  <p
-                  className="
-                  text-white
-                  text-xl
-                  sm:text-2xl
-                  md:text-3xl
-                  font-['Times_New_Roman']
-                  leading-relaxed
-  "
->
-                    Founded in August 2014
-                    <br />
-                    by Ankit Jaiswal.
-                  </p>
-
-                </div>
-
+              <div className="text-center pt-7 pb-11 sm:pt-9 sm:pb-13 min-h-[220px]">
+                <p className="text-white text-xl sm:text-2xl md:text-3xl font-['Times_New_Roman'] leading-relaxed">
+                  {item.description}
+                </p>
               </div>
 
             </div>
+          </div>
+        ))}
 
-          </section>
+        {/* Second identical copy for seamless looping */}
+        {timelineData.map((item, index) => (
+          <div
+  key={`second-${item.year}-${index}`}
+  className="history-card w-[calc(100vw-40px)] max-w-xl shrink-0"
+>
+            <div className="relative h-[700px] sm:h-[760px] md:h-[800px] overflow-hidden rounded-[50px] bg-white/5 backdrop-blur-md border border-white/10">
+
+  {/* Year / Image */}
+  <div className="relative w-full h-[390px] sm:h-[430px] md:h-[450px] rounded-[50px] bg-neutral-700 overflow-hidden flex items-center justify-center">
+
+    <span className="absolute inset-0 flex items-center justify-center text-6xl sm:text-7xl md:text-8xl font-['Times_New_Roman'] text-white">
+      {item.year}
+    </span>
+
+  </div>
+
+  {/* Description */}
+ <div className="min-h-[300px] flex items-center justify-center text-center px-8 sm:px-10 md:px-12 py-10">
+  <p className="text-white text-xl sm:text-2xl md:text-3xl font-['Times_New_Roman'] leading-relaxed">
+    {item.description}
+  </p>
+</div>
+
+</div>
+          </div>
+        ))}
+
+      </div>
+    </div>
+  </div>
+</section>
 
         </div>
 

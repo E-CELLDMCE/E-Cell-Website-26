@@ -117,3 +117,28 @@ body {
 * {
   border-color: rgba(255, 255, 255, 0.08);
 }
+
+@keyframes history-carousel {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 2rem));
+  }
+}
+
+.history-carousel-track {
+  width: max-content;
+  animation: history-carousel 90s linear infinite;
+}
+
+.history-carousel-track:has(.history-card:hover) {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-carousel-track {
+    animation: none;
+  }
+}
