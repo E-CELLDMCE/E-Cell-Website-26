@@ -1,459 +1,166 @@
 import React from "react";
+import ecellLogo from "../../assets/ecell-logo.png";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+
+import {
+  faInstagram,
+  faLinkedinIn,
+  faFacebookF,
+} from "@fortawesome/free-brands-svg-icons";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="relative z-10 w-full bg-black text-white font-['Montserrat']">
-
-      {/* =====================================================
-          MAIN FOOTER
-          ===================================================== */}
+    <footer className="relative bg-black text-white overflow-hidden">
+      {/* Background glow */}
       <div
-        className="
-          w-full
-          bg-black
-          px-8
-          sm:px-12
-          md:px-16
-          lg:px-20
-          py-10
-          sm:py-12
-        "
-      >
-        <div
-          className="
-            max-w-[1200px]
-            mx-auto
-            grid
-            grid-cols-1
-            sm:grid-cols-2
-            lg:grid-cols-4
-            gap-10
-            lg:gap-16
-          "
-        >
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(
+              ellipse 65% 80% at 100% 100%,
+              rgba(160, 0, 15, 0.85) 0%,
+              rgba(100, 0, 10, 0.55) 30%,
+              rgba(40, 0, 5, 0.25) 55%,
+              transparent 75%
+            ),
+            radial-gradient(
+              ellipse 55% 55% at 0% 80%,
+              rgba(70, 0, 10, 0.35),
+              transparent 70%
+            )
+          `,
+        }}
+      />
 
-          {/* =================================================
-              COLUMN 1 — LOGO + LOCATION
-              ================================================= */}
-          <div>
-            <img
-              src="/img_vid/ecell-logo.png"
-              alt="E-CELL DMCE"
-              className="
-                w-[105px]
-                sm:w-[115px]
-                h-auto
-                object-contain
-              "
-            />
+      <div className="relative z-10">
+        {/* Main footer content */}
+        <div className="max-w-6xl mx-auto px-8 pt-14 pb-8">
+          <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.65fr_1.3fr_1fr] gap-3">
 
-            {/* Location */}
-            <div className="flex items-start gap-2 mt-6">
+            {/* Brand + Location */}
+            <div>
+              <div className="mb-5">
+                <img
+                  src={ecellLogo}
+                  alt="E-Cell DMCE"
+                  className="w-32 sm:w-40 h-auto object-contain"
+                />
+              </div>
 
-              <span
-                className="
-                  text-red-500
-                  text-sm
-                  leading-none
-                  mt-[2px]
-                "
-              >
-                📍
-              </span>
-
-              <p
-                className="
-                  text-white/70
-                  text-[12px]
-                  sm:text-[13px]
-                  leading-[1.5]
-                  font-normal
-                "
-              >
-                Location: Datta Meghe
+              <p className="text-base text-neutral-400 leading-relaxed max-w-[240px]">
+                📍 Location: Datta Meghe
                 <br />
                 College of Engineering, Navi
                 <br />
                 Mumbai
               </p>
-
             </div>
-          </div>
 
-
-          {/* =================================================
-              COLUMN 2 — QUICK LINKS
-              ================================================= */}
-          <div>
-
-            <h3
-              className="
-                text-white
-                text-sm
-                font-semibold
-                mb-4
-              "
-            >
-              Quick Links
-            </h3>
-
-            <div className="flex flex-col gap-[5px]">
-
-              <a
-                href="#"
-                className="
-                  text-white/70
-                  text-[12px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                Home
-              </a>
-
-              <a
-                href="#"
-                className="
-                  text-white/70
-                  text-[12px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                About us
-              </a>
-
-              <a
-                href="#"
-                className="
-                  text-white/70
-                  text-[12px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                Event
-              </a>
-
-              <a
-                href="#"
-                className="
-                  text-white/70
-                  text-[12px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                Gallery
-              </a>
-
-              <a
-                href="#"
-                className="
-                  text-white/70
-                  text-[12px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                Team
-              </a>
-
-              <a
-                href="#"
-                className="
-                  text-white/70
-                  text-[12px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                Contact
-              </a>
-
-            </div>
-          </div>
-
-
-          {/* =================================================
-              COLUMN 3 — RESOURCES + LEGAL
-              ================================================= */}
-          <div className="grid grid-cols-2 gap-8">
-
-            {/* RESOURCES */}
+            {/* Quick Links */}
             <div>
-
-              <h3
-                className="
-                  text-white
-                  text-sm
-                  font-semibold
-                  mb-4
-                "
-              >
-                Resources
+              <h3 className="text-base font-bold mb-4 font-[Poppins]">
+                Quick Links
               </h3>
 
-              <div className="flex flex-col gap-[5px]">
+              <div className="space-y-1 text-sm sm:text-base text-neutral-400">
+                <p>Home</p>
+                <p>About us</p>
+                <p>Event</p>
+                <p>Gallery</p>
+                <p>Team</p>
+                <p>Contact</p>
+              </div>
+            </div>
 
-                <a
-                  href="#"
-                  className="
-                    text-white/70
-                    text-[12px]
-                    hover:text-white
-                    transition-colors
-                  "
-                >
-                  FAQs
-                </a>
+            {/* Resources + Legal */}
+            <div className="grid grid-cols-2 gap-4">
 
-                <a
-                  href="#"
-                  className="
-                    text-white/70
-                    text-[12px]
-                    hover:text-white
-                    transition-colors
-                  "
-                >
-                  Register
-                </a>
+              {/* Resources */}
+              <div>
+                <h3 className="text-base font-bold mb-4 font-[Poppins]">
+                  Resources
+                </h3>
 
-                <a
-                  href="#"
-                  className="
-                    text-white/70
-                    text-[12px]
-                    hover:text-white
-                    transition-colors
-                  "
-                >
-                  Volunteer
-                </a>
+                <div className="space-y-1 text-sm sm:text-base text-neutral-400">
+                  <p>FAQs</p>
+                  <p>Register</p>
+                  <p>Volunteer</p>
+                </div>
+              </div>
 
+              {/* Legal */}
+              <div>
+                <h3 className="text-base font-bold mb-4 font-[Poppins]">
+                  Legal
+                </h3>
+
+                <div className="space-y-1 text-sm sm:text-base text-neutral-400">
+                  <p>Privacy Policy</p>
+                  <p>Terms & Conditions</p>
+                </div>
               </div>
 
             </div>
 
-
-            {/* LEGAL */}
+            {/* Contact Us */}
             <div>
-
-              <h3
-                className="
-                  text-white
-                  text-sm
-                  font-semibold
-                  mb-4
-                "
-              >
-                Legal
+              <h3 className="text-base font-bold mb-4 font-[Poppins]">
+                Contact Us
               </h3>
 
-              <div className="flex flex-col gap-[5px]">
+              <div className="space-y-3 text-sm text-neutral-400">
 
-                <a
-                  href="#"
-                  className="
-                    text-white/70
-                    text-[12px]
-                    hover:text-white
-                    transition-colors
-                  "
-                >
-                  Privacy Policy
-                </a>
+                {/* Email */}
+                <p className="flex items-center gap-3">
+                  <FontAwesomeIcon
+                    icon={faEnvelope}
+                    className="w-5 h-5 text-white"
+                  />
+                  <span>Ecell.dmce.14@gmail.com</span>
+                </p>
 
-                <a
-                  href="#"
-                  className="
-                    text-white/70
-                    text-[12px]
-                    hover:text-white
-                    transition-colors
-                  "
-                >
-                  Terms &amp; Conditions
-                </a>
+                {/* Instagram */}
+                <p className="flex items-center gap-3">
+                  <FontAwesomeIcon
+                    icon={faInstagram}
+                    className="w-5 h-5 text-white"
+                  />
+                  <span>Ecell_dmce</span>
+                </p>
+
+                {/* LinkedIn */}
+                <p className="flex items-center gap-3">
+                  <FontAwesomeIcon
+                    icon={faLinkedinIn}
+                    className="w-5 h-5 text-white"
+                  />
+                  <span>Ecell_DMCE</span>
+                </p>
+
+                {/* Facebook */}
+                <p className="flex items-center gap-3">
+                  <FontAwesomeIcon
+                    icon={faFacebookF}
+                    className="w-5 h-5 text-white"
+                  />
+                  <span>Ecell_DMCE</span>
+                </p>
 
               </div>
-
             </div>
 
           </div>
+        </div>
 
-
-          {/* =================================================
-              COLUMN 4 — CONTACT US
-              ================================================= */}
-          <div>
-
-            <h3
-              className="
-                text-white
-                text-sm
-                font-semibold
-                mb-4
-              "
-            >
-              Contact Us
-            </h3>
-
-            <div className="flex flex-col gap-3">
-
-              {/* EMAIL */}
-              <a
-                href="mailto:ecell.dmce.14@gmail.com"
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  text-white/70
-                  text-[11px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  className="w-4 h-4 shrink-0"
-                >
-                  <rect
-                    x="3"
-                    y="5"
-                    width="18"
-                    height="14"
-                    rx="2"
-                  />
-                  <path d="m3 7 9 6 9-6" />
-                </svg>
-
-                <span>
-                  Ecell.dmce.14@gmail.com
-                </span>
-              </a>
-
-
-              {/* INSTAGRAM */}
-              <a
-                href="#"
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  text-white/70
-                  text-[11px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  className="w-4 h-4 shrink-0"
-                >
-                  <rect
-                    x="3"
-                    y="3"
-                    width="18"
-                    height="18"
-                    rx="5"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="4"
-                  />
-                  <circle
-                    cx="17.5"
-                    cy="6.5"
-                    r="1"
-                    fill="currentColor"
-                    stroke="none"
-                  />
-                </svg>
-
-                <span>
-                  ecell_dmce
-                </span>
-              </a>
-
-
-              {/* LINKEDIN */}
-              <a
-                href="#"
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  text-white/70
-                  text-[11px]
-                  hover:text-white
-                  transition-colors
-                "
-              >
-                <span
-                  className="
-                    w-4
-                    h-4
-                    flex
-                    items-center
-                    justify-center
-                    font-bold
-                    text-[13px]
-                    shrink-0
-                  "
-                >
-                  in
-                </span>
-
-                <span>
-                  Ecell_DMCE
-                </span>
-              </a>
-
-            </div>
-
-          </div>
-
+        {/* Copyright */}
+        <div className="border-t border-white/10">
+          <p className="text-center text-sm sm:text-base text-neutral-400 py-4">
+            © 2025 ECELL | E-CELL DMCE. All Rights Reserved.
+          </p>
         </div>
       </div>
-
-
-      {/* =====================================================
-          COPYRIGHT BAR
-          ===================================================== */}
-      <div
-        className="
-          w-full
-          bg-black
-          border-t
-          border-white/60
-          py-5
-          px-5
-          text-center
-        "
-      >
-        <p
-          className="
-            text-white/60
-            text-[11px]
-            sm:text-xs
-            font-normal
-          "
-        >
-          © 2026 ECELL | E-CELL DMCE. All Rights Reserved.
-        </p>
-      </div>
-
     </footer>
   );
 };

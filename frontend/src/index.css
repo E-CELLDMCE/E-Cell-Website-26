@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montagu+Slab:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
@@ -22,6 +23,19 @@ body {
   h6 {
     font-family: 'Space Grotesk', sans-serif;
   }
+}
+
+.about-us-page {
+  font-family: 'Poppins', sans-serif;
+}
+
+.about-us-page h1,
+.about-us-page h2,
+.about-us-page h3,
+.about-us-page h4,
+.about-us-page h5,
+.about-us-page h6 {
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Font Utility Classes */
@@ -102,4 +116,29 @@ body {
 /* Smooth default borders */
 * {
   border-color: rgba(255, 255, 255, 0.08);
+}
+
+@keyframes history-carousel {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 2rem));
+  }
+}
+
+.history-carousel-track {
+  width: max-content;
+  animation: history-carousel 90s linear infinite;
+}
+
+.history-carousel-track:has(.history-card:hover) {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-carousel-track {
+    animation: none;
+  }
 }
