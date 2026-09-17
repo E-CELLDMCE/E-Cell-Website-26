@@ -181,7 +181,7 @@ const AboutUs = () => {
           {/* OUR REACH */}
           {/* ================================================= */}
 
-          <section className="px-4 sm:px-8">
+          <section className="mt-30 px-14 sm:px-20">
 
             <div 
   className=" 
@@ -356,7 +356,7 @@ to-[#8f0007]
                 </span>
               </div>
 
-              <div className="text-center pt-7 pb-11 sm:pt-9 sm:pb-13 min-h-[220px]">
+              <div className="text-center pt-20 pb-11 sm:pt-9 sm:pb-13 min-h-[240px]">
                 <p className="text-white text-xl sm:text-2xl md:text-3xl font-['Times_New_Roman'] leading-relaxed">
                   {item.description}
                 </p>
@@ -384,7 +384,7 @@ to-[#8f0007]
   </div>
 
   {/* Description */}
- <div className="min-h-[300px] flex items-center justify-center text-center px-8 sm:px-10 md:px-12 py-10">
+ <div className="min-h-[300px] flex items-center justify-center text-center px-8 sm:px-10 md:px-12 pt-16 pb-10">
   <p className="text-white text-xl sm:text-2xl md:text-3xl font-['Times_New_Roman'] leading-relaxed">
     {item.description}
   </p>
