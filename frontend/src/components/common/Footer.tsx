@@ -1,5 +1,6 @@
 import React from "react";
-import ecellLogo from "../../assets/ecell-logo.png";
+import { Link } from "react-router-dom";
+import ecellLogo from "../../assets/ECELL LOGO.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
@@ -42,11 +43,13 @@ const Footer: React.FC = () => {
             {/* Brand + Location */}
             <div>
               <div className="mb-5">
-                <img
-                  src={ecellLogo}
-                  alt="E-Cell DMCE"
-                  className="w-32 sm:w-40 h-auto object-contain"
-                />
+                <Link to="/" className="inline-block cursor-pointer">
+                  <img
+                    src={ecellLogo}
+                    alt="E-Cell DMCE"
+                    className="w-32 sm:w-40 h-auto object-contain transition-transform duration-300 hover:scale-105"
+                  />
+                </Link>
               </div>
 
               <p className="text-base text-neutral-400 leading-relaxed max-w-[240px]">
@@ -60,17 +63,18 @@ const Footer: React.FC = () => {
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-base font-bold mb-4 font-[Poppins]">
+              <h3 className="text-base font-bold mb-4">
                 Quick Links
               </h3>
 
-              <div className="space-y-1 text-sm sm:text-base text-neutral-400">
-                <p>Home</p>
-                <p>About us</p>
-                <p>Event</p>
-                <p>Gallery</p>
-                <p>Team</p>
-                <p>Contact</p>
+              <div className="space-y-1.5 text-sm sm:text-base text-neutral-400">
+                <Link to="/" className="block hover:text-yellow-400 transition-colors cursor-pointer">Home</Link>
+                <Link to="/about-us" className="block hover:text-yellow-400 transition-colors cursor-pointer">About Us</Link>
+                <Link to="/events" className="block hover:text-yellow-400 transition-colors cursor-pointer">Events</Link>
+                <Link to="/gallery" className="block hover:text-yellow-400 transition-colors cursor-pointer">Gallery</Link>
+                <Link to="/team" className="block hover:text-yellow-400 transition-colors cursor-pointer">Team</Link>
+                <Link to="/initiatives" className="block hover:text-yellow-400 transition-colors cursor-pointer">Initiatives</Link>
+                <Link to="/blogs" className="block hover:text-yellow-400 transition-colors cursor-pointer">Blogs</Link>
               </div>
             </div>
 
@@ -79,26 +83,26 @@ const Footer: React.FC = () => {
 
               {/* Resources */}
               <div>
-                <h3 className="text-base font-bold mb-4 font-[Poppins]">
+                <h3 className="text-base font-bold mb-4">
                   Resources
                 </h3>
 
-                <div className="space-y-1 text-sm sm:text-base text-neutral-400">
-                  <p>FAQs</p>
-                  <p>Register</p>
-                  <p>Volunteer</p>
+                <div className="space-y-1.5 text-sm sm:text-base text-neutral-400">
+                  <Link to="/blogs" className="block hover:text-yellow-400 transition-colors cursor-pointer">FAQs</Link>
+                  <Link to="/login" className="block hover:text-yellow-400 transition-colors cursor-pointer">Register</Link>
+                  <Link to="/about-us" className="block hover:text-yellow-400 transition-colors cursor-pointer">Volunteer</Link>
                 </div>
               </div>
 
               {/* Legal */}
               <div>
-                <h3 className="text-base font-bold mb-4 font-[Poppins]">
+                <h3 className="text-base font-bold mb-4">
                   Legal
                 </h3>
 
-                <div className="space-y-1 text-sm sm:text-base text-neutral-400">
-                  <p>Privacy Policy</p>
-                  <p>Terms & Conditions</p>
+                <div className="space-y-1.5 text-sm sm:text-base text-neutral-400">
+                  <a href="#privacy" className="block hover:text-yellow-400 transition-colors cursor-pointer">Privacy Policy</a>
+                  <a href="#terms" className="block hover:text-yellow-400 transition-colors cursor-pointer">Terms & Conditions</a>
                 </div>
               </div>
 
@@ -106,47 +110,65 @@ const Footer: React.FC = () => {
 
             {/* Contact Us */}
             <div>
-              <h3 className="text-base font-bold mb-4 font-[Poppins]">
+              <h3 className="text-base font-bold mb-4">
                 Contact Us
               </h3>
 
               <div className="space-y-3 text-sm text-neutral-400">
 
                 {/* Email */}
-                <p className="flex items-center gap-3">
+                <a
+                  href="mailto:Ecell.dmce.14@gmail.com"
+                  className="flex items-center gap-3 hover:text-yellow-400 transition-colors cursor-pointer group"
+                >
                   <FontAwesomeIcon
                     icon={faEnvelope}
-                    className="w-5 h-5 text-white"
+                    className="w-5 h-5 text-white group-hover:text-yellow-400 transition-colors"
                   />
                   <span>Ecell.dmce.14@gmail.com</span>
-                </p>
+                </a>
 
                 {/* Instagram */}
-                <p className="flex items-center gap-3">
+                <a
+                  href="https://www.instagram.com/ecell_dmce/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:text-yellow-400 transition-colors cursor-pointer group"
+                >
                   <FontAwesomeIcon
                     icon={faInstagram}
-                    className="w-5 h-5 text-white"
+                    className="w-5 h-5 text-white group-hover:text-yellow-400 transition-colors"
                   />
                   <span>Ecell_dmce</span>
-                </p>
+                </a>
 
                 {/* LinkedIn */}
-                <p className="flex items-center gap-3">
+                <a
+                  href="https://www.linkedin.com/company/ecell-dmce/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:text-yellow-400 transition-colors cursor-pointer group"
+                >
                   <FontAwesomeIcon
                     icon={faLinkedinIn}
-                    className="w-5 h-5 text-white"
+                    className="w-5 h-5 text-white group-hover:text-yellow-400 transition-colors"
                   />
                   <span>Ecell_DMCE</span>
-                </p>
+                </a>
 
                 {/* Facebook */}
-                <p className="flex items-center gap-3">
+                <a
+                  href="https://www.facebook.com/ecelldmce/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 hover:text-yellow-400 transition-colors cursor-pointer group"
+                >
                   <FontAwesomeIcon
                     icon={faFacebookF}
-                    className="w-5 h-5 text-white"
+                    className="w-5 h-5 text-white group-hover:text-yellow-400 transition-colors"
                   />
                   <span>Ecell_DMCE</span>
-                </p>
+                </a>
 
               </div>
             </div>

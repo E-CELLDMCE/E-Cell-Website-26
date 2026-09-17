@@ -10,13 +10,13 @@ const Navbar: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState<boolean>(false);
 
   const navLinks: NavLink[] = [
-    { name: 'HOME', href: '#home', active: true },
-    { name: 'ABOUT US', href: '#about', active: false },
-    { name: 'EVENTS', href: '#events', active: false },
-    { name: 'GALLERY', href: '#gallery', active: false },
-    { name: 'TEAM', href: '#team', active: false },
-    { name: 'INITIATIVE', href: '#initiative', active: false },
-    { name: 'BLOGS', href: '#blogs', active: false },
+    { name: 'HOME', href: '/', active: true },
+    { name: 'ABOUT US', href: '/about-us', active: false },
+    { name: 'EVENTS', href: '/events', active: false },
+    { name: 'GALLERY', href: '/gallery', active: false },
+    { name: 'TEAM', href: '/team', active: false },
+    { name: 'INITIATIVE', href: '/initiatives', active: false },
+    { name: 'BLOGS', href: '/blogs', active: false },
   ];
 
   return (
@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
       <div className="w-[96%] max-w-[1400px] mx-auto bg-black/95 backdrop-blur-md rounded-full border border-neutral-800 px-5 sm:px-10 py-2.5 lg:py-3.5 flex items-center justify-between transition-all shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
         
         {/* ================= LEFT: LOGO ================= */}
-        <a href="#home" className="flex items-center space-x-2.5 lg:space-x-3 flex-shrink-0">
+        <a href="/" className="flex items-center space-x-2.5 lg:space-x-3 flex-shrink-0">
           <div className="flex flex-col justify-between w-5 h-4 lg:w-6 lg:h-5 py-0.5">
             <span className="block h-[2.5px] lg:h-[3px] w-full bg-white rounded-full"></span>
             <span className="block h-[2.5px] lg:h-[3px] w-full bg-yellow-400 rounded-full"></span>
