@@ -501,23 +501,26 @@ def export_event_registrations(
         bottom=Side(style="thin", color="CBD5E1"),
     )
 
-    headers = [
-        "Registration ID",
-        "Team Name",
-        "Leader Name",
-        "Leader Email",
-        "Leader Student ID",
-        "Member Name",
-        "Member Student ID",
-        "Member Email",
-        "Role",
-        "Registration Status",
-        "Amount Paid (INR)",
-        "Transaction ID",
-        "Ticket Used",
-        "Scanned At (UTC)",
-        "Registered At (UTC)",
-    ]
+    if event.is_team_event:
+        headers = [
+            "Registration ID",
+            "Team Name",
+            "Participant Name",
+            "Participant Email",
+            "Participant Student ID",
+            "Role (Leader or Member)",
+            "Registration Status",
+            "Amount Paid (INR)",
+        ]
+    else:
+        headers = [
+            "Registration ID",
+            "Participant Name",
+            "Participant Email",
+            "Participant Student ID",
+            "Registration Status",
+            "Amount Paid (INR)",
+        ]
     ws.append(headers)
 
     for col_idx in range(1, len(headers) + 1):
@@ -535,37 +538,36 @@ def export_event_registrations(
 
     row_idx = 2
     for reg in registrations:
-        leader_name = reg.leader.name if reg.leader else "N/A"
-        leader_email = reg.leader.email if reg.leader else "N/A"
-        leader_stdid = reg.leader.stdid if reg.leader else "N/A"
         team_name = reg.team_name or "Individual"
 
-        for member in reg.members:
-            student = member.student
-            m_name = student.name if student else "N/A"
-            m_stdid = student.stdid if student else "N/A"
-            m_email = student.email if student else "N/A"
-            m_role = "Leader" if member.is_leader else "Member"
-            scanned_str = member.scanned_at.strftime("%Y-%m-%d %H:%M:%S") if member.scanned_at else "No"
-            ticket_status = "Yes" if member.ticket_used else "No"
-            created_str = reg.created_at.strftime("%Y-%m-%d %H:%M:%S") if reg.created_at else ""
-
+        if event.is_team_event:
+            for member in reg.members:
+                student = member.student
+                row_data = [
+                    str(reg.id),
+                    team_name,
+                    student.name if student else "N/A",
+                    student.email if student else "N/A",
+                    student.stdid if student else "N/A",
+                    "Leader" if member.is_leader else "Member",
+                    reg.status,
+                    str(reg.amount_paid),
+                ]
+                ws.append(row_data)
+                for col_idx in range(1, len(row_data) + 1):
+                    cell = ws.cell(row=row_idx, column=col_idx)
+                    cell.border = cell_border
+                    cell.alignment = Alignment(vertical="center")
+                row_idx += 1
+        else:
+            student = reg.leader
             row_data = [
                 str(reg.id),
-                team_name,
-                leader_name,
-                leader_email,
-                leader_stdid,
-                m_name,
-                m_stdid,
-                m_email,
-                m_role,
+                student.name if student else "N/A",
+                student.email if student else "N/A",
+                student.stdid if student else "N/A",
                 reg.status,
                 str(reg.amount_paid),
-                reg.transaction_id or "N/A",
-                ticket_status,
-                scanned_str,
-                created_str,
             ]
             ws.append(row_data)
             for col_idx in range(1, len(row_data) + 1):
