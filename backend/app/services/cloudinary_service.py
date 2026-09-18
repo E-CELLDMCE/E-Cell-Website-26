@@ -1,6 +1,8 @@
 import logging
 import time
 from typing import Optional
+from urllib.parse import parse_qs, urlparse
+
 import cloudinary
 import cloudinary.uploader
 import cloudinary.utils
@@ -73,14 +75,50 @@ def generate_signed_url(
     return url
 
 
+def generate_poster_url(
+    public_id: str,
+    image_format: Optional[str] = None,
+) -> str:
+    ensure_cloudinary_configured()
+    url, _ = cloudinary.utils.cloudinary_url(
+        public_id,
+        type="authenticated",
+        sign_url=True,
+        secure=True,
+        format=image_format,
+    )
+    return url
+
+
+def refresh_poster_url(poster_url: Optional[str]) -> Optional[str]:
+    if not poster_url:
+        return poster_url
+
+    parsed_url = urlparse(poster_url)
+    if parsed_url.hostname != "api.cloudinary.com":
+        return poster_url
+
+    query = parse_qs(parsed_url.query)
+    public_id = query.get("public_id", [None])[0]
+    if not public_id:
+        return poster_url
+
+    try:
+        return generate_poster_url(public_id, query.get("format", [None])[0])
+    except Exception as exc:
+        logger.error(f"Failed to refresh Cloudinary poster URL: {exc}")
+        return poster_url
+
+
 async def _upload_authenticated_image(
     file: UploadFile,
     folder: str,
     expiry_minutes: int = 10,
+    permanent_url: bool = False,
 ) -> str:
     """
     Validates image file, ensures Cloudinary is configured, uploads with type='authenticated',
-    and returns a signed URL with a short expiration.
+    and returns a signed URL.
     """
     file_bytes = await file.read()
     if len(file_bytes) == 0:
@@ -110,6 +148,8 @@ async def _upload_authenticated_image(
         )
         public_id = upload_result.get("public_id")
         fmt = upload_result.get("format")
+        if permanent_url:
+            return generate_poster_url(public_id, fmt)
         return generate_signed_url(public_id, format=fmt, expiry_seconds=expiry_minutes * 60)
     except HTTPException:
         raise
@@ -128,7 +168,11 @@ async def upload_payment_screenshot(file: UploadFile) -> str:
 
 async def upload_poster_image(file: UploadFile) -> str:
     """Uploads event poster image to Cloudinary as type='authenticated' and returns signed URL."""
-    return await _upload_authenticated_image(file, folder="ecell/posters", expiry_minutes=10)
+    return await _upload_authenticated_image(
+        file,
+        folder="ecell/posters",
+        permanent_url=True,
+    )
 
 
 async def upload_payment_qr(file: UploadFile) -> str:

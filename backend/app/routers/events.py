@@ -7,9 +7,16 @@ from app.core.security import get_current_user, get_current_admin
 from app.database import get_db
 from app.models.event import Event
 from app.models.user import User
+from app.services.cloudinary_service import refresh_poster_url
 from app.schemas.event import EventCreate, EventUpdate, EventResponse
 
 router = APIRouter(prefix="/events", tags=["Events"])
+
+
+def serialize_event(event: Event) -> EventResponse:
+    response = EventResponse.model_validate(event)
+    response.poster_url = refresh_poster_url(response.poster_url)
+    return response
 
 
 @router.get("/", response_model=List[EventResponse])
@@ -18,7 +25,7 @@ def list_events(
 ):
     """List all available events."""
     events = db.query(Event).order_by(Event.created_at.desc()).all()
-    return [EventResponse.model_validate(e) for e in events]
+    return [serialize_event(e) for e in events]
 
 
 @router.get("/{event_id}", response_model=EventResponse)
@@ -33,7 +40,7 @@ def get_event(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Event not found",
         )
-    return EventResponse.model_validate(event)
+    return serialize_event(event)
 
 
 @router.post("/", response_model=EventResponse)
