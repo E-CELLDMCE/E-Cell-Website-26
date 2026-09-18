@@ -323,35 +323,83 @@ export const EventDetailPage: React.FC = () => {
           <div className="lg:col-span-7 space-y-8">
             
             {/* Poster Header */}
-            <div className="relative rounded-3xl overflow-hidden border border-neutral-800 bg-neutral-950 shadow-2xl">
+            <div className="relative w-full max-w-[450px] aspect-[2/3] mx-auto overflow-hidden rounded-2xl bg-neutral-900 border border-neutral-800 shadow-2xl flex items-center justify-center">
               {event.poster_url ? (
                 <img
                   src={event.poster_url}
                   alt={event.title}
-                  className="w-full h-72 sm:h-80 object-cover object-center"
+                  className="w-full h-full object-contain object-center bg-neutral-900"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/images/placeholder.png';
+                  }}
                 />
               ) : (
-                <div className="w-full h-64 p-8 bg-gradient-to-br from-[#380404] via-[#1c0202] to-black flex flex-col justify-between">
+                <div className="w-full h-full p-8 bg-gradient-to-br from-[#380404] via-[#1c0202] to-black flex flex-col justify-between select-none">
                   <span className="text-xs uppercase font-black tracking-widest text-yellow-400">
                     E-Cell DMCE
                   </span>
                   <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">
                     {event.title}
                   </h1>
+                  <div className="text-xs text-neutral-500 font-mono uppercase tracking-wider">
+                    Official E-Cell Conclave
+                  </div>
                 </div>
               )}
 
-              <div className="absolute top-4 right-4">
+              {/* Ambient top/bottom gradient scrim for badge contrast */}
+              <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/80 via-black/30 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
+
+              {/* Top-Left: E-CELL FLAGSHIP */}
+              <div className="absolute top-3.5 left-3.5 z-10 pointer-events-none">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-black/80 backdrop-blur-md text-red-400 border border-red-500/40 shadow-lg">
+                  <Sparkles className="w-3 h-3 text-red-400" />
+                  E-Cell Flagship
+                </span>
+              </div>
+
+              {/* Top-Right: Fee Tag */}
+              <div className="absolute top-3.5 right-3.5 z-10 pointer-events-none">
                 <span
-                  className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-xl ${
+                  className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-xl backdrop-blur-md ${
                     isFree
-                      ? 'bg-emerald-500 text-black'
-                      : 'bg-gradient-to-r from-red-600 to-red-800 text-white border border-red-500/50'
+                      ? 'bg-emerald-500 text-black font-extrabold'
+                      : 'bg-gradient-to-r from-red-600 to-rose-700 text-white border border-red-400/40 shadow-red-600/30'
                   }`}
                 >
                   {isFree ? 'Free Pass' : `₹${event.fee_amount}`}
                 </span>
               </div>
+
+              {/* Bottom-Left: Solo/Team Badge */}
+              <div className="absolute bottom-3.5 left-3.5 z-10 pointer-events-none">
+                <span className="inline-flex items-center gap-1.5 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-bold text-yellow-400 border border-yellow-400/40 shadow-lg">
+                  <Users className="w-3.5 h-3.5 text-yellow-400" />
+                  {event.is_team_event
+                    ? `Team of ${event.min_team_size} - ${event.max_team_size}`
+                    : 'Solo Entry'}
+                </span>
+              </div>
+
+              {/* Bottom-Right: Event Status */}
+              {event.status && (
+                <div className="absolute bottom-3.5 right-3.5 z-10 pointer-events-none">
+                  <span className="inline-flex items-center gap-1.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-300 border border-neutral-700/60 shadow-lg">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        event.status === 'upcoming'
+                          ? 'bg-amber-400'
+                          : event.status === 'ongoing'
+                          ? 'bg-emerald-400 animate-pulse'
+                          : 'bg-neutral-500'
+                      }`}
+                    />
+                    {event.status}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Title & Description */}
