@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import imageCompression from 'browser-image-compression';
 import { eventsApi, EventCreatePayload } from '../../api/events';
 import { adminApi } from '../../api/admin';
@@ -14,6 +15,7 @@ import {
   DollarSign,
   AlertCircle,
   Loader2,
+  Calendar,
 } from 'lucide-react';
 
 const formatMb = (bytes: number) => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
@@ -68,17 +70,17 @@ const ImageUploadField: React.FC<{
           accept="image/*"
           onChange={handleFileChange}
           disabled={isUploading}
-          className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-yellow-400 file:text-black file:font-bold file:text-xs file:uppercase file:cursor-pointer focus:outline-none focus:border-yellow-400 transition-colors disabled:opacity-60"
+          className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs sm:text-sm file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-red-600 file:to-rose-600 file:text-white file:font-bold file:text-xs file:uppercase file:cursor-pointer focus:outline-none focus:border-red-500/50 transition-all duration-300 disabled:opacity-60"
         />
         {isUploading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] text-neutral-400">
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-yellow-400" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-red-500" />
             Uploading...
           </div>
         )}
       </div>
       {compressionInfo && !error && (
-        <p className="text-[10px] text-neutral-500">{compressionInfo}</p>
+        <p className="text-[10px] text-neutral-400">{compressionInfo}</p>
       )}
       {error && (
         <p className="text-[10px] text-red-400 flex items-center gap-1">
@@ -87,23 +89,23 @@ const ImageUploadField: React.FC<{
         </p>
       )}
       {currentUrl && !error && (
-        <div className="mt-2 flex items-start gap-3 p-2 rounded-lg bg-neutral-900/60 border border-neutral-800">
+        <div className="mt-2 flex items-start gap-3 p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
           <img
             src={currentUrl}
             alt={`${label} preview`}
-            className="w-16 h-16 object-cover rounded-md border border-neutral-800"
+            className="w-14 h-14 object-cover rounded-lg border border-neutral-800 flex-shrink-0"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-green-400 font-bold uppercase">Uploaded</p>
-            <p className="text-[10px] text-neutral-500 truncate">{currentUrl}</p>
+            <p className="text-[10px] text-emerald-400 font-bold uppercase">Uploaded</p>
+            <p className="text-[10px] text-neutral-400 truncate">{currentUrl}</p>
           </div>
           <button
             type="button"
             onClick={onClear}
-            className="text-[10px] text-neutral-400 hover:text-red-400 font-bold uppercase"
+            className="text-[10px] text-neutral-400 hover:text-red-400 font-bold uppercase cursor-pointer"
           >
             Remove
           </button>
@@ -218,36 +220,43 @@ export const EventEditorPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="py-20 text-center">
+      <div className="p-20 text-center flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-6 h-6 animate-spin text-red-500" />
         <p className="text-sm font-bold text-neutral-400">Loading Event Configuration...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="max-w-4xl mx-auto space-y-6 sm:space-y-8"
+    >
       <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
         <div className="flex items-center gap-3">
           <Link
             to="/admin"
-            className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white"
+            className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-all active:scale-95 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h2 className="text-xl font-black text-white uppercase tracking-tight">
+            <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight">
               {isEditing ? 'Edit Event Details' : 'Create New Event'}
             </h2>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-neutral-400 mt-0.5">
               Configure parameters, registration limits, and pricing
             </p>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-8 rounded-3xl bg-neutral-950 border border-neutral-800 space-y-6 shadow-2xl">
-        
+      <form
+        onSubmit={handleSubmit}
+        className="p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 space-y-6 shadow-2xl"
+      >
         {/* Title */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
@@ -259,7 +268,7 @@ export const EventEditorPage: React.FC = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. E-Summit 2026: Pitch Tank"
-            className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors"
+            className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-red-500/50 transition-all duration-300"
           />
         </div>
 
@@ -274,15 +283,15 @@ export const EventEditorPage: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Provide competition format, eligibility, prizes, and schedule details..."
-            className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors"
+            className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-red-500/50 transition-all duration-300 resize-y"
           />
         </div>
 
         {/* Fee & Capacity Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-yellow-400" />
+              <DollarSign className="w-3.5 h-3.5 text-red-500" />
               Registration Fee (INR)
             </label>
             <input
@@ -292,14 +301,14 @@ export const EventEditorPage: React.FC = () => {
               value={feeAmount}
               onChange={(e) => setFeeAmount(Number(e.target.value))}
               placeholder="0 for Free"
-              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors"
+              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
             />
-            <p className="text-[10px] text-neutral-500">Set to 0 if event has free entry.</p>
+            <p className="text-[10px] text-neutral-400">Set to 0 if event has free entry.</p>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-yellow-400" />
+              <Users className="w-3.5 h-3.5 text-red-500" />
               Max Participant Capacity
             </label>
             <input
@@ -308,14 +317,14 @@ export const EventEditorPage: React.FC = () => {
               value={maxCapacity}
               onChange={(e) => setMaxCapacity(e.target.value)}
               placeholder="Unlimited if left empty"
-              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors"
+              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
             />
           </div>
         </div>
 
         {/* Team Event Toggles */}
-        <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-neutral-900/40 border border-neutral-800 space-y-4">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-white">
                 Team Competition Event
@@ -337,12 +346,12 @@ export const EventEditorPage: React.FC = () => {
                   setMaxTeamSize(4);
                 }
               }}
-              className="w-5 h-5 accent-yellow-400 rounded cursor-pointer"
+              className="w-5 h-5 accent-red-600 rounded cursor-pointer"
             />
           </div>
 
           {isTeamEvent && (
-            <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2 border-t border-neutral-800/60">
               <div>
                 <label className="text-[10px] uppercase font-bold text-neutral-400">
                   Minimum Team Size
@@ -352,7 +361,7 @@ export const EventEditorPage: React.FC = () => {
                   min="1"
                   value={minTeamSize}
                   onChange={(e) => setMinTeamSize(Number(e.target.value))}
-                  className="w-full mt-1 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-white text-xs"
+                  className="w-full mt-1 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none focus:border-red-500/50"
                 />
               </div>
               <div>
@@ -364,7 +373,7 @@ export const EventEditorPage: React.FC = () => {
                   min={minTeamSize}
                   value={maxTeamSize}
                   onChange={(e) => setMaxTeamSize(Number(e.target.value))}
-                  className="w-full mt-1 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-white text-xs"
+                  className="w-full mt-1 px-3 py-2 rounded-lg bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none focus:border-red-500/50"
                 />
               </div>
             </div>
@@ -372,39 +381,39 @@ export const EventEditorPage: React.FC = () => {
         </div>
 
         {/* Dates Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-yellow-400" />
+              <Calendar className="w-3.5 h-3.5 text-red-500" />
               Event Date & Time
             </label>
             <input
               type="datetime-local"
               value={eventDate}
               onChange={(e) => setEventDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none focus:border-yellow-400 transition-colors"
+              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs sm:text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
             />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-red-400" />
+              <Clock className="w-3.5 h-3.5 text-rose-400" />
               Registration Deadline
             </label>
             <input
               type="datetime-local"
               value={registrationDeadline}
               onChange={(e) => setRegistrationDeadline(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs focus:outline-none focus:border-yellow-400 transition-colors"
+              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs sm:text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
             />
           </div>
         </div>
 
         {/* URLs & Media Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <ImageUploadField
             label="Poster Image"
-            icon={<Image className="w-3.5 h-3.5 text-yellow-400" />}
+            icon={<Image className="w-3.5 h-3.5 text-red-500" />}
             currentUrl={posterUrl}
             onUploaded={(url) => setPosterUrl(url)}
             onClear={() => setPosterUrl('')}
@@ -413,7 +422,7 @@ export const EventEditorPage: React.FC = () => {
 
           <ImageUploadField
             label="Payment UPI QR Code"
-            icon={<QrCode className="w-3.5 h-3.5 text-yellow-400" />}
+            icon={<QrCode className="w-3.5 h-3.5 text-red-500" />}
             currentUrl={paymentQrUrl}
             onUploaded={(url) => setPaymentQrUrl(url)}
             onClear={() => setPaymentQrUrl('')}
@@ -429,7 +438,7 @@ export const EventEditorPage: React.FC = () => {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 transition-colors cursor-pointer"
+            className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-xs sm:text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300 cursor-pointer"
           >
             <option value="draft">Draft (Hidden from Public)</option>
             <option value="upcoming">Upcoming (Accepting Registrations)</option>
@@ -440,25 +449,23 @@ export const EventEditorPage: React.FC = () => {
         </div>
 
         {/* Submit */}
-        <div className="pt-4 border-t border-neutral-900 flex justify-end gap-3">
+        <div className="pt-4 border-t border-neutral-900 flex flex-col-reverse sm:flex-row justify-end gap-3">
           <Link
             to="/admin"
-            className="px-6 py-3 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white font-bold text-xs uppercase tracking-wider"
+            className="w-full sm:w-auto px-6 py-3 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white font-bold text-xs uppercase tracking-wider text-center transition-all active:scale-95 cursor-pointer"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSaving}
-            className="px-8 py-3 rounded-full bg-yellow-400 text-black font-black text-xs uppercase tracking-wider hover:bg-yellow-300 transition-all shadow-lg shadow-yellow-500/20 cursor-pointer"
+            className="w-full sm:w-auto px-8 py-3 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all duration-300 shadow-md shadow-red-950/50 hover:shadow-red-600/30 active:scale-95 cursor-pointer disabled:opacity-50"
           >
             {isSaving ? 'Saving...' : isEditing ? 'Save Changes' : 'Publish Event'}
           </button>
         </div>
-
       </form>
-
-    </div>
+    </motion.div>
   );
 };
 
