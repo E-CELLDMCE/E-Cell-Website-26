@@ -55,6 +55,8 @@ def get_pending_registrations(
     """
     registrations = (
         db.query(EventRegistration)
+        .join(Event, EventRegistration.event_id == Event.id)
+        .filter(Event.deleted_at.is_(None))
         .order_by(EventRegistration.created_at.desc())
         .all()
     )
@@ -475,7 +477,7 @@ def export_event_registrations(
     """
     Exports all registrations and student attendee details for an event as an Excel (.xlsx) file.
     """
-    event = db.query(Event).filter(Event.id == event_id).first()
+    event = db.query(Event).filter(Event.id == event_id, Event.deleted_at.is_(None)).first()
     if not event:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
