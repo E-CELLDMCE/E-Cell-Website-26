@@ -5,6 +5,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.event import Event
 from app.models.registration import EventRegistration, RegistrationMember
 from app.models.user import User
 from app.services.excel_service import create_excel
@@ -28,9 +29,14 @@ def get_approved_students(event_id: UUID, db: Session):
             EventRegistration,
             EventRegistration.id == RegistrationMember.registration_id,
         )
+        .join(
+            Event,
+            EventRegistration.event_id == Event.id,
+        )
         .filter(
             EventRegistration.event_id == event_id,
             EventRegistration.status == "approved",
+            Event.deleted_at.is_(None),
         )
         .all()
     )
