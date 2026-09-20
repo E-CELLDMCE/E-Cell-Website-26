@@ -5,236 +5,247 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 export const PortalHero: React.FC = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const whereRef = useRef<HTMLDivElement>(null);
+  const ideasRef = useRef<HTMLDivElement>(null);
+  const becomeRef = useRef<HTMLDivElement>(null);
+  const impactRef = useRef<HTMLDivElement>(null);
+
   const videoWrapperRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const dockedTargetRef = useRef<HTMLDivElement>(null);
-  const typoBgRef = useRef<HTMLDivElement>(null);
-  const leftTextRef = useRef<HTMLDivElement>(null);
-  const rightTextRef = useRef<HTMLDivElement>(null);
-  const centerTextRef = useRef<HTMLDivElement>(null);
-  const subTextRef = useRef<HTMLDivElement>(null);
-  const handLeftRef = useRef<HTMLDivElement>(null);
-  const handRightRef = useRef<HTMLDivElement>(null);
+  const videoVignetteRef = useRef<HTMLDivElement>(null);
+
+  const payoffRef = useRef<HTMLDivElement>(null);
+  const captionRef = useRef<HTMLDivElement>(null);
+  const metadataRightRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
-  const bottomBarRef = useRef<HTMLDivElement>(null);
-  
-  const textWrapperRef = useRef<HTMLDivElement>(null);
+  const metadataLeftRef = useRef<HTMLDivElement>(null);
+  const bridgeLineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) video.play();
-        else video.pause();
-      });
-    }, { threshold: 0.1 });
-    if (heroRef.current) observer.observe(heroRef.current);
-    return () => observer.disconnect();
+    // Force ScrollTrigger to recalculate on mount and resize
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener('resize', refresh);
+    return () => window.removeEventListener('resize', refresh);
   }, []);
 
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      const getDockedMetrics = () => {
-        if (!heroRef.current || !dockedTargetRef.current) {
-          const isMob = window.innerWidth < 768;
-          return {
-            width: isMob ? 230 : 440,
-            height: isMob ? 130 : 248,
-            left: isMob ? window.innerWidth - 246 : window.innerWidth - 488,
-            top: isMob ? window.innerHeight - 190 : window.innerHeight - 310,
-          };
-        }
-        const heroRect = heroRef.current.getBoundingClientRect();
-        const targetRect = dockedTargetRef.current.getBoundingClientRect();
-        return {
-          width: targetRect.width,
-          height: targetRect.height,
-          left: targetRect.left - heroRect.left,
-          top: targetRect.top - heroRect.top,
-        };
-      };
+    let ctx = gsap.context(() => {
+      let mm = gsap.matchMedia();
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: '+=220%',
-          pin: true,
-          scrub: 1.5,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
+      mm.add("(min-width: 768px)", () => {
+        // Desktop Setup
+        gsap.set(videoWrapperRef.current, {
+          scale: 40 / 62, // Base size is now 62vw, starting visually at 40vw
+          x: '24vw', // Starting further left to sit closer to type (100-40)/2 = 30; 30-6 margin = 24
+          y: '0vh',
+          borderRadius: '48px',
+          borderColor: 'rgba(255,255,255,0.06)',
+          boxShadow: '0 0px 0px rgba(0,0,0,0)'
+        });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: '+=220%',
+            pin: true,
+            scrub: 1.2,
+            anticipatePin: 1
+          }
+        });
+
+        // Stage 1 (0% -> 20%)
+        tl.to(becomeRef.current, { opacity: 0, y: -20, duration: 20, ease: 'power1.out' }, 0);
+        tl.to(scrollIndicatorRef.current, { opacity: 0, y: 10, duration: 10, ease: 'power1.out' }, 0);
+        tl.to(metadataLeftRef.current, { opacity: 0, duration: 15, ease: 'power1.out' }, 0);
+        tl.to(bridgeLineRef.current, { opacity: 0, scaleX: 0, duration: 18, ease: 'power1.out' }, 0);
+        tl.to(videoWrapperRef.current, { scale: 50 / 62, x: '15vw', duration: 20, ease: 'power2.inOut' }, 0);
+
+        // Stage 2 (20% -> 40%)
+        tl.to(whereRef.current, { opacity: 0, y: -20, duration: 20, ease: 'power1.out' }, 20);
+        tl.to(videoWrapperRef.current, {
+          scale: 62 / 62,
+          x: '5vw',
+          borderRadius: '24px',
+          duration: 20,
+          ease: 'power2.inOut'
+        }, 20);
+
+        // Stage 3 (40% -> 60%)
+        tl.to(impactRef.current, { opacity: 0, y: -20, duration: 20, ease: 'power1.out' }, 40);
+        tl.to(videoWrapperRef.current, {
+          scale: 78 / 62,
+          x: '-5vw',
+          borderRadius: '12px',
+          duration: 20,
+          ease: 'power2.inOut'
+        }, 40);
+        tl.to(videoVignetteRef.current, { backgroundColor: 'rgba(0,0,0,0.35)', duration: 20 }, 40);
+
+        // Stage 4 (60% -> 85%) - Shrinks & settles
+        tl.to(ideasRef.current, { opacity: 0, y: -20, duration: 25, ease: 'power1.out' }, 60);
+        tl.to(videoWrapperRef.current, {
+          scale: 1, // 62vw
+          x: '0vw', // Centered horizontally
+          y: '2vh', // Slightly below center
+          borderRadius: '4px', // Final sharp corners (editorial)
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+          duration: 25,
+          ease: 'power2.inOut'
+        }, 60);
+
+        tl.fromTo(payoffRef.current,
+          { opacity: 0, x: -30 },
+          { opacity: 1, x: 0, duration: 25, ease: 'power2.out' },
+          60);
+
+        // Stage 5 (85% -> 100%) - Lock and text fade in
+        tl.to(videoWrapperRef.current, { borderColor: 'rgba(255,255,255,0.10)', duration: 15 }, 85);
+        tl.fromTo(captionRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 15 }, 85);
+        tl.fromTo(metadataRightRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 15 }, 85);
       });
 
-      // 1. VIDEO SHRINK & DOCK
-      tl.fromTo(
-        videoWrapperRef.current,
-        { width: '100%', height: '100%', left: '0px', top: '0px', borderRadius: '0px' },
-        {
-          width: () => `${getDockedMetrics().width}px`,
-          height: () => `${getDockedMetrics().height}px`,
-          left: () => `${getDockedMetrics().left}px`,
-          top: () => `${getDockedMetrics().top}px`,
-          borderRadius: () => (window.innerWidth < 768 ? '16px' : '24px'),
-          boxShadow: '0 0 35px rgba(225, 29, 72, 0.35), 0 25px 60px rgba(0, 0, 0, 0.95)',
-          ease: 'power2.inOut',
-          duration: 1,
-        },
-        0
-      );
+      mm.add("(max-width: 767px)", () => {
+        // Mobile Setup
+        gsap.set(videoWrapperRef.current, {
+          scale: 60 / 90,
+          x: '18vw',
+          y: '0vh',
+          borderRadius: '36px',
+          borderColor: 'rgba(255,255,255,0.06)',
+          boxShadow: '0 0px 0px rgba(0,0,0,0)'
+        });
 
-      // 2. TEXT INSIDE VIDEO: Scales down + moves ONLY a few cm right at end
-      tl.fromTo(
-        textWrapperRef.current,
-        { scale: 1, opacity: 1, x: 0 },
-        { 
-          scale: 0.25, 
-          opacity: 1, 
-          x: () => (window.innerWidth < 768 ? 20 : 40), // ONLY small right movement
-          ease: 'power2.inOut', 
-          duration: 1 
-        },
-        0
-      );
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top top',
+            end: '+=220%',
+            pin: true,
+            scrub: 1.2,
+            anticipatePin: 1
+          }
+        });
 
-      // 3. INITIAL SCROLL INDICATOR FADE OUT
-      tl.to(scrollIndicatorRef.current, { opacity: 0, y: -25, duration: 0.25, ease: 'power1.out' }, 0);
+        // Stage 1
+        tl.to(becomeRef.current, { opacity: 0, y: -20, duration: 20, ease: 'power1.out' }, 0);
+        tl.to(scrollIndicatorRef.current, { opacity: 0, y: 10, duration: 10, ease: 'power1.out' }, 0);
+        tl.to(metadataLeftRef.current, { opacity: 0, duration: 15, ease: 'power1.out' }, 0);
+        tl.to(bridgeLineRef.current, { opacity: 0, scaleX: 0, duration: 18, ease: 'power1.out' }, 0);
+        tl.to(videoWrapperRef.current, { scale: 70 / 90, x: '10vw', duration: 20, ease: 'power2.inOut' }, 0);
 
-      // 4. REVEAL MINIMAL "E-CELL" TITLE
-      tl.fromTo(centerTextRef.current, { opacity: 0, scale: 0.94, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.12);
+        // Stage 2
+        tl.to(whereRef.current, { opacity: 0, y: -20, duration: 20, ease: 'power1.out' }, 20);
+        tl.to(videoWrapperRef.current, { scale: 80 / 90, x: '2vw', borderRadius: '24px', duration: 20, ease: 'power2.inOut' }, 20);
 
-      // 5. REVEAL SUBTITLE
-      tl.fromTo(subTextRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 0.28);
+        // Stage 3
+        tl.to(impactRef.current, { opacity: 0, y: -20, duration: 20, ease: 'power1.out' }, 40);
+        tl.to(videoWrapperRef.current, { scale: 100 / 90, x: '0vw', borderRadius: '12px', duration: 20, ease: 'power2.inOut' }, 40);
+        tl.to(videoVignetteRef.current, { backgroundColor: 'rgba(0,0,0,0.35)', duration: 20 }, 40);
 
-      // 6. REVEAL LEFT TEXT COLUMN
-      tl.fromTo(leftTextRef.current, { opacity: 0, x: -35 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' }, 0.22);
+        // Stage 4
+        tl.to(ideasRef.current, { opacity: 0, y: -20, duration: 25, ease: 'power1.out' }, 60);
+        tl.to(videoWrapperRef.current, { scale: 1, x: '0vw', y: '-15vh', borderRadius: '4px', boxShadow: '0 30px 80px rgba(0,0,0,0.5)', duration: 25, ease: 'power2.inOut' }, 60);
+        tl.fromTo(payoffRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 25, ease: 'power2.out' }, 60);
 
-      // 7. REVEAL RIGHT TEXT COLUMN
-      tl.fromTo(rightTextRef.current, { opacity: 0, x: 35 }, { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' }, 0.22);
+        // Stage 5
+        tl.to(videoWrapperRef.current, { borderColor: 'rgba(255,255,255,0.10)', duration: 15 }, 85);
+        tl.fromTo(captionRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 15 }, 85);
+        tl.fromTo(metadataRightRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 15 }, 85);
+      });
 
-      // 8. REVEAL HANDWRITTEN ACCENTS
-      tl.fromTo(handLeftRef.current, { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, 0.38);
-      tl.fromTo(handRightRef.current, { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, 0.42);
-
-      // 9. REVEAL BOTTOM BAR
-      tl.fromTo(bottomBarRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power1.out' }, 0.48);
-    }, heroRef);
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id="home" ref={heroRef} className="relative w-full h-screen bg-black overflow-hidden select-none">
-      {/* VIDEO CONTAINER */}
-      <div ref={videoWrapperRef} className="absolute top-0 left-0 w-full h-full z-[10] overflow-hidden will-change-transform" style={{ boxShadow: '0 0 0 rgba(0,0,0,0)' }}>
-        <video ref={videoRef} src="/img_vid/recap.mp4" autoPlay loop muted playsInline preload="auto" className="w-full h-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70 pointer-events-none" />
-        
-        {/* DREAM. DARE. DEVELOP. TEXT */}
-        <div ref={textWrapperRef} className="absolute inset-0 flex flex-col justify-center items-start px-6 sm:px-12 lg:px-20 pointer-events-none will-change-transform">
-          <div className="font-heading font-black uppercase leading-[0.95] tracking-tight text-[11vw] sm:text-[12vw] lg:text-[13vw]">
-            <span className="block text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">DREAM.</span>
-            <span className="block text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">DARE.</span>
-            <span className="block text-rose-500 drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">DEVELOP.</span>
-          </div>
-          <p className="mt-6 text-xs sm:text-sm lg:text-base tracking-[0.4em] uppercase text-neutral-200 font-heading font-medium">E-CELL DMCE • EST. 2014</p>
+    <section ref={containerRef} className="relative w-full h-screen bg-[#050505] overflow-hidden select-none font-heading text-white flex items-center justify-center">
+
+      {/* 1. LEFT TYPOGRAPHY (Opening State) */}
+      <div className="absolute left-[4vw] top-1/2 -translate-y-1/2 flex flex-col items-start z-10 pointer-events-none">
+        <div ref={whereRef} className="text-[2vw] md:text-[0.9vw] tracking-[0.4em] uppercase font-normal text-white/60 mb-2">WHERE</div>
+        <div ref={ideasRef} className="text-[15vw] md:text-[11vw] font-black text-white leading-[0.92] tracking-[-0.02em]">IDEAS</div>
+        <div ref={becomeRef} className="text-[7vw] md:text-[5vw] font-extralight text-white/85 leading-[1.0]">BECOME</div>
+        <div ref={impactRef} className="text-[15vw] md:text-[11vw] font-black leading-[0.92] tracking-[-0.02em] text-transparent" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.85)' }}>IMPACT</div>
+      </div>
+
+      {/* 2. THE VIDEO WRAPPER */}
+      {/* 
+        Base CSS size is the FINAL desktop size (62vw) and Mobile size (90vw).
+        Aspect ratio: 4:5 (portrait). Positioned center, scaled by GSAP.
+      */}
+      <div
+        ref={videoWrapperRef}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] md:w-[62vw] aspect-[4/5] border border-white/5 z-20 will-change-transform origin-center"
+      >
+        {/* Inner clip container — inherits border-radius for rounded clipping */}
+        <div className="w-full h-full overflow-hidden rounded-[inherit] relative">
+          <video
+            src="/img_vid/recap.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover object-center"
+          />
+          <div ref={videoVignetteRef} className="absolute inset-0 pointer-events-none bg-black/15" />
+        </div>
+        {/* Sub-caption below video card */}
+        <div className="absolute top-[calc(100%+12px)] right-0 text-[2vw] md:text-[0.7vw] tracking-[0.35em] text-white/40 uppercase pointer-events-none whitespace-nowrap">
+          E-CELL DMCE · RECAP · 25/26
         </div>
       </div>
 
-      {/* TYPOGRAPHY BACKGROUND LAYER */}
-      <div ref={typoBgRef} className="absolute inset-0 z-[1] pointer-events-none">
-        {/* Left text column */}
-        <div ref={leftTextRef} className="absolute left-6 sm:left-10 lg:left-14 top-24 sm:top-28 lg:top-32 flex flex-col gap-0.5 opacity-0 select-none">
-          <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-neutral-300 font-heading">IDEAS</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-rose-500 font-heading">MEET</span>
-            <div className="w-8 sm:w-12 h-[1px] bg-rose-500/70" />
-            <span className="text-rose-500 text-xs font-mono">+</span>
-          </div>
-          <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-neutral-300 font-heading">OPPORTUNITY</span>
+      {/* BRIDGE LINE — thin horizontal connector between typography and video */}
+      <div
+        ref={bridgeLineRef}
+        className="hidden md:block absolute top-1/2 left-[46vw] w-[6vw] h-[1px] z-10 pointer-events-none origin-left"
+        style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+      />
+
+      {/* 3. PAYOFF LINE & LEFT METADATA (Ending State) */}
+      <div
+        ref={payoffRef}
+        className="absolute left-[6vw] top-[auto] bottom-[10vh] md:top-1/2 md:bottom-[auto] md:-translate-y-1/2 z-30 pointer-events-none opacity-0 flex flex-col gap-[8vh]"
+      >
+        <div className="flex flex-col leading-[0.95]">
+          <div className="text-[14vw] md:text-[5.5vw] font-black text-white">We don't pitch.</div>
+          <div className="text-[14vw] md:text-[5.5vw] font-black text-[#e11d48]">We build.</div>
         </div>
 
-        {/* Right text column */}
-        <div ref={rightTextRef} className="absolute right-6 sm:right-10 lg:right-14 top-24 sm:top-28 lg:top-32 flex flex-col gap-0.5 text-right opacity-0 select-none">
-          <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-rose-500 font-heading">DMCE</span>
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400 font-heading">ENTREPRENEURSHIP</span>
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400 font-heading">INNOVATION</span>
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400 font-heading">COMMUNITY</span>
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-neutral-400 font-heading">GROWTH</span>
-        </div>
-
-        {/* CENTER: E-CELL TITLE */}
-        <div ref={centerTextRef} className="absolute inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none px-4">
-          <div className="flex items-center justify-center font-heading font-black italic select-none transform -skew-x-12">
-            <div className="flex flex-col justify-between h-[7vw] sm:h-[8vw] lg:h-[9vw] max-h-[130px] mr-[1.5vw] sm:mr-[2vw]">
-              <span className="w-[7.5vw] sm:w-[8.5vw] lg:w-[9.5vw] max-w-[135px] h-[24%] rounded-[2px] bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 shadow-[0_0_12px_rgba(225,29,72,0.4)] border border-rose-400/40" />
-              <span className="w-[6.5vw] sm:w-[7.5vw] lg:w-[8.5vw] max-w-[120px] h-[24%] rounded-[2px] bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 shadow-[0_0_12px_rgba(225,29,72,0.4)] border border-rose-400/40" />
-              <span className="w-[7.5vw] sm:w-[8.5vw] lg:w-[9.5vw] max-w-[135px] h-[24%] rounded-[2px] bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 shadow-[0_0_12px_rgba(225,29,72,0.4)] border border-rose-400/40" />
-            </div>
-            <span className="w-[3vw] sm:w-[3.5vw] lg:w-[4vw] max-w-[55px] h-[1.8vw] sm:h-[2vw] lg:h-[2.2vw] max-h-[30px] rounded-[2px] bg-gradient-to-r from-rose-600 to-red-700 shadow-[0_0_10px_rgba(225,29,72,0.35)] border border-rose-400/40 mr-[1.5vw]" />
-            <h1 className="text-[13vw] sm:text-[14vw] md:text-[15vw] lg:text-[15vw] font-black tracking-wider uppercase font-heading leading-none ecell-title" style={{ background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(190, 190, 200, 0.7) 40%, rgba(50, 50, 60, 0.85) 85%, rgba(20, 20, 25, 0.95) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>CELL</h1>
-          </div>
-          <div ref={subTextRef} className="mt-4 sm:mt-6 flex flex-col items-center gap-1 opacity-0">
-            <p className="text-[9px] sm:text-xs lg:text-sm tracking-[0.45em] uppercase text-neutral-400 font-heading font-medium">ENTREPRENEURSHIP CELL • DMCE</p>
-          </div>
-        </div>
-
-        {/* BOTTOM-LEFT: Dream Plan Build */}
-        <div ref={handLeftRef} className="absolute left-6 sm:left-10 lg:left-14 bottom-14 sm:bottom-18 lg:bottom-22 opacity-0 select-none z-[12]">
-          <div className="flex flex-col font-handwritten text-lg sm:text-2xl lg:text-3xl leading-tight">
-            <span className="text-white/85">Dream</span>
-            <span className="text-rose-500 text-xl sm:text-3xl lg:text-4xl font-bold italic">Plan</span>
-            <span className="text-white/85">Build</span>
-          </div>
-          <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white/60 mt-1" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 32 C 12 24, 20 16, 30 10" /><polyline points="20 10, 30 10, 30 20" /></svg>
-        </div>
-
-        {/* BOTTOM-RIGHT DOCKED LAYOUT */}
-        <div className="absolute right-4 sm:right-8 lg:right-12 bottom-4 sm:bottom-6 lg:bottom-8 flex items-end gap-3 sm:gap-6 pointer-events-none z-[12]">
-          <div ref={handRightRef} className="flex flex-col items-end text-right opacity-0 select-none">
-            <div className="flex flex-col font-handwritten text-base sm:text-xl lg:text-2xl leading-tight items-end">
-              <span className="text-white/80">Small</span><span className="text-white/80">Steps</span>
-              <span className="text-rose-500 text-xl sm:text-2xl lg:text-3xl font-bold italic">Big</span>
-              <span className="text-white/80">Impact</span>
-            </div>
-            <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white/60 mt-0.5" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 14 C 14 14, 24 18, 30 26" /><polyline points="20 26, 30 26, 30 16" /></svg>
-          </div>
-          <div ref={dockedTargetRef} className="w-[56vw] sm:w-[42vw] lg:w-[32vw] max-w-[460px] aspect-video rounded-2xl lg:rounded-3xl border border-rose-500/30 relative pointer-events-none">
-            <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-rose-500/70" />
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-rose-500/70" />
-            <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-rose-500/70" />
-            <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-rose-500/70" />
-          </div>
-        </div>
-
-        {/* BOTTOM BAR */}
-        <div ref={bottomBarRef} className="absolute bottom-3 sm:bottom-5 left-0 right-0 flex items-center justify-between px-6 sm:px-10 lg:px-14 opacity-0 select-none z-[15]">
-          <div className="flex items-center gap-3 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-neutral-400 font-heading font-bold">
-            <span className="text-white">E-CELL DMCE</span>
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="w-8 lg:w-12 h-[1px] bg-neutral-800" />
-              <span className="text-rose-500 text-xs">✦</span>
-              <span className="w-8 lg:w-12 h-[1px] bg-neutral-800" />
-            </div>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <div className="w-4 h-7 rounded-full border border-neutral-600 flex items-start justify-center pt-1">
-              <div className="w-1 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-            </div>
-            <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-neutral-400 font-heading">SCROLL TO EXPLORE</span>
-          </div>
-          <div className="w-24 hidden lg:block" />
+        <div className="hidden md:flex flex-col gap-1 text-[1.5vw] md:text-[0.7vw] tracking-[0.4em] text-white/40">
+          <div>E-CELL DMCE</div>
+          <div>INNOVATE · CREATE · ELEVATE</div>
         </div>
       </div>
 
-      {/* SCROLL INDICATOR */}
-      <div ref={scrollIndicatorRef} className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-[20] flex flex-col items-center gap-2 pointer-events-none">
-        <div className="w-5 h-9 rounded-full border-2 border-white/50 flex items-start justify-center pt-1.5">
-          <div className="w-1 h-2 rounded-full bg-white animate-bounce" />
-        </div>
-        <span className="text-[10px] sm:text-xs uppercase tracking-[0.35em] text-neutral-300 font-heading font-bold">SCROLL TO EXPLORE</span>
+      {/* 4. VIDEO CAPTION (Ending State) */}
+      <div
+        ref={captionRef}
+        className="absolute left-[4vw] md:left-1/2 md:-translate-x-1/2 bottom-[4vh] md:top-1/2 md:bottom-[auto] md:mt-[calc(38.75vw+4vh)] z-30 opacity-0 pointer-events-none text-[2vw] md:text-[0.75vw] tracking-[0.35em] text-white/50 uppercase font-normal"
+      >
+        E-CELL DMCE · CHAPTER 25/26
+      </div>
+
+      {/* 5. METADATA LEFT (Opening State - fades out) */}
+      <div ref={metadataLeftRef} className="absolute left-[4vw] bottom-[4vh] md:bottom-[6vh] z-10 opacity-100 pointer-events-none flex flex-col gap-1 text-[1.5vw] md:text-[0.7vw] tracking-[0.35em] text-white/45">
+        <div>E-CELL DMCE</div>
+        <div>INNOVATE · CREATE · ELEVATE</div>
+      </div>
+
+      {/* 6. SCROLL INDICATOR (Opening State) */}
+      <div ref={scrollIndicatorRef} className="absolute bottom-[4vh] left-1/2 -translate-x-1/2 z-10 flex flex-col items-center pointer-events-none">
+        <div className="w-[1px] h-[40px] bg-gradient-to-b from-white/60 to-transparent animate-pulse" />
+      </div>
+
+      {/* 7. METADATA RIGHT (Ending State) */}
+      <div ref={metadataRightRef} className="absolute right-[4vw] bottom-[4vh] md:bottom-[6vh] z-30 opacity-0 pointer-events-none flex flex-col items-end gap-1 text-[1.5vw] md:text-[0.7vw] tracking-[0.35em] text-white/45 text-right">
+        <div>STUDENT DRIVEN</div>
+        <div>COMMUNITY BUILT</div>
+        <div>IMPACT FOCUSED</div>
       </div>
     </section>
   );

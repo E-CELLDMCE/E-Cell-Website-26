@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ecellLogo from "../../assets/ECELL LOGO.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
@@ -45,7 +44,7 @@ const Footer: React.FC = () => {
               <div className="mb-5">
                 <Link to="/" className="inline-block cursor-pointer">
                   <img
-                    src={ecellLogo}
+                    src="/team/ecell-logo.png"
                     alt="E-Cell DMCE"
                     className="w-32 sm:w-40 h-auto object-contain transition-transform duration-300 hover:scale-105"
                   />
