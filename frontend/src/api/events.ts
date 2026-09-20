@@ -53,4 +53,9 @@ export const eventsApi = {
     const res = await apiClient.put<EventItem>(`/events/${eventId}`, payload);
     return res.data;
   },
+
+  deleteEvent: async (eventId: string): Promise<{ message: string }> => {
+    const res = await apiClient.delete<{ message: string }>(`/events/${eventId}`);
+    return res.data;
+  },
 };
