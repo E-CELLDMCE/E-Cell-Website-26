@@ -74,7 +74,7 @@ def register_team(
     # 1. Fetch Event with row lock for concurrency protection
     event = (
         db.query(Event)
-        .filter(Event.id == payload.event_id)
+        .filter(Event.id == payload.event_id, Event.deleted_at.is_(None))
         .with_for_update()
         .first()
     )
@@ -279,6 +279,7 @@ def get_my_tickets(
             RegistrationMember.student_id == current_user.id,
             EventRegistration.status == "approved",
             RegistrationMember.ticket_qr_token.isnot(None),
+            Event.deleted_at.is_(None),
         )
         .all()
     )
@@ -317,9 +318,11 @@ def get_my_registrations(
 
     registrations = (
         db.query(EventRegistration)
+        .join(Event, EventRegistration.event_id == Event.id)
         .filter(
+            Event.deleted_at.is_(None),
             (EventRegistration.leader_id == current_user.id)
-            | (EventRegistration.id.in_(member_reg_ids))
+            | (EventRegistration.id.in_(member_reg_ids)),
         )
         .order_by(EventRegistration.created_at.desc())
         .all()
