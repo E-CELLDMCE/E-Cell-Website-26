@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
 
       <div className="relative z-10">
         {/* Main footer content */}
-        <div className="max-w-6xl mx-auto px-8 pt-14 pb-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-14 pb-8">
           <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.65fr_1.3fr_1fr] gap-3">
 
             {/* Brand + Location */}

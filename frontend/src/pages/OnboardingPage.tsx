@@ -92,7 +92,7 @@ export const OnboardingPage: React.FC = () => {
               placeholder="e.g. STD2026105 or 23CO102"
               className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm uppercase focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-colors"
             />
-            <p className="text-[11px] text-neutral-500">Must be unique to your college enrollment.</p>
+            <p className="text-xs text-neutral-400">Must be unique to your college enrollment.</p>
           </div>
 
           {/* Branch / Department */}

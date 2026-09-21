@@ -45,7 +45,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
           /* Styled cyber banner fallback */
           <div className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-[#2a0404] via-[#150202] to-black border-b border-neutral-800 select-none">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] uppercase font-black tracking-widest text-red-400 bg-red-950/80 border border-red-500/30 px-2.5 py-1 rounded-full">
+              <span className="text-xs uppercase font-black tracking-widest text-red-400 bg-red-950/80 border border-red-500/30 px-2.5 py-1 rounded-full">
                 E-Cell Flagship
               </span>
               <span className="text-2xl opacity-40">⚡</span>
@@ -58,7 +58,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
                 {event.title}
               </h4>
             </div>
-            <div className="text-center text-[11px] font-mono tracking-wider text-neutral-500 uppercase">
+            <div className="text-center text-xs font-mono tracking-wider text-neutral-500 uppercase">
               Official E-Cell Conclave
             </div>
           </div>
@@ -71,7 +71,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
         {/* Badges absolutely positioned over poster corners */}
         {/* Top-Left: E-CELL FLAGSHIP */}
         <div className="absolute top-3 left-3 z-10 pointer-events-none">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-black/80 backdrop-blur-md text-red-400 border border-red-500/40 shadow-lg">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black tracking-widest uppercase bg-black/80 backdrop-blur-md text-red-400 border border-red-500/40 shadow-lg">
             <Sparkles className="w-3 h-3 text-red-400" />
             E-Cell Flagship
           </span>
@@ -92,7 +92,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
 
         {/* Bottom-Left: Solo/Team Badge */}
         <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
-          <span className="inline-flex items-center gap-1.5 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-full text-[11px] font-bold text-yellow-400 border border-yellow-400/40 shadow-lg">
+          <span className="inline-flex items-center gap-1.5 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold text-yellow-400 border border-yellow-400/40 shadow-lg">
             <Users className="w-3.5 h-3.5 text-yellow-400" />
             {event.is_team_event
               ? `Team of ${event.min_team_size} - ${event.max_team_size}`
@@ -103,7 +103,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
         {/* Bottom-Right: Event Status */}
         {event.status && (
           <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-neutral-300 border border-neutral-700/60 shadow-lg">
+            <span className="inline-flex items-center gap-1.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-neutral-300 border border-neutral-700/60 shadow-lg">
               <span
                 className={`w-2 h-2 rounded-full ${
                   event.status === 'upcoming'
@@ -354,7 +354,7 @@ export const EventsPage: React.FC = () => {
                 >
                   <span>{f.label}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                    className={`text-xs px-2 py-0.5 rounded-full font-extrabold ${
                       isActive ? 'bg-black/20 text-black' : 'bg-neutral-800 text-neutral-400'
                     }`}
                   >
