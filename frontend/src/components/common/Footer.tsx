@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ecellLogo from "../../assets/ECELL LOGO.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
@@ -37,7 +36,7 @@ const Footer: React.FC = () => {
 
       <div className="relative z-10">
         {/* Main footer content */}
-        <div className="max-w-6xl mx-auto px-8 pt-14 pb-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 pt-14 pb-8">
           <div className="grid grid-cols-1 md:grid-cols-[1.2fr_0.65fr_1.3fr_1fr] gap-3">
 
             {/* Brand + Location */}
@@ -45,7 +44,7 @@ const Footer: React.FC = () => {
               <div className="mb-5">
                 <Link to="/" className="inline-block cursor-pointer">
                   <img
-                    src={ecellLogo}
+                    src="/team/ecell-logo.png"
                     alt="E-Cell DMCE"
                     className="w-32 sm:w-40 h-auto object-contain transition-transform duration-300 hover:scale-105"
                   />

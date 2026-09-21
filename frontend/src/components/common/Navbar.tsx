@@ -57,16 +57,14 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 to={link.href}
-                className={`relative text-xs font-bold tracking-widest uppercase transition-colors duration-200 py-1.5 cursor-pointer group ${
-                  isActive ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
-                }`}
+                className={`relative text-xs font-bold tracking-widest uppercase transition-colors duration-200 py-1.5 cursor-pointer group ${isActive ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
+                  }`}
               >
                 <span>{link.name}</span>
                 {/* Subtle yellow underline on active or hover */}
                 <span
-                  className={`absolute bottom-0 left-0 h-[2px] bg-yellow-400 transition-all duration-300 ${
-                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                  }`}
+                  className={`absolute bottom-0 left-0 h-[2px] bg-yellow-400 transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}
                 />
               </Link>
             );
@@ -176,9 +174,8 @@ export const Navbar: React.FC = () => {
                   key={link.name}
                   to={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center justify-between py-2 text-sm font-bold tracking-widest uppercase transition-colors ${
-                    isActive ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
-                  }`}
+                  className={`flex items-center justify-between py-2 text-sm font-bold tracking-widest uppercase transition-colors ${isActive ? 'text-yellow-400' : 'text-neutral-300 hover:text-yellow-400'
+                    }`}
                 >
                   <span>{link.name}</span>
                   {isActive && (

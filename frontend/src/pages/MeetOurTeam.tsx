@@ -1,20 +1,4 @@
 import React from "react";
-import ecellLogo from "../assets/ECELL LOGO.png";
-import adityaDongre from "../assets/aditya-dongre.png";
-import advayDeshmukh from "../assets/advay-deshmukh.jpg";
-import akshadaSangore from "../assets/akshada-sangore.png";
-import aryaKamble from "../assets/arya-kamble.png";
-import harpalKotadiya from "../assets/harpal-kotadiya.png";
-import juiJagtap from "../assets/jui-jagtap.png";
-import komalSahu from "../assets/komal-sahu.jpg";
-import krishMahanwar from "../assets/krish-mahanwar.png";
-import malashriShrirage from "../assets/malashri-shrirage.png";
-import niteshShetty from "../assets/nitesh-shetty.png";
-import riyaBehere from "../assets/riya-behere.png";
-import sadiyaShaikh from "../assets/sadiya-shaikh.png";
-import sayliChaudhari from "../assets/sayli-chaudhari.png";
-import sunishPanigrahy from "../assets/sunish-panigrahy.png";
-import varshaChaurasiya from "../assets/varsha-chaurasiya.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -345,7 +329,7 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="ADITYA DONGRE"
         role="Chairperson"
-        image={adityaDongre}
+        image="/team/aditya-dongre.png"
         description="Turning Innovation Into Enterprise"
       />
     </div>
@@ -357,14 +341,14 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="HARPAL KOTADIYA"
         role="Co-Chairperson"
-        image={harpalKotadiya}
+        image="/team/harpal-kotadiya.png"
         description="Making The Chaos Looked By Organized."
       />
 
       <TeamMemberCard
         name="NITESH SHETTY"
         role="Co-Chairperson"
-        image={niteshShetty}
+        image="/team/nitesh-shetty.png"
         objectPosition="center 20%"
         description="Bridging Leadership, Building Empires"
       />
@@ -373,14 +357,14 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="AKSHADA SANGORE"
         role="Event Initiative Head"
-        image={akshadaSangore}
+        image="/team/akshada-sangore.png"
         description="Curating Innovation Into Reality"
       />
 
       <TeamMemberCard
         name="KOMAL SAHU"
         role="Event Initiative Head"
-        image={komalSahu}
+        image="/team/komal-sahu.jpg"
         objectPosition="center 10%"
         description="Shaping Experiences That Matters"
       />
@@ -389,14 +373,14 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="JUI JAGTAP"
         role="Public Relation Head"
-        image={juiJagtap}
+        image="/team/jui-jagtap.png"
         description="Narrating The Future Of Business"
       />
 
       <TeamMemberCard
         name="RIYA BEHERE"
         role="Public Relation Head"
-        image={riyaBehere}
+        image="/team/riya-behere.png"
          description="Building Bridges, Amplifying Voices"
       />
 
@@ -404,7 +388,7 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="KRISH MAHANWAR"
         role="Technical Head"
-        image={krishMahanwar}
+        image="/team/krish-mahanwar.png"
         objectPosition="center 40%"
          description="Powered By Code, Driven By Innovation."
       />
@@ -412,7 +396,7 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="MALASHRI SHRIRAGE"
         role="Technical Head"
-        image={malashriShrirage}
+        image="/team/malashri-shrirage.png"
         objectPosition="center 20%"
         description="From Creating Blueprint To Bytes"
       />
@@ -421,14 +405,14 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="VARSHA CHAURASIYA"
         role="Creative Head"
-        image={varshaChaurasiya}
+        image="/team/varsha-chaurasiya.png"
          description="Where Imagination meets Impact"
       />
 
       <TeamMemberCard
         name="SUNISH PANIGRAHY"
         role="Creative Head"
-        image={sunishPanigrahy}
+        image="/team/sunish-panigrahy.png"
         description="Transforming abstract ideas into iconic identities"
       />
 
@@ -436,14 +420,14 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="ADVAY DESHMUKH"
         role="Social Media Head"
-        image={advayDeshmukh}
+        image="/team/advay-deshmukh.jpg"
          description="Connecting Minds, Capturing Stories"
       />
 
       <TeamMemberCard
         name="SAYLI CHAUDHARI"
         role="Social Media Head"
-        image={sayliChaudhari}
+        image="/team/sayli-chaudhari.png"
         objectPosition="center 40%"
         description="Crafting Conversations, Not Just Content"
       />
@@ -452,7 +436,7 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="ARYA KAMBLE"
         role="Alumni Initiative Head"
-        image={aryaKamble}
+        image="/team/arya-kamble.png"
         objectPosition="center 20%"
         description="Reconnecting Minds, Igniting Ventures"
       />
@@ -460,7 +444,7 @@ const MeetOurTeam = () => {
       <TeamMemberCard
         name="SADIYA SHAIKH"
         role="Documentation Head"
-        image={sadiyaShaikh}
+        image="/team/sadiya-shaikh.png"
         objectPosition="center 50%"
         description="Mapping The Journey From Ideation To Reality"
       />
