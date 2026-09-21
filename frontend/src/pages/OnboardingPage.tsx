@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usersApi } from '../api/users';
 import { getErrorMessage } from '../api/client';
-import { UserCheck, Sparkles, BookOpen, Hash, Phone, Building } from 'lucide-react';
+import { UserCheck, Sparkles, BookOpen, Hash, Phone, Building, Layers, ListOrdered } from 'lucide-react';
 
 export const OnboardingPage: React.FC = () => {
   const { user, updateUser } = useAuth();
@@ -15,6 +15,8 @@ export const OnboardingPage: React.FC = () => {
   const [branch, setBranch] = useState(user?.branch || 'Computer Engineering');
   const [year, setYear] = useState<number>(user?.year || 2);
   const [phone, setPhone] = useState(user?.phone || '');
+  const [division, setDivision] = useState(user?.division || '');
+  const [rollNumber, setRollNumber] = useState(user?.roll_number || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,6 +27,16 @@ export const OnboardingPage: React.FC = () => {
       return;
     }
 
+    if (stdid.trim().length !== 11) {
+      toast.error('Student ID must be exactly 11 characters');
+      return;
+    }
+
+    if (phone.trim() && (!/^\d{10}$/.test(phone.trim()))) {
+      toast.error('Phone number must be exactly 10 digits');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const updated = await usersApi.updateProfile({
@@ -32,6 +44,8 @@ export const OnboardingPage: React.FC = () => {
         branch: branch.trim(),
         year: Number(year),
         phone: phone.trim() || undefined,
+        division: division.trim() || undefined,
+        rollNumber: rollNumber.trim() || undefined,
       });
 
       updateUser(updated);
@@ -39,11 +53,7 @@ export const OnboardingPage: React.FC = () => {
       navigate('/events');
     } catch (err: any) {
       const msg = getErrorMessage(err);
-      if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('registered')) {
-        toast.error('Student ID already in use');
-      } else {
-        toast.error(msg);
-      }
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -82,17 +92,19 @@ export const OnboardingPage: React.FC = () => {
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
               <Hash className="w-3.5 h-3.5 text-yellow-400" />
-              Student ID / Roll Number <span className="text-red-500">*</span>
+              Student ID <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               required
+              minLength={11}
+              maxLength={11}
               value={stdid}
               onChange={(e) => setStdid(e.target.value)}
-              placeholder="e.g. STD2026105 or 23CO102"
+              placeholder="e.g. 23CO102XXXX"
               className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white font-mono text-sm uppercase focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-colors"
             />
-            <p className="text-[11px] text-neutral-500">Must be unique to your college enrollment.</p>
+            <p className="text-[11px] text-neutral-500">Must be exactly 11 characters and unique to your college enrollment.</p>
           </div>
 
           {/* Branch / Department */}
@@ -140,6 +152,36 @@ export const OnboardingPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Division */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-yellow-400" />
+              Division
+            </label>
+            <input
+              type="text"
+              value={division}
+              onChange={(e) => setDivision(e.target.value)}
+              placeholder="e.g. A, B, C"
+              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm uppercase focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-colors"
+            />
+          </div>
+
+          {/* Roll Number */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
+              <ListOrdered className="w-3.5 h-3.5 text-yellow-400" />
+              Roll Number
+            </label>
+            <input
+              type="text"
+              value={rollNumber}
+              onChange={(e) => setRollNumber(e.target.value)}
+              placeholder="e.g. 42"
+              className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-colors"
+            />
+          </div>
+
           {/* Phone Number */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
@@ -148,6 +190,8 @@ export const OnboardingPage: React.FC = () => {
             </label>
             <input
               type="tel"
+              minLength={10}
+              maxLength={10}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="e.g. 9876543210"

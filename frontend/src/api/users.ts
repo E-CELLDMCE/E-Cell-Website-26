@@ -8,6 +8,8 @@ export interface UserProfile {
   stdid?: string | null;
   branch?: string | null;
   year?: number | null;
+  division?: string | null;
+  roll_number?: string | null;
   phone?: string | null;
   created_at?: string;
 }
@@ -17,6 +19,8 @@ export interface UserProfileUpdate {
   phone?: string;
   branch?: string;
   year?: number;
+  division?: string;
+  rollNumber?: string;
 }
 
 export const usersApi = {
