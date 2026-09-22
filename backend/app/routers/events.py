@@ -88,6 +88,10 @@ def create_event(
         payment_qr_url=payload.payment_qr_url,
         status=payload.status,
         created_by=current_admin.id,
+        early_bird_enabled=payload.early_bird_enabled if payload.early_bird_enabled is not None else False,
+        early_bird_capacity=payload.early_bird_capacity,
+        early_bird_fee=payload.early_bird_fee,
+        early_bird_taken=0,
     )
     db.add(event)
     db.commit()
@@ -130,8 +134,10 @@ def update_event(
             detail="max_team_size must be greater than or equal to min_team_size",
         )
 
-    update_data = payload.model_dump(exclude_unset=True)
+    update_data = payload.model_dump(exclude_unset=True, exclude={"early_bird_taken"})
     for field, value in update_data.items():
+        if field == "early_bird_taken":
+            continue
         setattr(event, field, value)
 
     db.commit()
