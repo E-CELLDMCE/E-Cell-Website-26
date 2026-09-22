@@ -1,348 +1,201 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { adminApi } from '../../api/admin';
+import { apiClient } from '../../api/client';
 import { RegistrationDetailResponse } from '../../api/registrations';
 import { useToast } from '../../context/ToastContext';
 import { getErrorMessage } from '../../api/client';
 import {
-  CheckSquare,
-  CheckCircle2,
-  XCircle,
-  Eye,
-  Clock,
-  AlertCircle,
-  RefreshCw,
-  Filter,
-  X,
-  CreditCard,
-  Users,
+  CheckCircle2, XCircle, Clock, RefreshCw, AlertCircle, UserCheck, ExternalLink
 } from 'lucide-react';
 
 export const ApprovalsPage: React.FC = () => {
-  const [registrations, setRegistrations] = useState<RegistrationDetailResponse[]>([]);
+  const [eventId, setEventId] = useState<string>('');
+  const [events, setEvents] = useState<{id:string;title:string}[]>([]);
+  const [nextReg, setNextReg] = useState<RegistrationDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('pending_approval');
-  const [selectedScreenshotUrl, setSelectedScreenshotUrl] = useState<string | null>(null);
+  const [showScreenshot, setShowScreenshot] = useState(false);
   const toast = useToast();
 
-  const loadRegistrations = async () => {
+  const loadNext = async (id: string) => {
     setIsLoading(true);
+    setLoadError(null);
+    setShowScreenshot(false);
     try {
-      const data = await adminApi.getPendingRegistrations();
-      setRegistrations(data);
+      if (!id) { setNextReg(null); setIsLoading(false); return; }
+      const res = await apiClient.get(`/admin/events/${id}/registrations/next`);
+      setNextReg(res.data ?? null);
     } catch (err: any) {
-      toast.error(getErrorMessage(err, 'Failed to fetch registrations'));
-    } finally {
-      setIsLoading(false);
-    }
+      const msg = getErrorMessage(err, 'Failed to load next registration');
+      setLoadError(msg);
+      console.error('ApprovalsPage /next error:', msg, err);
+      toast.error(msg);
+    } finally { setIsLoading(false); }
   };
 
   useEffect(() => {
-    loadRegistrations();
+    apiClient.get('/events/')
+      .then(r => {
+        const evs = r.data || [];
+        setEvents(evs);
+        if (evs.length > 0) {
+          setEventId(evs[0].id);
+          loadNext(evs[0].id);
+        } else {
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        setEvents([]);
+        setIsLoading(false);
+      });
   }, []);
 
-  const handleApprove = async (regId: string) => {
-    setActionInProgress(regId);
+  const handleDecide = async (action: 'verified' | 'rejected', reason?: string) => {
+    if (!nextReg) return;
+    setActionInProgress(nextReg.id);
     try {
-      await adminApi.approveRegistration(regId);
-      toast.success('Registration approved & digital ticket passes issued!');
-      // Update local state
-      setRegistrations((prev) =>
-        prev.map((r) => (r.id === regId ? { ...r, status: 'approved' } : r))
-      );
+      const endpoint = action === 'verified' ? adminApi.approveRegistration : adminApi.rejectRegistration;
+      await endpoint(nextReg.id);
+      toast.success(`Registration ${action}`);
+      await loadNext(eventId);
     } catch (err: any) {
-      if (err.response?.status === 409) {
-        toast.error('Action failed — registration already processed');
-      } else {
-        toast.error(getErrorMessage(err, 'Failed to approve registration'));
-      }
+      toast.error(getErrorMessage(err, 'Decision failed'));
     } finally {
       setActionInProgress(null);
     }
   };
 
-  const handleReject = async (regId: string) => {
-    setActionInProgress(regId);
-    try {
-      await adminApi.rejectRegistration(regId);
-      toast.warning('Registration rejected. Student has been granted retry attempt.');
-      setRegistrations((prev) =>
-        prev.map((r) => (r.id === regId ? { ...r, status: 'rejected', retry_count: r.retry_count + 1 } : r))
-      );
-    } catch (err: any) {
-      if (err.response?.status === 409) {
-        toast.error('Action failed — registration already processed');
-      } else {
-        toast.error(getErrorMessage(err, 'Failed to reject registration'));
-      }
-    } finally {
-      setActionInProgress(null);
-    }
-  };
-
-  const filteredList = registrations.filter((r) => {
-    if (filterStatus === 'all') return true;
-    return r.status === filterStatus;
-  });
-
-  const getStatusBadge = (status: string) => {
-    if (status === 'approved') {
-      return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-950/60 text-emerald-400 border border-emerald-500/30">
-          Approved
-        </span>
-      );
-    }
-    if (status === 'rejected') {
-      return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-950/60 text-red-400 border border-red-500/30">
-          Rejected
-        </span>
-      );
-    }
-    if (status === 'pending_approval') {
-      return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
-          Pending Approval
-        </span>
-      );
-    }
+  if (loadError) {
     return (
-      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-neutral-800 text-neutral-300 border border-neutral-700">
-        {status.replace('_', ' ')}
-      </span>
+      <div className="p-8 text-red-400 flex items-center gap-2">
+        <AlertCircle /> {loadError}
+      </div>
     );
-  };
+  }
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="space-y-6 sm:space-y-8"
-    >
-      {/* Header & Controls */}
-      <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
-        <div>
-          <div className="flex items-center gap-2">
-            <CheckSquare className="w-5 h-5 text-red-500" />
-            <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight">
-              Registration & Payment Approvals
-            </h2>
-          </div>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            Review submitted bank UTRs, verify payment screenshots, and grant event admission
-          </p>
-        </div>
+  if (isLoading) return <div className="p-8 text-neutral-400">Loading next item...</div>;
 
-        <div className="flex items-center gap-2.5 w-full md:w-auto">
-          {/* Status Filter */}
-          <div className="relative flex-1 md:w-64">
-            <Filter className="w-3.5 h-3.5 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs text-white focus:outline-none focus:border-red-500/50 transition-all duration-300 cursor-pointer appearance-none"
-            >
-              <option value="pending_approval">Pending Approval (Action Req.)</option>
-              <option value="approved">Approved Passes</option>
-              <option value="rejected">Rejected</option>
-              <option value="pending_payment">Awaiting Payment</option>
-              <option value="all">All Registrations</option>
-            </select>
-          </div>
-
-          <button
-            onClick={loadRegistrations}
-            disabled={isLoading}
-            aria-label="Refresh Registrations"
-            className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-red-500/50 text-neutral-300 hover:text-white transition-all duration-300 cursor-pointer active:scale-95 disabled:opacity-50 shrink-0"
+  if (!nextReg) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto">
+        <h1 className="text-xl font-bold mb-3">Next Pending Review</h1>
+        <div className="mb-4">
+          <label htmlFor="event-select" className="text-sm text-neutral-400 block mb-1">Event</label>
+          <select
+            id="event-select"
+            value={eventId}
+            onChange={e => { const id = e.target.value; setEventId(id); loadNext(id); }}
+            className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-red-500' : ''}`} />
-          </button>
+            <option value="">Select event…</option>
+            {events.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
+          </select>
+        </div>
+        <div className="p-8 text-neutral-300 text-center">
+          <UserCheck className="mx-auto mb-2 w-8 h-8 text-neutral-500" />
+          <h2 className="text-lg font-semibold">No pending registrations</h2>
+          <p className="text-sm text-neutral-400">Review queue is empty — call /next when new registrations arrive.</p>
         </div>
       </div>
+    );
+  }
 
-      {/* Registrations List */}
-      {isLoading ? (
-        <div className="p-16 text-center text-neutral-400 flex flex-col items-center justify-center gap-3">
-          <RefreshCw className="w-6 h-6 animate-spin text-red-500" />
-          <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Loading Registrations...</span>
+  const screenshotUrl = nextReg.payment_screenshot_url;
+
+  return (
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-xl font-bold mb-3">Next Pending Review</h1>
+      <div className="mb-4">
+        <label htmlFor="event-select" className="text-sm text-neutral-400 block mb-1">Event</label>
+        <select
+          id="event-select"
+          value={eventId}
+          onChange={e => { const id = e.target.value; setEventId(id); loadNext(id); }}
+          className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm"
+        >
+          <option value="">Select event…</option>
+          {events.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
+        </select>
+      </div>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 shadow-lg">
+        <div className="flex justify-between items-start mb-3">
+          <h2 className="text-lg font-semibold">{nextReg.event_title ?? 'Event'}</h2>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">Pending Approval</span>
         </div>
-      ) : filteredList.length === 0 ? (
-        <div className="py-16 text-center rounded-2xl sm:rounded-3xl bg-neutral-950/60 border border-neutral-900 p-8 space-y-2">
-          <CheckCircle2 className="w-12 h-12 text-neutral-700 mx-auto" />
-          <h3 className="text-base font-bold text-white uppercase">Queue Empty</h3>
-          <p className="text-xs text-neutral-400 max-w-sm mx-auto">
-            No registrations currently found in "{filterStatus.replace('_', ' ')}" status.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {filteredList.map((reg) => {
-            const isProcessing = actionInProgress === reg.id;
+        <p><strong>Team / Student:</strong> {nextReg.leader_name ?? 'Unknown'}</p>
+        <p><strong>Created:</strong> {new Date(nextReg.created_at).toLocaleString()}</p>
+        <p><strong>Fee charged:</strong> {(nextReg as any).fee_charged ?? nextReg.amount_paid ?? '—'}</p>
+        <p><strong>Early bird:</strong> {(nextReg as any).is_early_bird ? 'Yes' : 'No'}</p>
+        <p><strong>Transaction ID:</strong> {nextReg.transaction_id ?? '—'}</p>
 
-            return (
-              <div
-                key={reg.id}
-                className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-neutral-950/80 border border-neutral-800/80 hover:border-neutral-700 transition-all duration-300 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 shadow-lg"
-              >
-                {/* Event & Leader Details */}
-                <div className="space-y-3 flex-1 w-full min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm sm:text-base font-bold text-white truncate max-w-xs sm:max-w-md">
-                      {reg.event_title || 'E-Cell Event'}
-                    </span>
-                    {getStatusBadge(reg.status)}
-                    {reg.retry_count > 0 && (
-                      <span className="text-[10px] text-red-400 font-bold bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded-full">
-                        Retried {reg.retry_count}x
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs text-neutral-400 bg-neutral-900/40 p-3 rounded-xl border border-neutral-800/60">
-                    <div>
-                      <strong className="text-neutral-300 font-semibold block text-[10px] uppercase">Leader:</strong>
-                      <span className="text-white truncate block">{reg.leader_name} ({reg.leader_stdid || 'No ID'})</span>
-                    </div>
-                    <div>
-                      <strong className="text-neutral-300 font-semibold block text-[10px] uppercase">Team:</strong>
-                      <span className="text-white truncate block">{reg.team_name || 'Solo Registration'}</span>
-                    </div>
-                    <div>
-                      <strong className="text-neutral-300 font-semibold block text-[10px] uppercase">Fee Amount:</strong>
-                      <span className="font-semibold text-emerald-400">₹{reg.amount_paid}</span>
-                    </div>
-                    <div className="sm:col-span-2 md:col-span-3 pt-1 border-t border-neutral-800/60 flex items-center gap-2 flex-wrap">
-                      <strong className="text-neutral-300 font-semibold text-[10px] uppercase">Transaction / UTR:</strong>
-                      <span className="font-mono text-xs text-neutral-200 font-bold bg-neutral-900 px-2 py-0.5 rounded border border-neutral-700/80">
-                        {reg.transaction_id || 'Not Submitted'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Members Roster Preview */}
-                  {reg.members && reg.members.length > 1 && (
-                    <div className="pt-1">
-                      <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1">
-                        <Users className="w-3 h-3 text-neutral-400" />
-                        Roster ({reg.members.length} members):
-                      </span>
-                      <div className="flex flex-wrap gap-1.5 mt-1">
-                        {reg.members.map((m) => (
-                          <span
-                            key={m.id}
-                            className="px-2 py-0.5 rounded-md bg-neutral-900 border border-neutral-800 text-[10px] text-neutral-300"
-                          >
-                            {m.student_name} ({m.student_stdid || 'N/A'})
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions & Proof */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto lg:flex-shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-neutral-800/80">
-                  {/* View Screenshot Button */}
-                  {reg.payment_screenshot_url ? (
-                    <button
-                      onClick={() => setSelectedScreenshotUrl(reg.payment_screenshot_url || null)}
-                      className="px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700/80 hover:border-neutral-500 text-neutral-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-95 cursor-pointer shadow-sm"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-neutral-400" />
-                      <span>View Screenshot</span>
-                    </button>
-                  ) : (
-                    <span className="text-[11px] text-neutral-400 italic px-2 py-1 text-center">
-                      No screenshot uploaded
-                    </span>
-                  )}
-
-                  {/* Approve Action */}
-                  {reg.status !== 'approved' && (
-                    <button
-                      onClick={() => handleApprove(reg.id)}
-                      disabled={isProcessing}
-                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all duration-300 shadow-md shadow-emerald-950/40 active:scale-95 cursor-pointer disabled:opacity-50"
-                    >
-                      {isProcessing ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      )}
-                      <span>Approve</span>
-                    </button>
-                  )}
-
-                  {/* Reject Action */}
-                  {reg.status !== 'rejected' && (
-                    <button
-                      onClick={() => handleReject(reg.id)}
-                      disabled={isProcessing}
-                      className="px-4 py-2.5 rounded-xl bg-neutral-900 border border-red-500/40 text-red-400 hover:bg-red-950/40 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-95 cursor-pointer disabled:opacity-50"
-                    >
-                      {isProcessing ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <XCircle className="w-3.5 h-3.5" />
-                      )}
-                      <span>Reject</span>
-                    </button>
-                  )}
-                </div>
+        {/* Payment screenshot preview */}
+        <div className="mt-4">
+          <p className="font-semibold mb-2">Payment Screenshot</p>
+          {screenshotUrl ? (
+            <>
+              <img
+                src={screenshotUrl}
+                alt="Payment screenshot"
+                onClick={() => setShowScreenshot(true)}
+                className="w-full max-w-sm rounded-lg border border-neutral-700 cursor-pointer hover:border-red-500/60 transition-colors"
+              />
+              <div className="flex items-center gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowScreenshot(true)}
+                  className="text-xs text-red-400 hover:text-red-300 font-bold uppercase"
+                >
+                  View Full Size
+                </button>
+                <a
+                  href={screenshotUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-neutral-400 hover:text-white font-bold uppercase flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3 h-3" /> Open in new tab
+                </a>
               </div>
-            );
-          })}
+            </>
+          ) : (
+            <p className="text-xs text-neutral-500">No screenshot uploaded.</p>
+          )}
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button onClick={() => handleDecide('verified')} disabled={!!actionInProgress} className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium">Verify</button>
+          <button onClick={() => handleDecide('rejected', 'Rejected by admin')} disabled={!!actionInProgress} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium">Reject</button>
+          <button onClick={() => loadNext(eventId)} className="px-3 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600 text-white text-sm"><RefreshCw className="w-4 h-4" /></button>
+        </div>
+        <p className="text-xs text-neutral-500 mt-3">Call /next again after deciding to load the following item.</p>
+      </motion.div>
+
+      {/* Full-screen screenshot modal */}
+      {showScreenshot && screenshotUrl && (
+        <div
+          onClick={() => setShowScreenshot(false)}
+          className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-6 cursor-zoom-out"
+        >
+          <img
+            src={screenshotUrl}
+            alt="Payment screenshot full size"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-full rounded-lg border border-neutral-700 shadow-2xl"
+          />
+          <button
+            type="button"
+            onClick={() => setShowScreenshot(false)}
+            className="absolute top-6 right-6 text-white text-2xl font-bold hover:text-red-400"
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
       )}
-
-      {/* SCREENSHOT MODAL VIEWER */}
-      <AnimatePresence>
-        {selectedScreenshotUrl && (
-          <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative max-w-2xl w-full bg-neutral-950 border border-neutral-800 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-                <h3 className="text-sm font-bold uppercase text-white tracking-wider flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-red-500" />
-                  Payment Proof Screenshot
-                </h3>
-                <button
-                  onClick={() => setSelectedScreenshotUrl(null)}
-                  className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors active:scale-95 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="rounded-2xl overflow-auto bg-black flex items-center justify-center p-2 flex-1 min-h-0">
-                <img
-                  src={selectedScreenshotUrl}
-                  alt="Proof of Payment"
-                  className="max-h-[60vh] w-auto object-contain rounded-xl"
-                />
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={() => setSelectedScreenshotUrl(null)}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-neutral-900 border border-neutral-700 hover:border-neutral-500 text-white text-xs font-bold uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
-                >
-                  Close Preview
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 
