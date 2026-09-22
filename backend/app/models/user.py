@@ -7,9 +7,16 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Enum as SQLEnum,
+    UniqueConstraint,
+    Index,
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
+
+class UserRole(SQLEnum):
+    student = "student"
+    admin = "admin"
+
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -26,13 +33,12 @@ class User(Base):
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
-        index=True,
     )
-    stdid = Column(String(50), unique=True, nullable=True, index=True)
-    name = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
+    stdid = Column(String(50), nullable=True)
+    name = Column(String(150), nullable=False)
+    email = Column(String(255), nullable=False)
     role = Column(
-        SQLEnum("student", "admin", name="user_role_enum", native_enum=False),
+        SQLEnum("student", "admin", name="user_role"),
         nullable=False,
         default="student",
     )
@@ -81,6 +87,17 @@ class User(Base):
         back_populates="admin",
         foreign_keys="[AuditLog.admin_id]",
     )
+    admin_action_logs = relationship(
+        "AdminActionLog",
+        back_populates="admin",
+        foreign_keys="[AdminActionLog.admin_id]",
+    )
+
+    __table_args__ = (
+        Index("idx_users_stdid", "stdid"),
+        UniqueConstraint("email", name="users_email_key"),
+        UniqueConstraint("stdid", name="users_stdid_key"),
+    )
 
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email} role={self.role}>"
@@ -101,23 +118,14 @@ class AdminProfile(Base):
         nullable=False,
     )
     section = Column(
-        SQLEnum(
-            "superadmin",
-            "tech",
-            "social_media",
-            "events",
-            "design",
-            "other",
-            name="admin_section_enum",
-            native_enum=False,
-        ),
+        SQLEnum("superadmin", "tech", "social_media", "events", "design", "other", name="admin_section"),
         nullable=False,
         default="other",
     )
     managed_events = Column(ARRAY(UUID(as_uuid=True)), nullable=True, default=list)
     created_by = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id", ondelete="SET NULL"),
+        ForeignKey("users.id"),
         nullable=True,
     )
     created_at = Column(
