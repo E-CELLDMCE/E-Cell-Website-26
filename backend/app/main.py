@@ -184,9 +184,22 @@ async def lifespan(app: FastAPI):
         try:
             with engine.connect() as conn:
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);"))
+                conn.execute(text("ALTER TABLE events ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE;"))
                 conn.commit()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[DB Startup] Column migration check error: {e}")
+
+        # Purge soft-deleted events that exceeded 7 days retention
+        try:
+            from app.services.event_cleanup import purge_expired_deleted_events
+            cleanup_db = SessionLocal()
+            purged = purge_expired_deleted_events(cleanup_db, retention_days=7)
+            if purged > 0:
+                print(f"[DB Startup] Purged {purged} event(s) exceeding 7-day retention period.")
+            cleanup_db.close()
+        except Exception as e:
+            print(f"[DB Startup] Cleanup warning: {e}")
+
         ensure_superadmin_exists()
         seed_initial_data()
     except Exception as e:

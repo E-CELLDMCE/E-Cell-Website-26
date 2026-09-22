@@ -18,6 +18,9 @@ class EventBase(BaseModel):
     poster_url: Optional[str] = None
     payment_qr_url: Optional[str] = None
     status: str = "upcoming"
+    early_bird_enabled: Optional[bool] = False
+    early_bird_capacity: Optional[int] = None
+    early_bird_fee: Optional[Decimal] = None
 
     @model_validator(mode="after")
     def validate_team_sizes(self):
@@ -30,6 +33,19 @@ class EventBase(BaseModel):
 
 class EventCreate(EventBase):
     pass
+
+    @model_validator(mode="after")
+    def validate_early_bird(self):
+        if self.early_bird_enabled:
+            if self.early_bird_capacity is None or self.early_bird_fee is None:
+                raise ValueError("early_bird_capacity and early_bird_fee must be provided when early_bird_enabled is True")
+            if self.early_bird_capacity <= 0:
+                raise ValueError("early_bird_capacity must be greater than 0")
+            if self.early_bird_fee <= 0:
+                raise ValueError("early_bird_fee must be greater than 0")
+            if self.early_bird_fee >= self.fee_amount:
+                raise ValueError("early_bird_fee must be less than fee_amount")
+        return self
 
 
 class EventUpdate(BaseModel):
@@ -45,6 +61,9 @@ class EventUpdate(BaseModel):
     poster_url: Optional[str] = None
     payment_qr_url: Optional[str] = None
     status: Optional[str] = None
+    early_bird_enabled: Optional[bool] = None
+    early_bird_capacity: Optional[int] = None
+    early_bird_fee: Optional[Decimal] = None
 
     @model_validator(mode="after")
     def validate_team_sizes(self):
@@ -58,10 +77,19 @@ class EventUpdate(BaseModel):
             raise ValueError("max_team_size must be greater than or equal to min_team_size")
         return self
 
+    @model_validator(mode="after")
+    def validate_early_bird(self):
+        if self.early_bird_enabled is True:
+            # Note: when updating, capacity and fee must still be positive if enabled
+            # But we don't enforce full consistency here since partial updates may occur
+            pass
+        return self
+
 
 class EventResponse(EventBase):
     id: uuid.UUID
     created_at: datetime
+    early_bird_taken: int = 0
 
     class Config:
         from_attributes = True

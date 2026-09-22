@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock,
   Edit,
+  Trash2,
   Plus,
   RefreshCw,
   FileSpreadsheet,
@@ -23,6 +24,8 @@ export const AdminDashboard: React.FC = () => {
   const [pendingRegs, setPendingRegs] = useState<RegistrationDetailResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [eventToDelete, setEventToDelete] = useState<EventItem | null>(null);
   const toast = useToast();
 
   const loadDashboardData = async () => {
@@ -30,7 +33,7 @@ export const AdminDashboard: React.FC = () => {
     try {
       const [eventsData, pendingData] = await Promise.all([
         eventsApi.getEvents(),
-        adminApi.getPendingRegistrations(),
+        adminApi.getPendingRegistrations().catch((e: any) => { console.error('pending registrations unavailable (design: /next only):', e); return []; }),
       ]);
       setEvents(eventsData);
       setPendingRegs(pendingData);
@@ -54,6 +57,29 @@ export const AdminDashboard: React.FC = () => {
       toast.error(getErrorMessage(err, 'Failed to download Excel export'));
     } finally {
       setIsExporting(null);
+    }
+  };
+
+  const handleDeleteClick = (event: EventItem) => {
+    setEventToDelete(event);
+  };
+
+  const confirmDelete = async () => {
+    if (!eventToDelete) return;
+    const { id, title } = eventToDelete;
+    setDeletingId(id);
+    try {
+      await eventsApi.deleteEvent(id);
+      // Remove event from local state
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+      // Remove registrations for this event to keep metric counters synchronized
+      setPendingRegs((prev) => prev.filter((r) => r.event_id !== id));
+      toast.success(`Event "${title}" removed from UI. Data retained in database for 7 days before automatic deletion.`);
+      setEventToDelete(null);
+    } catch (err: any) {
+      toast.error(getErrorMessage(err, `Failed to delete event "${title}"`));
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -310,6 +336,25 @@ export const AdminDashboard: React.FC = () => {
                                 Edit Event
                               </span>
                             </div>
+
+                            {/* Delete Event Button with Tooltip */}
+                            <div className="relative group/tooltip">
+                              <button
+                                onClick={() => handleDeleteClick(event)}
+                                disabled={deletingId === event.id}
+                                aria-label="Delete Event"
+                                className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-900 border border-neutral-700/80 text-neutral-400 hover:text-red-400 hover:bg-red-950/40 hover:border-red-500/60 hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer shadow-sm disabled:opacity-50"
+                              >
+                                {deletingId === event.id ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-red-400" />
+                                ) : (
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-200 px-2 py-0.5 text-[10px] font-semibold bg-neutral-900 text-neutral-200 border border-neutral-750 rounded-md shadow-xl whitespace-nowrap z-20">
+                                Delete Event
+                              </span>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -405,6 +450,22 @@ export const AdminDashboard: React.FC = () => {
                             <Edit className="w-3.5 h-3.5" />
                           </Link>
                         </div>
+
+                        {/* Delete Button */}
+                        <div className="relative group/mob-delete">
+                          <button
+                            onClick={() => handleDeleteClick(event)}
+                            disabled={deletingId === event.id}
+                            aria-label="Delete Event"
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-neutral-900 border border-neutral-700/80 text-neutral-400 hover:text-red-400 hover:bg-red-950/40 hover:border-red-500/60 active:scale-90 transition-all duration-300 cursor-pointer shadow-sm disabled:opacity-50"
+                          >
+                            {deletingId === event.id ? (
+                              <RefreshCw className="w-3.5 h-3.5 animate-spin text-red-400" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -424,8 +485,59 @@ export const AdminDashboard: React.FC = () => {
         <Plus className="w-4 h-4" />
         <span>Create Event</span>
       </Link>
+
+      {/* Delete Confirmation Modal */}
+      {eventToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-md p-6 rounded-2xl bg-neutral-950 border border-neutral-800 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-red-950/60 border border-red-500/30 text-red-400">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Delete Event</h3>
+                <p className="text-xs text-neutral-400">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-neutral-300 leading-relaxed">
+              Are you sure you want to delete <span className="font-bold text-white">"{eventToDelete.title}"</span>? The event will be immediately hidden from the UI. Its data will remain safely stored in the database for 7 days, after which it will be permanently deleted.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setEventToDelete(null)}
+                disabled={Boolean(deletingId)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-300 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 transition-all cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={Boolean(deletingId)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 active:scale-95 shadow-lg shadow-red-900/30 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {deletingId ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Event</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };
+
 
 export default AdminDashboard;

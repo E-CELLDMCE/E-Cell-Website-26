@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -6,8 +7,10 @@ from sqlalchemy.orm import Session
 from app.core.security import get_current_user, get_current_admin
 from app.database import get_db
 from app.models.event import Event
+from app.models.registration import EventRegistration, RegistrationMember, AuditLog
 from app.models.user import User
 from app.services.cloudinary_service import refresh_poster_url
+from app.services.event_cleanup import purge_expired_deleted_events
 from app.schemas.event import EventCreate, EventUpdate, EventResponse
 
 router = APIRouter(prefix="/events", tags=["Events"])
@@ -23,8 +26,14 @@ def serialize_event(event: Event) -> EventResponse:
 def list_events(
     db: Session = Depends(get_db),
 ):
-    """List all available events."""
-    events = db.query(Event).order_by(Event.created_at.desc()).all()
+    """List all available events (excluding deleted events; auto-purges events expired > 7 days)."""
+    purge_expired_deleted_events(db, retention_days=7)
+    events = (
+        db.query(Event)
+        .filter(Event.deleted_at.is_(None))
+        .order_by(Event.created_at.desc())
+        .all()
+    )
     return [serialize_event(e) for e in events]
 
 
@@ -33,8 +42,12 @@ def get_event(
     event_id: uuid.UUID,
     db: Session = Depends(get_db),
 ):
-    """Get single event details by id."""
-    event = db.query(Event).filter(Event.id == event_id).first()
+    """Get single event details by id (excludes soft-deleted events)."""
+    event = (
+        db.query(Event)
+        .filter(Event.id == event_id, Event.deleted_at.is_(None))
+        .first()
+    )
     if not event:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -75,6 +88,10 @@ def create_event(
         payment_qr_url=payload.payment_qr_url,
         status=payload.status,
         created_by=current_admin.id,
+        early_bird_enabled=payload.early_bird_enabled if payload.early_bird_enabled is not None else False,
+        early_bird_capacity=payload.early_bird_capacity,
+        early_bird_fee=payload.early_bird_fee,
+        early_bird_taken=0,
     )
     db.add(event)
     db.commit()
@@ -91,7 +108,11 @@ def update_event(
     db: Session = Depends(get_db),
 ):
     """Update event details (Admin only)."""
-    event = db.query(Event).filter(Event.id == event_id).first()
+    event = (
+        db.query(Event)
+        .filter(Event.id == event_id, Event.deleted_at.is_(None))
+        .first()
+    )
     if not event:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -113,10 +134,64 @@ def update_event(
             detail="max_team_size must be greater than or equal to min_team_size",
         )
 
-    update_data = payload.model_dump(exclude_unset=True)
+    update_data = payload.model_dump(exclude_unset=True, exclude={"early_bird_taken"})
     for field, value in update_data.items():
+        if field == "early_bird_taken":
+            continue
         setattr(event, field, value)
 
     db.commit()
     db.refresh(event)
     return EventResponse.model_validate(event)
+
+
+@router.delete("/{event_id}", status_code=status.HTTP_200_OK)
+def delete_event(
+    event_id: uuid.UUID,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Soft-deletes an event from the UI while retaining all data in the DB for 7 days.
+    Expired events (> 7 days) are automatically purged from the DB.
+    """
+    # 1. Clean up any soft-deleted events that have passed the 7-day retention window
+    purge_expired_deleted_events(db, retention_days=7)
+
+    # 2. Locate active event
+    event = (
+        db.query(Event)
+        .filter(Event.id == event_id, Event.deleted_at.is_(None))
+        .first()
+    )
+    if not event:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Event not found",
+        )
+
+    now = datetime.now(timezone.utc)
+    event_title = event.title
+
+    # 3. Soft-delete: mark as deleted with timestamp and cancel status
+    event.deleted_at = now
+    event.status = "cancelled"
+
+    # 4. Record audit log entry
+    audit = AuditLog(
+        admin_id=current_admin.id,
+        action="soft_delete_event",
+        target_type="event",
+        target_id=str(event_id),
+        details={
+            "title": event_title,
+            "deleted_at": now.isoformat(),
+            "retention_days": 7,
+        },
+    )
+    db.add(audit)
+    db.commit()
+
+    return {
+        "message": f"Event '{event_title}' removed from UI. Data retained in database for 7 days before permanent deletion."
+    }

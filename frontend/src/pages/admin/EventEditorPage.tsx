@@ -137,6 +137,9 @@ export const EventEditorPage: React.FC = () => {
   const [posterUrl, setPosterUrl] = useState('');
   const [paymentQrUrl, setPaymentQrUrl] = useState('');
   const [status, setStatus] = useState('upcoming');
+  const [earlyBirdEnabled, setEarlyBirdEnabled] = useState(false);
+  const [earlyBirdFee, setEarlyBirdFee] = useState<number>(0);
+  const [earlyBirdCapacity, setEarlyBirdCapacity] = useState<number>(0);
 
   useEffect(() => {
     if (isEditing && id) {
@@ -157,6 +160,9 @@ export const EventEditorPage: React.FC = () => {
           setPosterUrl(e.poster_url || '');
           setPaymentQrUrl(e.payment_qr_url || '');
           setStatus(e.status || 'upcoming');
+          setEarlyBirdEnabled(!!e.early_bird_enabled);
+          setEarlyBirdFee(Number(e.early_bird_fee) || 0);
+          setEarlyBirdCapacity(Number(e.early_bird_capacity) || 0);
         } catch (err: any) {
           toast.error(getErrorMessage(err, 'Failed to load event for editing'));
         } finally {
@@ -185,6 +191,10 @@ export const EventEditorPage: React.FC = () => {
       toast.error('Maximum team size cannot be less than minimum team size');
       return;
     }
+    if (earlyBirdEnabled && (earlyBirdFee <= 0 || earlyBirdCapacity <= 0 || earlyBirdFee >= feeAmount)) {
+      toast.error('Early-bird: fee > 0, quota > 0, and fee must be less than regular fee');
+      return;
+    }
 
     setIsSaving(true);
     const payload: EventCreatePayload = {
@@ -200,6 +210,9 @@ export const EventEditorPage: React.FC = () => {
       poster_url: posterUrl.trim() || null,
       payment_qr_url: paymentQrUrl.trim() || null,
       status,
+      early_bird_enabled: earlyBirdEnabled,
+      early_bird_fee: earlyBirdEnabled ? Number(earlyBirdFee) : null,
+      early_bird_capacity: earlyBirdEnabled ? Number(earlyBirdCapacity) : null,
     };
 
     try {
@@ -287,39 +300,113 @@ export const EventEditorPage: React.FC = () => {
           />
         </div>
 
-        {/* Fee & Capacity Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-red-500" />
-              Registration Fee (INR)
-            </label>
+        {/* Early-bird conditional pricing */}
+        <div className="p-4 rounded-2xl bg-neutral-900/40 border border-neutral-800 space-y-3">
+          <label className="flex items-center gap-3 text-sm font-bold text-white cursor-pointer">
             <input
-              type="number"
-              min="0"
-              step="1"
-              value={feeAmount}
-              onChange={(e) => setFeeAmount(Number(e.target.value))}
-              placeholder="0 for Free"
-              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
+              type="checkbox"
+              checked={earlyBirdEnabled}
+              onChange={(e) => {
+                setEarlyBirdEnabled(e.target.checked);
+                if (!e.target.checked) {
+                  setEarlyBirdFee(0);
+                  setEarlyBirdCapacity(0);
+                }
+              }}
+              className="w-5 h-5 accent-red-500"
             />
-            <p className="text-[10px] text-neutral-400">Set to 0 if event has free entry.</p>
-          </div>
+            This event has an early-bird offer
+          </label>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-red-500" />
-              Max Participant Capacity
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={maxCapacity}
-              onChange={(e) => setMaxCapacity(e.target.value)}
-              placeholder="Unlimited if left empty"
-              className="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
-            />
-          </div>
+          {earlyBirdEnabled && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs text-neutral-400">Early-bird fee (INR)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={earlyBirdFee}
+                    onChange={(e) => setEarlyBirdFee(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-neutral-400">Max early-bird quota</label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={earlyBirdCapacity}
+                    onChange={(e) => setEarlyBirdCapacity(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-neutral-400">Regular fee (INR)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={feeAmount}
+                    onChange={(e) => setFeeAmount(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-neutral-400">Max participant capacity (total)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={maxCapacity}
+                  onChange={(e) => setMaxCapacity(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm"
+                />
+              </div>
+              {earlyBirdFee >= feeAmount && (
+                <p className="text-xs text-red-400">Early-bird fee must be less than regular fee.</p>
+              )}
+              {(earlyBirdFee <= 0 || earlyBirdCapacity <= 0) && (
+                <p className="text-xs text-red-400">Early-bird fee and quota must be greater than 0.</p>
+              )}
+            </>
+          )}
+
+          {!earlyBirdEnabled && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5 text-red-500" />
+                  Registration Fee (INR)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={feeAmount}
+                  onChange={(e) => setFeeAmount(Number(e.target.value))}
+                  placeholder="0 for Free"
+                  className="w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-red-500" />
+                  Max Participant Capacity
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={maxCapacity}
+                  onChange={(e) => setMaxCapacity(e.target.value)}
+                  placeholder="Unlimited if left empty"
+                  className="w-full px-3.5 sm:px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white text-sm focus:outline-none focus:border-red-500/50 transition-all duration-300"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Team Event Toggles */}

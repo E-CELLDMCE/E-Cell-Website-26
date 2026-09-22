@@ -9,6 +9,7 @@ from fastapi import File, UploadFile
 
 from app.core.security import get_current_admin, get_current_superadmin
 from app.database import get_db
+from app.models.admin_action_log import AdminActionLog
 from app.models.event import Event
 from app.models.registration import EventRegistration, RegistrationMember, AuditLog
 from app.models.user import User, AdminProfile
@@ -16,6 +17,8 @@ from app.schemas.user import UserResponse
 from app.schemas.registration import (
     RegistrationDetailResponse,
     RegistrationMemberDetail,
+    AdminDecisionRequest,
+    RegistrationResponse,
     TicketScanRequest,
     TicketScanResponse,
 )
@@ -45,58 +48,155 @@ async def upload_qr(
     return {"url": url}
 
 
-@router.get("/registrations/pending", response_model=List[RegistrationDetailResponse])
-def get_pending_registrations(
+# /registrations/pending removed to prevent bias via browsing/filtering/sorting
+# Admin review uses ONLY sequential /next endpoint
+
+
+@router.get("/events/{event_id}/registrations/pending/count")
+def get_pending_registrations_count(
+    event_id: uuid.UUID,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    count = db.query(EventRegistration).filter(
+        EventRegistration.event_id == event_id,
+        EventRegistration.status == "pending",
+    ).count()
+    return {"count": count}
+
+
+@router.get("/events/{event_id}/registrations/next")
+def get_next_pending_registration(
+    event_id: uuid.UUID,
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db),
 ):
     """
-    Returns list of registrations awaiting admin approval (status='pending_approval' or all registrations).
+    Returns the single oldest pending registration for sequential anti-bias review.
+    This is the ONLY read endpoint for pending registrations.
     """
-    registrations = (
+    reg = (
         db.query(EventRegistration)
-        .order_by(EventRegistration.created_at.desc())
-        .all()
+        .filter(EventRegistration.event_id == event_id, EventRegistration.status == "pending_approval")
+        .order_by(EventRegistration.created_at.asc())
+        .first()
+    )
+    if not reg:
+        return None
+    members_detail = [
+        RegistrationMemberDetail(
+            id=m.id,
+            student_id=m.student_id,
+            student_name=m.student.name if m.student else "",
+            student_email=m.student.email if m.student else "",
+            student_stdid=m.student.stdid if m.student else None,
+            is_leader=m.is_leader,
+            ticket_qr_token=m.ticket_qr_token,
+            ticket_used=m.ticket_used,
+            scanned_at=m.scanned_at,
+        )
+        for m in reg.members
+    ]
+
+    return RegistrationDetailResponse(
+        id=reg.id,
+        event_id=reg.event_id,
+        event_title=reg.event.title if reg.event else None,
+        leader_id=reg.leader_id,
+        leader_name=reg.leader.name if reg.leader else None,
+        leader_email=reg.leader.email if reg.leader else None,
+        leader_stdid=reg.leader.stdid if reg.leader else None,
+        team_name=reg.team_name,
+        status=reg.status,
+        transaction_id=reg.transaction_id,
+        payment_screenshot_url=reg.payment_screenshot_url,
+        amount_paid=reg.amount_paid,
+        retry_count=reg.retry_count,
+        created_at=reg.created_at,
+        verified_at=reg.verified_at,
+        members=members_detail,
+        is_early_bird=reg.is_early_bird,
+        fee_charged=reg.fee_charged,
     )
 
-    result: List[RegistrationDetailResponse] = []
-    for reg in registrations:
-        members_detail = []
-        for m in reg.members:
-            members_detail.append(
-                RegistrationMemberDetail(
-                    id=m.id,
-                    student_id=m.student_id,
-                    student_name=m.student.name if m.student else "",
-                    student_email=m.student.email if m.student else "",
-                    student_stdid=m.student.stdid if m.student else None,
-                    is_leader=m.is_leader,
-                    ticket_qr_token=m.ticket_qr_token,
-                    ticket_used=m.ticket_used,
-                    scanned_at=m.scanned_at,
-                )
-            )
-        result.append(
-            RegistrationDetailResponse(
-                id=reg.id,
-                event_id=reg.event_id,
-                event_title=reg.event.title if reg.event else None,
-                leader_id=reg.leader_id,
-                leader_name=reg.leader.name if reg.leader else None,
-                leader_email=reg.leader.email if reg.leader else None,
-                leader_stdid=reg.leader.stdid if reg.leader else None,
-                team_name=reg.team_name,
-                status=reg.status,
-                transaction_id=reg.transaction_id,
-                payment_screenshot_url=reg.payment_screenshot_url,
-                amount_paid=reg.amount_paid,
-                retry_count=reg.retry_count,
-                created_at=reg.created_at,
-                verified_at=reg.verified_at,
-                members=members_detail,
-            )
-        )
-    return result
+
+@router.post("/registrations/{registration_id}/decide")
+def decide_registration(
+    registration_id: uuid.UUID,
+    payload: AdminDecisionRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    """
+    Admin decides on a single pending registration (verified/rejected).
+    Atomic transaction: update registration + append admin_action_log.
+    """
+    # Prevent double-action / race: only proceed if still pending
+    registration = (
+        db.query(EventRegistration)
+        .filter(EventRegistration.id == registration_id)
+        .with_for_update()
+        .first()
+    )
+    if not registration:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Registration not found")
+    if registration.status != "pending":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Registration has already been decided")
+
+    # Double-check rejected reason at router level
+    if payload.action == "rejected" and (not payload.reason or not str(payload.reason).strip()):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reason is required when rejecting")
+
+    # Update registration
+    registration.status = "verified" if payload.action == "verified" else "rejected"
+    registration.decided_at = datetime.now(timezone.utc)
+    registration.decided_by_admin_id = current_admin.id
+    registration.decision_reason = str(payload.reason).strip() if payload.reason else None
+
+    # Always append to audit-only log
+    log = AdminActionLog(
+        registration_id=registration.id,
+        admin_id=current_admin.id,
+        action="verified" if payload.action == "verified" else "rejected",
+        reason=str(payload.reason).strip() if payload.reason else None,
+        timestamp=datetime.now(timezone.utc),
+    )
+    db.add(log)
+    db.commit()
+    db.refresh(registration)
+    db.refresh(log)
+
+    return {
+        "registration": RegistrationResponse.model_validate(registration),
+        "note": "Call GET /admin/events/{event_id}/registrations/next to proceed to the following item.",
+    }
+
+
+@router.get("/registrations/{registration_id}/audit-log")
+def get_registration_audit_log(
+    registration_id: uuid.UUID,
+    current_admin: User = Depends(get_current_superadmin),
+    db: Session = Depends(get_db),
+):
+    """
+    Restricted to super-admin: pulls AdminActionLog history for a registration.
+    """
+    logs = (
+        db.query(AdminActionLog)
+        .filter(AdminActionLog.registration_id == registration_id)
+        .order_by(AdminActionLog.timestamp.asc())
+        .all()
+    )
+    return [
+        {
+            "id": str(l.id),
+            "admin_id": str(l.admin_id) if l.admin_id else None,
+            "action": l.action,
+            "reason": l.reason,
+            "timestamp": l.timestamp,
+        }
+        for l in logs
+    ]
 
 
 @router.post("/registrations/{registration_id}/approve", response_model=RegistrationDetailResponse)
@@ -475,7 +575,7 @@ def export_event_registrations(
     """
     Exports all registrations and student attendee details for an event as an Excel (.xlsx) file.
     """
-    event = db.query(Event).filter(Event.id == event_id).first()
+    event = db.query(Event).filter(Event.id == event_id, Event.deleted_at.is_(None)).first()
     if not event:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

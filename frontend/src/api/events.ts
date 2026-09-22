@@ -31,6 +31,9 @@ export interface EventCreatePayload {
   poster_url?: string | null;
   payment_qr_url?: string | null;
   status: string;
+  early_bird_enabled?: boolean;
+  early_bird_capacity?: number | null;
+  early_bird_fee?: number | null;
 }
 
 export const eventsApi = {
@@ -51,6 +54,11 @@ export const eventsApi = {
 
   updateEvent: async (eventId: string, payload: Partial<EventCreatePayload>): Promise<EventItem> => {
     const res = await apiClient.put<EventItem>(`/events/${eventId}`, payload);
+    return res.data;
+  },
+
+  deleteEvent: async (eventId: string): Promise<{ message: string }> => {
+    const res = await apiClient.delete<{ message: string }>(`/events/${eventId}`);
     return res.data;
   },
 };
