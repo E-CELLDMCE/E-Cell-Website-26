@@ -31,6 +31,9 @@ export interface EventCreatePayload {
   poster_url?: string | null;
   payment_qr_url?: string | null;
   status: string;
+  early_bird_enabled?: boolean;
+  early_bird_capacity?: number | null;
+  early_bird_fee?: number | null;
 }
 
 export const eventsApi = {
