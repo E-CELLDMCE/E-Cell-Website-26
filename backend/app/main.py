@@ -226,11 +226,7 @@ app = FastAPI(
 # Configure CORS from environment variable
 import os
 
-allowed_origins = [
-    o.strip()
-    for o in os.getenv("ALLOWED_ORIGINS", "").split(",")
-    if o.strip()
-]
+allowed_origins = settings.cors_origins
 
 if not allowed_origins:
     allowed_origins = ["http://localhost:5173"]

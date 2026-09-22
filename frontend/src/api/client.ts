@@ -5,8 +5,11 @@ const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  // Local development fallback only
-  return 'http://localhost:8000/api/v1';
+  // Development-only localhost fallback; never used in production builds
+  if (import.meta.env.DEV || import.meta.env.MODE === 'development' || (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development')) {
+    return 'http://localhost:8000/api/v1';
+  }
+  return '';
 };
 
 export const API_BASE_URL = getBaseUrl();
