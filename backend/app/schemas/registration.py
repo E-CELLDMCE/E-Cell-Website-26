@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import List, Optional, Literal
+from pydantic import BaseModel, Field, model_validator
 
 
 class TeamRegistrationCreate(BaseModel):
@@ -65,6 +65,8 @@ class RegistrationDetailResponse(BaseModel):
     transaction_id: Optional[str] = None
     payment_screenshot_url: Optional[str] = None
     amount_paid: Decimal
+    is_early_bird: Optional[bool] = False
+    fee_charged: Optional[Decimal] = None
     retry_count: int
     created_at: datetime
     verified_at: Optional[datetime] = None
@@ -81,3 +83,37 @@ class RegistrationSimpleResponse(BaseModel):
     status: str
     amount_paid: Decimal
     message: str
+
+
+class RegistrationCreate(BaseModel):
+    # Student input fields only; no server-computed fields
+    student_id: Optional[uuid.UUID] = None
+    student_name: Optional[str] = None
+    student_email: Optional[str] = None
+    student_stdid: Optional[str] = None
+
+
+class RegistrationResponse(BaseModel):
+    id: uuid.UUID
+    event_id: uuid.UUID
+    student_name: Optional[str] = None
+    student_email: Optional[str] = None
+    student_stdid: Optional[str] = None
+    is_early_bird: bool
+    fee_charged: Decimal
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class AdminDecisionRequest(BaseModel):
+    action: Literal["verified", "rejected"]
+    reason: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_reason_for_rejected(self):
+        if self.action == "rejected" and (not self.reason or not self.reason.strip()):
+            raise ValueError("reason is required when action is 'rejected'")
+        return self
