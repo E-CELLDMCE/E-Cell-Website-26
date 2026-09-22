@@ -18,6 +18,7 @@ def get_current_user_profile(
 
 
 @router.patch("/me", response_model=UserResponse)
+@router.post("/me", response_model=UserResponse)
 def update_user_profile(
     payload: UserProfileUpdate,
     current_user: User = Depends(get_current_user),
