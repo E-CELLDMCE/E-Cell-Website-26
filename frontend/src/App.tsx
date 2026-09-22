@@ -23,6 +23,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 
 // Admin Pages
+import AdminRouteGuard from './components/admin/AdminRouteGuard';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import EventEditorPage from './pages/admin/EventEditorPage';
@@ -60,7 +61,7 @@ export const App = () => {
                   <Route path="/tickets" element={<MyTicketsPage />} />
 
                   {/* Admin Protected Routes */}
-                  <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="/admin" element={<AdminRouteGuard><AdminLayout /></AdminRouteGuard>}>
                     <Route index element={<AdminDashboard />} />
                     <Route path="events/new" element={<EventEditorPage />} />
                     <Route path="events/:id/edit" element={<EventEditorPage />} />

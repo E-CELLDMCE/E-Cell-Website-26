@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, LogOut, ShieldCheck, Ticket } from 'lucide-react';
+import { Menu, X, LogOut, Ticket } from 'lucide-react';
 
 interface NavItem {
   name: string;
@@ -70,16 +70,6 @@ export const Navbar: React.FC = () => {
             );
           })}
 
-          {/* Admin Panel Direct Link for Admins */}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="text-xs font-bold tracking-widest flex items-center gap-1.5 px-3 py-1 rounded-full border border-red-500/50 bg-red-950/40 text-red-300 hover:bg-red-900/50 hover:border-red-400 transition-all shadow-[0_0_12px_rgba(220,38,38,0.3)] uppercase"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
-              ADMIN
-            </Link>
-          )}
         </nav>
 
         {/* Right side: Auth Action */}
@@ -196,16 +186,6 @@ export const Navbar: React.FC = () => {
               </Link>
             )}
 
-            {isAdmin && (
-              <Link
-                to="/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="py-2 text-sm font-bold tracking-widest text-red-400 hover:text-red-300 flex items-center gap-2 uppercase cursor-pointer"
-              >
-                <ShieldCheck className="w-4 h-4 text-red-500" />
-                ADMIN PANEL
-              </Link>
-            )}
           </div>
 
           <div className="pt-4 border-t border-neutral-800">
