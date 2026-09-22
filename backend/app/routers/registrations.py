@@ -53,6 +53,8 @@ def lookup_student_by_stdid(
         stdid=student.stdid,
         name=student.name,
         email=student.email,
+        division=student.division,
+        roll_number=student.roll_number,
     )
 
 

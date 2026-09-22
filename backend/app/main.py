@@ -134,6 +134,8 @@ def seed_initial_data():
                 stdid="STD2026001",
                 branch="Computer Science",
                 year=3,
+                division="A",
+                roll_number="45",
                 phone="9876543210",
                 oauth_provider="dev_seed",
             )
@@ -148,6 +150,8 @@ def seed_initial_data():
                 stdid="STD2026002",
                 branch="Information Technology",
                 year=3,
+                division="B",
+                roll_number="12",
                 phone="9876543211",
                 oauth_provider="dev_seed",
             )
@@ -162,6 +166,8 @@ def seed_initial_data():
                 stdid="STD2026003",
                 branch="Electronics",
                 year=2,
+                division="A",
+                roll_number="28",
                 phone="9876543212",
                 oauth_provider="dev_seed",
             )
@@ -184,6 +190,8 @@ async def lifespan(app: FastAPI):
         try:
             with engine.connect() as conn:
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS division VARCHAR(50);"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS roll_number VARCHAR(50);"))
                 conn.execute(text("ALTER TABLE events ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP WITH TIME ZONE;"))
                 conn.commit()
         except Exception as e:

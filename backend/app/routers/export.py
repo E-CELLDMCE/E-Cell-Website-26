@@ -19,6 +19,8 @@ def get_approved_students(event_id: UUID, db: Session):
             User.name.label("name"),
             User.branch.label("branch"),
             User.year.label("year"),
+            User.division.label("division"),
+            User.roll_number.label("roll_number"),
             EventRegistration.team_name.label("team_name"),
         )
         .join(
@@ -46,6 +48,8 @@ def get_approved_students(event_id: UUID, db: Session):
             "name": row.name,
             "branch": row.branch,
             "year": row.year,
+            "division": row.division,
+            "roll_number": row.roll_number,
             "team_name": row.team_name,
         }
         for row in rows

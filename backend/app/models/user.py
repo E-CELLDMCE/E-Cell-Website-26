@@ -44,6 +44,8 @@ class User(Base):
     )
     branch = Column(String(100), nullable=True)
     year = Column(Integer, nullable=True)
+    division = Column(String(50), nullable=True)
+    roll_number = Column(String(50), nullable=True)
     oauth_provider = Column(String(50), nullable=True)
     oauth_id = Column(String(255), nullable=True)
     phone = Column(String(20), nullable=True)

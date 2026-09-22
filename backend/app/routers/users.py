@@ -49,6 +49,33 @@ def update_user_profile(
         current_user.branch = payload.branch.strip() if payload.branch else None
     if payload.year is not None:
         current_user.year = payload.year
+    if payload.division is not None:
+        current_user.division = payload.division.strip() if payload.division else None
+    if payload.roll_number is not None:
+        current_user.roll_number = payload.roll_number.strip() if payload.roll_number else None
+
+    # Check uniqueness of (branch, division, roll_number, year) combination
+    final_branch = current_user.branch
+    final_division = current_user.division
+    final_roll_number = current_user.roll_number
+    final_year = current_user.year
+    if final_branch and final_division and final_roll_number and final_year:
+        duplicate = (
+            db.query(User)
+            .filter(
+                User.branch == final_branch,
+                User.division == final_division,
+                User.roll_number == final_roll_number,
+                User.year == final_year,
+                User.id != current_user.id,
+            )
+            .first()
+        )
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"A student with the same Branch, Division, and Roll Number is already registered",
+            )
 
     db.commit()
     db.refresh(current_user)

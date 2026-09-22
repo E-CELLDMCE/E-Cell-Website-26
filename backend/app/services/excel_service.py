@@ -7,13 +7,15 @@ def create_excel(rows):
     workbook = Workbook()
     worksheet = workbook.active
 
-    worksheet.append(["Student Name", "Branch", "Year", "Team Name"])
+    worksheet.append(["Student Name", "Branch", "Year", "Division", "Roll Number", "Team Name"])
 
     for row in rows:
         worksheet.append([
             row["name"],
             row["branch"],
             row["year"],
+            row.get("division", ""),
+            row.get("roll_number", ""),
             row["team_name"] or "",
         ])
 
