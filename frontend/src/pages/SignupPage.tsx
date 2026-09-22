@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Logging in with:', formData);
+    // Form submission handled by API
   };
 
   return (
@@ -61,7 +61,7 @@ export default function LoginPage() {
           {/* LOGO */}
           <div className="flex justify-center mb-5">
             <img
-              src="/images/ecell-logo.png"
+              src="/img_vid/ecell-logo.png"
               alt="E-Cell DMCE Logo"
               className="
                 h-16

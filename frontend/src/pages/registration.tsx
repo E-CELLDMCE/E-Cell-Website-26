@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Mail, MapPin, Upload } from 'lucide-react';
 import { FaInstagram, FaLinkedin } from 'react-icons/fa';
-import ecellLogo from '../assets/ecell-logo.png';
+
 import InitiativeBackground from '../components/InitiativeBackground';
 interface FormData {
   firstName: string;
@@ -66,19 +66,9 @@ export const RegistrationPage: React.FC = () => {
     });
 
     try {
-      // Connect this endpoint when the FastAPI backend is ready.
-      //
-      // const response = await fetch(
-      //   'http://localhost:8000/api/register',
-      //   {
-      //     method: 'POST',
-      //     body: payload,
-      //   }
-      // );
-
-      console.log('Form submitted successfully:', formData);
+      // TODO: Connect to backend API endpoint when ready
     } catch (error) {
-      console.error('Submission failed:', error);
+      // Submission error handling
     }
   };
 
@@ -425,7 +415,7 @@ flex
             {/* Brand */}
             <div>
              <img
-  src={ecellLogo}
+  src="/img_vid/ecell-logo.png"
   alt="ECELL DMCE"
   className="w-24 h-auto object-contain"
 />

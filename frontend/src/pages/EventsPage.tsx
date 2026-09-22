@@ -38,7 +38,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
             className="w-full h-full object-contain bg-neutral-900 transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = '/images/placeholder.png';
+              e.currentTarget.src = '/img_vid/ecell-logo.png';
             }}
           />
         ) : (

@@ -331,7 +331,7 @@ export const EventDetailPage: React.FC = () => {
                   className="w-full h-full object-contain object-center bg-neutral-900"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/images/placeholder.png';
+                    e.currentTarget.src = '/img_vid/ecell-logo.png';
                   }}
                 />
               ) : (

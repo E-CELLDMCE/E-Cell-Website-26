@@ -1,14 +1,12 @@
 import axios from 'axios';
 
-// Default fallback to configured base URL, with auto-fallback to localhost if on localhost
+// Resolve API base URL from environment variable with localhost dev fallback
 const getBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'http://localhost:8000/api/v1';
-  }
-  return 'http://192.168.1.42:8000/api/v1';
+  // Local development fallback only
+  return 'http://localhost:8000/api/v1';
 };
 
 export const API_BASE_URL = getBaseUrl();

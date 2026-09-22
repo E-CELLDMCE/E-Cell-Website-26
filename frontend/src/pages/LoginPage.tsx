@@ -13,8 +13,8 @@ export const LoginPage: React.FC = () => {
   const [isAwaitingGoogleSession, setIsAwaitingGoogleSession] = useState(false);
 
   // Admin login credentials
-  const [adminEmail, setAdminEmail] = useState('admin@ecell.com');
-  const [adminPassword, setAdminPassword] = useState('adminecell26');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   const { login, isAdmin } = useAuth();
   const toast = useToast();
@@ -187,7 +187,7 @@ export const LoginPage: React.FC = () => {
         {/* Header Logo */}
         <div className="flex justify-center mb-4">
           <img
-            src="/images/ecell-logo.png"
+            src="/img_vid/ecell-logo.png"
             alt="E-Cell DMCE Logo"
             className="h-16 w-auto object-contain"
             onError={(e) => {
@@ -284,7 +284,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
-                placeholder="admin@ecell.com"
+                placeholder="Enter admin email"
                 className="w-full px-4 py-3 rounded-xl bg-neutral-900/90 border border-neutral-800 text-white text-sm focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-colors"
               />
             </div>
@@ -312,11 +312,6 @@ export const LoginPage: React.FC = () => {
               {isLoading ? 'Verifying Admin...' : 'Authenticate Superadmin'}
             </button>
 
-            <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 text-center">
-              <p className="text-[11px] text-neutral-400">
-                Default Superadmin: <code className="text-yellow-400">admin@ecell.com</code> • Password: <code className="text-yellow-400">adminecell26</code>
-              </p>
-            </div>
           </form>
         )}
 
