@@ -52,7 +52,7 @@ const timelineData = [
   },
   {
     year: "2023",
-    description: "Expanded E-CELL's didgital presence and activities.",
+    description: "Expanded E-CELL's digital presence and activities.",
   },
   {
     year: "2024",
@@ -129,9 +129,13 @@ const AboutUs = () => {
     <div className="relative z-10 flex flex-col items-center gap-8 lg:flex-row lg:gap-12">
 
       {/* PHOTO */}
-      <div className="-mt-14 h-[260px] w-full max-w-[480px] shrink-0 bg-[#292929] sm:h-[290px]">
-        {/* Actual Origin of E-Cell image goes here */}
-      </div>
+      <div className="-mt-14 h-[260px] w-full max-w-[480px] shrink-0 overflow-hidden sm:h-[290px]">
+  <img
+    src="/img_vid/OriginOfEcell.jpg"
+    alt="Origin of E-CELL"
+    className="h-full w-full object-cover"
+  />
+</div>
 
       {/* TITLE */}
       <h2 className="text-xl sm:text-2xl md:text-4xl font-extrabold uppercase tracking-wide text-yellow-400 drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] mb-7">
@@ -330,7 +334,7 @@ to-[#8f0007]
 {/* HISTORY */}
 {/* ================================================= */}
 
-<section className="px-5 sm:px-8 pt-12 pb-0 sm:pt-12 sm:pb-0 overflow-hidden">
+<section className="px-5 sm:px-8 pt-12 pb-20 sm:pt-12 sm:pb-24 overflow-hidden">
   <div className="w-full relative">
 
     {/* Red glow */}
@@ -350,11 +354,23 @@ to-[#8f0007]
           >
             <div className="relative overflow-hidden rounded-[50px] bg-white/5 backdrop-blur-md border border-white/10">
 
-              <div className="relative w-full h-[340px] rounded-[50px] bg-neutral-700 overflow-hidden flex items-center justify-center">
-                <span className="absolute inset-0 flex items-center justify-center text-6xl sm:text-7xl md:text-8xl font-['Times_New_Roman'] text-white">
-                  {item.year}
-                </span>
-              </div>
+              <div className="relative w-full h-[300px] rounded-[55px] overflow-hidden">
+  <img
+    src={`/img_vid/TimeLine${item.year}.jpg`}
+    alt={`E-CELL ${item.year}`}
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+
+  {item.year !== "2024" && (
+  <span
+    className={`absolute inset-0 z-10 flex items-center justify-center text-8xl sm:text-9xl md:text-[10rem] font-['Times_New_Roman'] text-white ${
+      item.year === "2018" ? "pt-10 sm:pt-12 md:pt-14" : ""
+    }`}
+  >
+    {item.year}
+  </span>
+)}
+</div>
 
               <div className="text-center pt-20 pb-11 sm:pt-9 sm:pb-13 min-h-[240px]">
                 <p className="text-white text-xl sm:text-2xl md:text-3xl font-['Times_New_Roman'] leading-relaxed">
@@ -372,19 +388,29 @@ to-[#8f0007]
   key={`second-${item.year}-${index}`}
   className="history-card w-[calc(100vw-40px)] max-w-xl shrink-0"
 >
-            <div className="relative h-[700px] sm:h-[760px] md:h-[800px] overflow-hidden rounded-[50px] bg-white/5 backdrop-blur-md border border-white/10">
+            <div className="relative overflow-hidden rounded-[50px] bg-white/5 backdrop-blur-md border border-white/10">
 
   {/* Year / Image */}
-  <div className="relative w-full h-[390px] sm:h-[430px] md:h-[450px] rounded-[50px] bg-neutral-700 overflow-hidden flex items-center justify-center">
+ <div className="relative w-full h-[300px] rounded-[55px] overflow-hidden">
+  <img
+    src={`/img_vid/TimeLine${item.year}.jpg`}
+    alt={`E-CELL ${item.year}`}
+    className="absolute inset-0 h-full w-full object-cover"
+  />
 
-    <span className="absolute inset-0 flex items-center justify-center text-6xl sm:text-7xl md:text-8xl font-['Times_New_Roman'] text-white">
-      {item.year}
-    </span>
-
-  </div>
+  {item.year !== "2024" && (
+  <span
+    className={`absolute inset-0 z-10 flex items-center justify-center text-8xl sm:text-9xl md:text-[10rem] font-['Times_New_Roman'] text-white ${
+      item.year === "2018" ? "pt-16 sm:pt-18 md:pt-20" : ""
+    }`}
+  >
+    {item.year}
+  </span>
+)}
+</div>
 
   {/* Description */}
- <div className="min-h-[300px] flex items-center justify-center text-center px-8 sm:px-10 md:px-12 pt-16 pb-10">
+ <div className="text-center pt-20 pb-11 sm:pt-9 sm:pb-13 min-h-[240px]">
   <p className="text-white text-xl sm:text-2xl md:text-3xl font-['Times_New_Roman'] leading-relaxed">
     {item.description}
   </p>
