@@ -28,7 +28,7 @@ def google_callback(
     Returns backend JWT access token.
     """
     clean_email = payload.email.strip().lower()
-    user = db.query(User).filter(func.lower(User.email) == clean_email).first()
+    user = db.query(User).filter(User.email == clean_email).first()
 
     if user:
         # Update existing user OAuth info if missing
