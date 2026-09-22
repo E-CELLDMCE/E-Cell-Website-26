@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from typing import List
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+from decimal import Decimal
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from app.core.security import get_current_user, require_registration_access
@@ -180,6 +182,27 @@ def register_team(
 
     # 5. Atomic Transaction: Create EventRegistration and RegistrationMember rows
     try:
+        # Atomic early-bird claim using conditional UPDATE + RETURNING
+        # This avoids race conditions: no application-level read-compare.
+        # Must run inside same transaction so rollback releases slot.
+        # Note: Event model uses UUID PK; the atomic claim uses event.id directly.
+        result = db.execute(
+            text("""
+                UPDATE events
+                SET early_bird_taken = early_bird_taken + 1
+                WHERE id = :event_id
+                  AND early_bird_enabled = true
+                  AND early_bird_taken < early_bird_capacity
+                RETURNING early_bird_taken
+            """),
+            {"event_id": event.id},
+        )
+        row = result.fetchone()
+        is_early_bird = row is not None
+
+        # Snapshot fee permanently at creation time
+        fee_charged = event.early_bird_fee if is_early_bird else event.fee_amount
+
         # Free events (fee_amount == 0) skip the payment step entirely:
         # set status to 'approved' immediately and generate tickets so the
         # registration never gets stuck in the payment-approval queue.
@@ -191,7 +214,9 @@ def register_team(
             leader_id=current_user.id,
             team_name=payload.team_name.strip() if payload.team_name else None,
             status=initial_status,
-            amount_paid=event.fee_amount,
+            amount_paid=fee_charged,
+            is_early_bird=is_early_bird,
+            fee_charged=fee_charged,
         )
         db.add(registration)
         db.flush()  # Populates registration.id
@@ -233,7 +258,7 @@ def register_team(
             event_id=registration.event_id,
             team_name=registration.team_name,
             status=registration.status,
-            amount_paid=registration.amount_paid,
+            amount_paid=registration.fee_charged or Decimal("0.00"),
             message=(
                 "Registration confirmed. Tickets generated."
                 if is_free_event
