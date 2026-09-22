@@ -180,153 +180,161 @@ const AboutUs = () => {
 
 
 
+          
           {/* ================================================= */}
-          {/* OUR REACH */}
-          {/* ================================================= */}
+{/* OUR REACH */}
+{/* ================================================= */}
 
-          <section className="mt-30 px-14 sm:px-20">
+<section className="mt-30 px-6 sm:px-10 lg:px-20">
 
-            <div 
-  className=" 
-    max-w-6xl
-    mx-auto 
-    bg-gradient-to-b
-from-[#120000]
-via-[#4a0003]
-to-[#8f0007]
-    px-6 
-    py-7 
-    sm:py-9 
-    min-h-[310px]
-    sm:min-h-[350px]
-  " 
->
+  <div
+    className="
+      max-w-6xl
+      mx-auto
+      bg-gradient-to-b
+      from-[#120000]
+      via-[#4a0003]
+      to-[#8f0007]
+      px-6
+      py-10
+      sm:px-10
+      sm:py-12
+      lg:px-16
+      lg:py-14
+      min-h-[300px]
+      sm:min-h-[340px]
+      flex
+      flex-col
+      justify-center
+    "
+  >
 
-              <h2 
-  className=" 
-    text-center 
-    text-xl 
-    sm:text-2xl 
-    md:text-3xl 
-    font-black 
-    text-yellow-400 
-    drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)]
-    uppercase 
-    mb-15 
-  " 
->
-  OUR REACH
-</h2>
+    {/* Heading */}
+    <h2
+      className="
+        text-center
+        text-xl
+        sm:text-2xl
+        md:text-3xl
+        font-black
+        text-yellow-400
+        drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)]
+        uppercase
+        tracking-wide
+        mb-12
+        sm:mb-14
+      "
+    >
+      OUR REACH
+    </h2>
 
 
-              <div className="grid grid-cols-3 gap-1 sm:gap-8">
+    {/* Reach Statistics */}
+    <div
+      className="
+        grid
+        grid-cols-2
+        gap-10
+        sm:gap-16
+        md:gap-24
+        max-w-3xl
+        mx-auto
+        w-full
+      "
+    >
 
-  {/* Facebook */}
-  <div className="flex min-w-0 flex-col items-center text-center">
+      {/* Instagram */}
+      <div className="flex flex-col items-center text-center">
 
-    <FontAwesomeIcon
-      icon={faFacebookF}
-      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
-    />
+        <FontAwesomeIcon
+          icon={faInstagram}
+          className="
+            text-white
+            text-4xl
+            sm:text-5xl
+            md:text-6xl
+            mb-5
+          "
+        />
 
-    <div className="flex items-center justify-center whitespace-nowrap">
+        <div
+          className="
+            text-white
+            text-2xl
+            sm:text-3xl
+            md:text-4xl
+            font-extrabold
+            tracking-tight
+            leading-none
+          "
+        >
+          1.3K+
+        </div>
 
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
+        <p
+          className="
+            text-white/85
+            text-sm
+            sm:text-base
+            md:text-lg
+            font-medium
+            mt-3
+          "
+        >
+          Instagram Followers
+        </p>
 
-      <span className="text-white text-base sm:text-xl font-bold px-1">
-        .
-      </span>
+      </div>
 
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
 
-      <span className="text-white text-base sm:text-xl font-bold ml-1">
-        K+
-      </span>
+      {/* LinkedIn */}
+      <div className="flex flex-col items-center text-center">
+
+        <FontAwesomeIcon
+          icon={faLinkedinIn}
+          className="
+            text-white
+            text-4xl
+            sm:text-5xl
+            md:text-6xl
+            mb-5
+          "
+        />
+
+        <div
+          className="
+            text-white
+            text-2xl
+            sm:text-3xl
+            md:text-4xl
+            font-extrabold
+            tracking-tight
+            leading-none
+          "
+        >
+          150+
+        </div>
+
+        <p
+          className="
+            text-white/85
+            text-sm
+            sm:text-base
+            md:text-lg
+            font-medium
+            mt-3
+          "
+        >
+          LinkedIn Followers
+        </p>
+
+      </div>
 
     </div>
 
-    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
-      followers
-    </p>
-
   </div>
 
-
-  {/* Instagram */}
-  <div className="flex min-w-0 flex-col items-center text-center">
-
-    <FontAwesomeIcon
-      icon={faInstagram}
-      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
-    />
-
-    <div className="flex items-center justify-center whitespace-nowrap">
-
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
-
-      <span className="text-white text-base sm:text-xl font-bold px-1">
-        .
-      </span>
-
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
-
-      <span className="text-white text-base sm:text-xl font-bold ml-1">
-        K+
-      </span>
-
-    </div>
-
-    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
-      followers
-    </p>
-
-  </div>
-
-
-  {/* LinkedIn */}
-  <div className="flex min-w-0 flex-col items-center text-center">
-
-    <FontAwesomeIcon
-      icon={faLinkedinIn}
-      className="text-white text-3xl sm:text-4xl md:text-5xl mb-2"
-    />
-
-    <div className="flex items-center justify-center whitespace-nowrap">
-
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-l-md bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
-
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center border-l border-red-900 bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
-
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-r-md border-l border-red-900 bg-[#650005] text-white text-base sm:text-xl font-bold">
-        0
-      </span>
-
-    </div>
-
-    <p className="text-white text-xs sm:text-sm md:text-base font-semibold mt-2">
-      followers
-    </p>
-
-  </div>
-
-</div>
-
-            </div>
-
-          </section>
-
+</section>
 
 
 {/* ================================================= */}
