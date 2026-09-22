@@ -33,7 +33,7 @@ export const AdminDashboard: React.FC = () => {
     try {
       const [eventsData, pendingData] = await Promise.all([
         eventsApi.getEvents(),
-        adminApi.getPendingRegistrations(),
+        adminApi.getPendingRegistrations().catch((e: any) => { console.error('pending registrations unavailable (design: /next only):', e); return []; }),
       ]);
       setEvents(eventsData);
       setPendingRegs(pendingData);
