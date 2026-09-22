@@ -1,15 +1,19 @@
 import axios from 'axios';
 
 // Resolve API base URL from environment variable with localhost dev fallback
-const getBaseUrl = () => {
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+const getBaseUrl = (): string => {
+  const url = import.meta.env.VITE_API_BASE_URL;
+  if (url && url.trim().length > 0) {
+    return url.replace(/\/+$/, ''); // strip any trailing slashes
   }
-  // Development-only localhost fallback; never used in production builds
-  if (import.meta.env.DEV || import.meta.env.MODE === 'development' || (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development')) {
+  if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
     return 'http://localhost:8000/api/v1';
   }
-  return '';
+  throw new Error(
+    'VITE_API_BASE_URL is not set for this production build. ' +
+    'Set it in Vercel → Project → Settings → Environment Variables ' +
+    '(e.g. https://<your-backend>.onrender.com/api/v1) and redeploy.'
+  );
 };
 
 export const API_BASE_URL = getBaseUrl();
