@@ -24,9 +24,7 @@ export const GateScannerPage: React.FC = () => {
   const [scanError, setScanError] = useState<string | null>(null);
   const [history, setHistory] = useState<TicketScanResult[]>([]);
   const scannerRef = useRef<Html5Qrcode | null>(null);
-  // Tracks whether the html5-qrcode instance has finished starting successfully,
-  // so cleanup only runs on a fully-started scanner.
-  const scannerStartedRef = useRef(false);
+  const isStartingRef = useRef(false);
   // Tracks whether the component is still mounted, to avoid setState-after-unmount.
   const isMountedRef = useRef(true);
   const toast = useToast();
@@ -56,30 +54,24 @@ export const GateScannerPage: React.FC = () => {
     }
   };
 
-  // Safely stop and clear the scanner. No-op if it was never started.
-  const teardownScanner = async () => {
+  // Cleanup on unmount: stop camera only (no clear — React handles DOM removal)
+  const stopOnlyOnUnmount = async () => {
     const scanner = scannerRef.current;
-    if (!scanner || !scannerStartedRef.current) {
-      scannerRef.current = null;
-      return;
-    }
+    if (!scanner) return;
     try {
       await scanner.stop();
     } catch {
-      // already stopped or never fully started — safe to ignore
-    }
-    try {
-      scanner.clear();
-    } catch {
-      // already cleared — safe to ignore
+      // ignore
     }
     scannerRef.current = null;
-    scannerStartedRef.current = false;
   };
 
   const startCamera = async () => {
+    if (isStartingRef.current) return;
+    if (scannerRef.current) return;
+    isStartingRef.current = true;
     try {
-      await teardownScanner();
+      await stopOnlyOnUnmount();
 
       const scanner = new Html5Qrcode('qr-reader');
       scannerRef.current = scanner;
@@ -90,31 +82,44 @@ export const GateScannerPage: React.FC = () => {
         { facingMode: 'environment' },
         config,
         (decodedText) => {
+          if (!isMountedRef.current) return;
           handleProcessToken(decodedText);
         },
         () => {
-          // ignore scan frame errors
+          // ignore per-frame errors
         }
       );
 
-      scannerStartedRef.current = true;
-      if (isMountedRef.current) {
-        setIsCameraActive(true);
+      if (!isMountedRef.current) {
+        // Component unmounted during start — clean up
+        await scanner.stop().catch(() => {});
+        scannerRef.current = null;
+        return;
       }
+      setIsCameraActive(true);
     } catch (err: any) {
       console.error('Failed to start camera scanner', err);
-      await teardownScanner();
+      scannerRef.current = null;
       if (isMountedRef.current) {
         toast.error('Unable to access device camera. Please use manual token entry.');
         setIsCameraActive(false);
       }
+    } finally {
+      isStartingRef.current = false;
     }
   };
 
   const stopCamera = async () => {
-    await teardownScanner();
-    if (isMountedRef.current) {
-      setIsCameraActive(false);
+    const scanner = scannerRef.current;
+    if (!scanner) return;
+    try {
+      await scanner.stop();
+      scanner.clear();
+    } catch (err: any) {
+      console.error('Failed to stop camera', err);
+    } finally {
+      scannerRef.current = null;
+      if (isMountedRef.current) setIsCameraActive(false);
     }
   };
 
@@ -122,7 +127,16 @@ export const GateScannerPage: React.FC = () => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      void teardownScanner();
+      const scanner = scannerRef.current;
+      scannerRef.current = null;
+      // Stop camera stream, but do NOT call clear() — React will remove
+      // the #qr-reader container itself during unmount; calling clear()
+      // (which mutates DOM) during unmount is the source of the removeChild error.
+      if (scanner) {
+        scanner.stop().catch(() => {
+          // ignore stop errors during unmount
+        });
+      }
     };
   }, []);
 
@@ -187,19 +201,31 @@ export const GateScannerPage: React.FC = () => {
               <Camera className="w-4 h-4 text-red-500" /> Camera Feed
             </h3>
 
-            <div
-              id="qr-reader"
-              className="w-full rounded-2xl overflow-hidden bg-black border border-neutral-800/80 min-h-[260px] flex items-center justify-center text-center p-4 relative"
-            >
-              {!isCameraActive && (
-                <div className="text-neutral-500 space-y-2 p-4">
+          <div className="scanner-wrapper" style={{ position: 'relative' }}>
+            <div id="qr-reader" className="w-full rounded-2xl overflow-hidden bg-black min-h-[260px]" />
+            {!isCameraActive && (
+              <div
+                className="scanner-overlay"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(0,0,0,0.6)',
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                }}
+              >
+                <div className="text-neutral-500 space-y-2 p-4 text-center">
                   <QrCode className="w-12 h-12 mx-auto text-neutral-700" />
                   <p className="text-xs text-neutral-400">
-                    Camera is off. Click "Start Camera" above or paste token below.
+                    Camera is off. Click &quot;Start Camera&quot; above or paste token below.
                   </p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
           </div>
 
           {/* Manual Token Entry Box */}
