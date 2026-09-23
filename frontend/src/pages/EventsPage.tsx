@@ -31,23 +31,25 @@ function toNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function getActivePrice(event: EventItem): { active: number; original: number | null; isEarlyBird: boolean } {
+function getActivePrice(event: EventItem): { active: number; original: number | null; isEarlyBird: boolean; seatsLeft: number | null } {
   const regular = toNumber(event.fee_amount) ?? 0;
-  const early = toNumber(event.early_bird_price);
-  const endsAt = event.early_bird_ends_at ? new Date(event.early_bird_ends_at).getTime() : null;
-  const now = Date.now();
+  const earlyFee = toNumber(event.early_bird_fee);
+  const capacity = event.early_bird_capacity ?? null;
+  const taken = event.early_bird_taken ?? 0;
+
+  const seatsLeft = capacity !== null ? Math.max(capacity - taken, 0) : null;
 
   const earlyBirdActive =
-    event.is_early_bird === true &&
-    early !== null &&
-    early > 0 &&
-    early < regular &&
-    (endsAt === null || Number.isNaN(endsAt) || now < endsAt);
+    event.early_bird_enabled === true &&
+    earlyFee !== null &&
+    earlyFee > 0 &&
+    earlyFee < regular &&
+    (capacity === null || taken < capacity);
 
-  if (earlyBirdActive && early !== null) {
-    return { active: early, original: regular, isEarlyBird: true };
+  if (earlyBirdActive && earlyFee !== null) {
+    return { active: earlyFee, original: regular, isEarlyBird: true, seatsLeft };
   }
-  return { active: regular, original: null, isEarlyBird: false };
+  return { active: regular, original: null, isEarlyBird: false, seatsLeft };
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
@@ -113,11 +115,14 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
                 : 'bg-gradient-to-r from-red-600 to-rose-700 text-white border border-red-400/40 shadow-red-600/30'
             }`}
           >
-            {isFree ? 'Free Pass' : priceInfo.isEarlyBird ? (
+            {isFree ? 'Free Pass' : priceInfo.isEarlyBird && priceInfo.original !== null ? (
               <span className="flex flex-col items-end leading-none gap-0.5">
                 <span className="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider">Early Bird</span>
                 <span>₹{priceInfo.active.toFixed(2)}</span>
-                <span className="text-[10px] font-semibold text-neutral-300 line-through opacity-60">₹{priceInfo.original?.toFixed(2)}</span>
+                <span className="text-[10px] font-semibold text-neutral-300 line-through opacity-60">₹{priceInfo.original.toFixed(2)}</span>
+                {priceInfo.seatsLeft !== null && priceInfo.seatsLeft > 0 && (
+                  <span className="text-[10px] font-semibold text-neutral-300">{priceInfo.seatsLeft} seat{priceInfo.seatsLeft === 1 ? '' : 's'} left</span>
+                )}
               </span>
             ) : `₹${priceInfo.active.toFixed(2)}`}
           </span>
