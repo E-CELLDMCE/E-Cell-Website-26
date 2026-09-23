@@ -10,9 +10,27 @@ export interface TicketScanResult {
   scanned_at: string;
 }
 
+export interface AdminStatsResponse {
+  total_events: number;
+  total_registrations: number;
+  pending_approvals: number;
+  approved_passes: number;
+}
+
+export interface EventStatsItem {
+  event_id: string;
+  total_registrations: number;
+  pending_count: number;
+}
+
 export const adminApi = {
-  getPendingRegistrations: async (): Promise<RegistrationDetailResponse[]> => {
-    const res = await apiClient.get<RegistrationDetailResponse[]>('/admin/registrations/pending');
+  getStats: async (): Promise<AdminStatsResponse> => {
+    const res = await apiClient.get<AdminStatsResponse>('/admin/stats');
+    return res.data;
+  },
+
+  getEventStats: async (): Promise<EventStatsItem[]> => {
+    const res = await apiClient.get<EventStatsItem[]>('/admin/events/stats');
     return res.data;
   },
 

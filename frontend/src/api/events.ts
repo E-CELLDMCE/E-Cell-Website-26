@@ -14,6 +14,9 @@ export interface EventItem {
   poster_url?: string | null;
   payment_qr_url?: string | null;
   status: 'draft' | 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  is_early_bird?: boolean;
+  early_bird_price?: number | null;
+  early_bird_ends_at?: string | null;
   created_at?: string;
   created_by?: string;
 }

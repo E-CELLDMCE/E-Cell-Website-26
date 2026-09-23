@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { eventsApi, EventItem } from '../../api/events';
-import { adminApi } from '../../api/admin';
-import { RegistrationDetailResponse } from '../../api/registrations';
+import { adminApi, AdminStatsResponse, EventStatsItem } from '../../api/admin';
 import { useToast } from '../../context/ToastContext';
 import { getErrorMessage } from '../../api/client';
 import {
@@ -21,31 +20,37 @@ import {
 
 export const AdminDashboard: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
-  const [pendingRegs, setPendingRegs] = useState<RegistrationDetailResponse[]>([]);
+  const [stats, setStats] = useState<AdminStatsResponse | null>(null);
+  const [eventStats, setEventStats] = useState<Map<string, EventStatsItem>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [eventToDelete, setEventToDelete] = useState<EventItem | null>(null);
   const toast = useToast();
 
-  const loadDashboardData = async () => {
-    setIsLoading(true);
-    try {
-      const [eventsData, pendingData] = await Promise.all([
-        eventsApi.getEvents(),
-        adminApi.getPendingRegistrations().catch((e: any) => { console.error('pending registrations unavailable (design: /next only):', e); return []; }),
-      ]);
-      setEvents(eventsData);
-      setPendingRegs(pendingData);
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, 'Failed to load dashboard data'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadDashboardData();
+    let cancelled = false;
+    (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [evts, s, es] = await Promise.all([
+          eventsApi.getEvents(),
+          adminApi.getStats(),
+          adminApi.getEventStats(),
+        ]);
+        if (cancelled) return;
+        setEvents(evts);
+        setStats(s);
+        setEventStats(new Map(es.map((x) => [x.event_id, x])));
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message ?? 'Failed to load dashboard');
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const handleExportExcel = async (eventId: string, title: string) => {
@@ -72,8 +77,9 @@ export const AdminDashboard: React.FC = () => {
       await eventsApi.deleteEvent(id);
       // Remove event from local state
       setEvents((prev) => prev.filter((e) => e.id !== id));
-      // Remove registrations for this event to keep metric counters synchronized
-      setPendingRegs((prev) => prev.filter((r) => r.event_id !== id));
+      // Refresh event stats after deletion
+      const esAfter = await adminApi.getEventStats();
+      setEventStats(new Map(esAfter.map((x) => [x.event_id, x])));
       toast.success(`Event "${title}" removed from UI. Data retained in database for 7 days before automatic deletion.`);
       setEventToDelete(null);
     } catch (err: any) {
@@ -83,11 +89,11 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Compute stats
-  const totalEvents = events.length;
-  const totalRegistrations = pendingRegs.length;
-  const pendingApprovalsCount = pendingRegs.filter((r) => r.status === 'pending_approval').length;
-  const approvedCount = pendingRegs.filter((r) => r.status === 'approved').length;
+  // Compute stats from aggregate endpoints
+  const totalEvents = stats?.total_events ?? events.length;
+  const totalRegistrations = stats?.total_registrations ?? 0;
+  const pendingApprovalsCount = stats?.pending_approvals ?? 0;
+  const approvedCount = stats?.approved_passes ?? 0;
 
   const getStatusBadge = (status: string) => {
     const s = (status || '').toLowerCase();
@@ -229,6 +235,10 @@ export const AdminDashboard: React.FC = () => {
             <RefreshCw className="w-6 h-6 animate-spin text-red-500" />
             <span className="text-xs font-bold uppercase tracking-wider text-neutral-400">Loading Events...</span>
           </div>
+        ) : error ? (
+          <div className="p-8 text-red-400 flex items-center gap-2">
+            <AlertCircle /> {error}
+          </div>
         ) : events.length === 0 ? (
           <div className="p-12 text-center text-neutral-400 space-y-3">
             <AlertCircle className="w-8 h-8 text-neutral-400 mx-auto" />
@@ -257,8 +267,9 @@ export const AdminDashboard: React.FC = () => {
                 </thead>
                 <tbody className="text-xs">
                   {events.map((event) => {
-                    const eventRegs = pendingRegs.filter((r) => r.event_id === event.id);
-                    const pendingThisEvent = eventRegs.filter((r) => r.status === 'pending_approval').length;
+                    const es = eventStats.get(event.id);
+                    const totalRegs = es?.total_registrations ?? 0;
+                    const pendingThisEvent = es?.pending_count ?? 0;
 
                     return (
                       <tr
@@ -282,7 +293,7 @@ export const AdminDashboard: React.FC = () => {
                         </td>
 
                         <td className="px-6 py-4">
-                          <span className="font-mono font-bold text-white">{eventRegs.length}</span>
+                          <span className="font-mono font-bold text-white">{totalRegs}</span>
                           {event.max_capacity && (
                             <span className="text-[10px] text-neutral-400"> / {event.max_capacity} cap</span>
                           )}
@@ -406,7 +417,7 @@ export const AdminDashboard: React.FC = () => {
                         <span className="text-[10px] uppercase font-semibold text-neutral-400 block">
                           Registrations
                         </span>
-                        <span className="font-mono font-bold text-white">{eventRegs.length}</span>
+                        <span className="font-mono font-bold text-white">{totalRegs}</span>
                         {event.max_capacity && (
                           <span className="text-[10px] text-neutral-400"> / {event.max_capacity}</span>
                         )}

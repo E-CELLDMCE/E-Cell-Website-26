@@ -24,8 +24,24 @@ interface EventCardProps {
   formatDate: (isoString?: string | null) => string;
 }
 
+function getActivePrice(event: EventItem) {
+  const now = Date.now();
+  const endsAt = event.early_bird_ends_at ? new Date(event.early_bird_ends_at).getTime() : null;
+  const earlyBirdActive =
+    event.is_early_bird === true &&
+    typeof event.early_bird_price === 'number' &&
+    event.early_bird_price > 0 &&
+    event.early_bird_price < event.fee_amount &&
+    (endsAt === null || now < endsAt);
+  if (earlyBirdActive) {
+    return { active: event.early_bird_price as number, original: event.fee_amount, isEarlyBird: true };
+  }
+  return { active: event.fee_amount, original: null, isEarlyBird: false };
+}
+
 export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
-  const isFree = Number(event.fee_amount) === 0;
+  const priceInfo = getActivePrice(event);
+  const isFree = priceInfo.active === 0;
 
   return (
     <div className="group rounded-3xl bg-neutral-950/80 border border-neutral-800/80 hover:border-red-500/70 overflow-hidden flex flex-col transition-all duration-500 hover:shadow-[0_12px_45px_rgba(239,68,68,0.2)] hover:-translate-y-1.5 h-full">
@@ -86,7 +102,13 @@ export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
                 : 'bg-gradient-to-r from-red-600 to-rose-700 text-white border border-red-400/40 shadow-red-600/30'
             }`}
           >
-            {isFree ? 'Free Pass' : `₹${event.fee_amount}`}
+            {isFree ? 'Free Pass' : priceInfo.isEarlyBird ? (
+              <span className="flex flex-col items-end leading-none gap-0.5">
+                <span className="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider">Early Bird</span>
+                <span>₹{priceInfo.active.toFixed(2)}</span>
+                <span className="text-[10px] font-semibold text-neutral-300 line-through opacity-60">₹{priceInfo.original?.toFixed(2)}</span>
+              </span>
+            ) : `₹${priceInfo.active.toFixed(2)}`}
           </span>
         </div>
 

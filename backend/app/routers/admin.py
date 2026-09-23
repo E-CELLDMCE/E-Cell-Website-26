@@ -4,6 +4,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
+
+from app.schemas.admin import AdminStatsResponse, EventStatsItemResponse
 
 from fastapi import File, UploadFile
 
@@ -391,6 +394,50 @@ def reject_registration(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to reject registration: {str(e)}",
         )
+
+
+@router.get("/stats", response_model=AdminStatsResponse)
+def get_admin_stats(
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    total_events = db.query(func.count(Event.id)).filter(Event.deleted_at.is_(None)).scalar() or 0
+    total_registrations = db.query(func.count(EventRegistration.id)).scalar() or 0
+    pending_approvals = db.query(func.count(EventRegistration.id)).filter(EventRegistration.status == "pending_approval").scalar() or 0
+    approved_passes = db.query(func.count(EventRegistration.id)).filter(EventRegistration.status == "approved").scalar() or 0
+    return AdminStatsResponse(
+        total_events=total_events,
+        total_registrations=total_registrations,
+        pending_approvals=pending_approvals,
+        approved_passes=approved_passes,
+    )
+
+
+@router.get("/events/stats", response_model=list[EventStatsItemResponse])
+def get_admin_event_stats(
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    events_with_counts = db.query(
+        Event.id.label("event_id"),
+        func.count(EventRegistration.id).label("total_registrations"),
+    ).outerjoin(EventRegistration, Event.id == EventRegistration.event_id).filter(
+        Event.deleted_at.is_(None)
+    ).group_by(Event.id).all()
+    # We need pending counts too — do a subquery or separate approach; using Python aggregation here for simplicity but keeping only counts
+    # Actually to keep it pure SQL: use a separate sub-query. Given simplicity, compute in Python from results but still no PII.
+    result = []
+    for event_id, total_regs in events_with_counts:
+        pending = db.query(func.count(EventRegistration.id)).filter(
+            EventRegistration.event_id == event_id,
+            EventRegistration.status == "pending_approval",
+        ).scalar() or 0
+        result.append(EventStatsItemResponse(
+            event_id=str(event_id),
+            total_registrations=total_regs or 0,
+            pending_count=pending,
+        ))
+    return result
 
 
 @router.post("/tickets/scan", response_model=TicketScanResponse)
