@@ -378,8 +378,9 @@ export const AdminDashboard: React.FC = () => {
             {/* Mobile Card-Based Layout: Visible only on small screens */}
             <div className="block md:hidden p-4 space-y-3">
               {events.map((event) => {
-                const eventRegs = pendingRegs.filter((r) => r.event_id === event.id);
-                const pendingThisEvent = eventRegs.filter((r) => r.status === 'pending_approval').length;
+                const stats = eventStats.get(event.id);
+                const eventRegsCount = stats?.total_registrations ?? 0;
+                const pendingThisEvent = stats?.pending_count ?? 0;
 
                 return (
                   <div
@@ -417,7 +418,7 @@ export const AdminDashboard: React.FC = () => {
                         <span className="text-[10px] uppercase font-semibold text-neutral-400 block">
                           Registrations
                         </span>
-                        <span className="font-mono font-bold text-white">{totalRegs}</span>
+                        <span className="font-mono font-bold text-white">{eventRegsCount}</span>
                         {event.max_capacity && (
                           <span className="text-[10px] text-neutral-400"> / {event.max_capacity}</span>
                         )}
