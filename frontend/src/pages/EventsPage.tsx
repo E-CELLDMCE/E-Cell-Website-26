@@ -5,6 +5,7 @@ import { eventsApi, EventItem } from '../api/events';
 import { adminApi } from '../api/admin';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../api/client';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import {
   Calendar,
   Users,
@@ -24,19 +25,29 @@ interface EventCardProps {
   formatDate: (isoString?: string | null) => string;
 }
 
-function getActivePrice(event: EventItem) {
-  const now = Date.now();
+function toNumber(v: unknown): number | null {
+  if (v === null || v === undefined) return null;
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function getActivePrice(event: EventItem): { active: number; original: number | null; isEarlyBird: boolean } {
+  const regular = toNumber(event.fee_amount) ?? 0;
+  const early = toNumber(event.early_bird_price);
   const endsAt = event.early_bird_ends_at ? new Date(event.early_bird_ends_at).getTime() : null;
+  const now = Date.now();
+
   const earlyBirdActive =
     event.is_early_bird === true &&
-    typeof event.early_bird_price === 'number' &&
-    event.early_bird_price > 0 &&
-    event.early_bird_price < event.fee_amount &&
-    (endsAt === null || now < endsAt);
-  if (earlyBirdActive) {
-    return { active: event.early_bird_price as number, original: event.fee_amount, isEarlyBird: true };
+    early !== null &&
+    early > 0 &&
+    early < regular &&
+    (endsAt === null || Number.isNaN(endsAt) || now < endsAt);
+
+  if (earlyBirdActive && early !== null) {
+    return { active: early, original: regular, isEarlyBird: true };
   }
-  return { active: event.fee_amount, original: null, isEarlyBird: false };
+  return { active: regular, original: null, isEarlyBird: false };
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event, formatDate }) => {
@@ -439,7 +450,9 @@ export const EventsPage: React.FC = () => {
                   transition={{ duration: 0.35, ease: 'easeOut' }}
                   className="h-full"
                 >
-                  <EventCard event={event} formatDate={formatDate} />
+                  <ErrorBoundary key={event.id}>
+                    <EventCard event={event} formatDate={formatDate} />
+                  </ErrorBoundary>
                 </motion.div>
               ))}
             </AnimatePresence>

@@ -4,7 +4,7 @@ export interface EventItem {
   id: string;
   title: string;
   description: string;
-  fee_amount: number;
+  fee_amount: number | string;
   is_team_event: boolean;
   min_team_size: number;
   max_team_size: number;
@@ -24,7 +24,7 @@ export interface EventItem {
 export interface EventCreatePayload {
   title: string;
   description: string;
-  fee_amount: number;
+  fee_amount: number | string;
   is_team_event: boolean;
   min_team_size: number;
   max_team_size: number;
